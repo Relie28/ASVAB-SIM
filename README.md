@@ -1,5 +1,7 @@
 # ASVAB SIM — PICAT Verification Prep
 
+**🔗 Live app → [https://relie28.github.io/ASVAB-SIM/](https://relie28.github.io/ASVAB-SIM/)**
+
 A single-file, offline-capable web app built to simulate and reinforce performance on the **ASVAB / PICAT** (Pre-screening, Internet-delivered Computerized Adaptive Test). Built specifically around one user's real test results to drill the exact questions they missed, prepare for PICAT verification, and target an **AFQT score at the 95th percentile**.
 
 ---
