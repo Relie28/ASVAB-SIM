@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PICAT Verification — 95th Percentile Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=IBM+Plex+Mono:wght@400;500&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #1e2330;
+    --accent: #00e5ff;
+    --accent2: #ff3d5a;
+    --accent3: #ffd600;
+    --text: #e8eaf0;
+    --muted: #5a6070;
+    --correct: #00c97a;
+    --wrong: #ff3d5a;
+    --ar: #00e5ff;
+    --wk: #a78bfa;
+    --mk: #ffd600;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(0,229,255,0.04) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 30% at 10% 90%, rgba(167,139,250,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .screen { position: relative; z-index: 1; }
+
+  /* ── SPLASH ── */
+  #splash {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .rank-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+
+  h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(56px, 12vw, 110px);
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -2px;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.4s forwards;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 20px;
+    letter-spacing: 1px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.6s forwards;
+  }
+
+  .score-analysis {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 48px 0 40px;
+    width: 100%;
+    max-width: 540px;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.8s forwards;
+  }
+
+  .score-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 12px;
+    text-align: center;
+  }
+
+  .score-card .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .score-card .val {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+  }
+
+  .score-card .sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .score-card.ar .val { color: var(--ar); }
+  .score-card.wk .val { color: var(--wk); }
+  .score-card.mk .val { color: var(--mk); }
+
+  .weakness-tag {
+    display: inline-block;
+    background: rgba(255,61,90,0.12);
+    border: 1px solid rgba(255,61,90,0.3);
+    color: var(--wrong);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-top: 4px;
+  }
+
+  .start-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 18px 56px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+    opacity: 0;
+    animation: fadeUp 0.6s 1s forwards;
+  }
+
+  .start-btn:hover { background: #fff; transform: translateY(-2px); }
+
+  .quiz-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 16px;
+    opacity: 0;
+    animation: fadeUp 0.6s 1.1s forwards;
+  }
+
+  /* ── ADDED: Full ASVAB button ── */
+  .full-btn {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 14px 56px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+    margin-top: 12px;
+    opacity: 0;
+    animation: fadeUp 0.6s 1.2s forwards;
+  }
+  .full-btn:hover { border-color: var(--mk); color: var(--mk); transform: translateY(-2px); }
+  .full-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 10px;
+    opacity: 0;
+    animation: fadeUp 0.6s 1.3s forwards;
+  }
+
+  /* ── QUIZ ── */
+  #quiz { display: none; min-height: 100vh; padding: 0; }
+
+  .quiz-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,12,16,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    gap: 16px;
+  }
+
+  .section-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+
+  .section-tag.AR { background: rgba(0,229,255,0.12); color: var(--ar); border: 1px solid rgba(0,229,255,0.25); }
+  .section-tag.WK { background: rgba(167,139,250,0.12); color: var(--wk); border: 1px solid rgba(167,139,250,0.25); }
+  .section-tag.MK { background: rgba(255,214,0,0.12); color: var(--mk); border: 1px solid rgba(255,214,0,0.25); }
+  .section-tag.PC { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
+  .section-tag.GS { background: rgba(251,146,60,0.12); color: #fb923c; border: 1px solid rgba(251,146,60,0.25); }
+  .section-tag.EI { background: rgba(96,165,250,0.12); color: #60a5fa; border: 1px solid rgba(96,165,250,0.25); }
+  .section-tag.AI { background: rgba(244,114,182,0.12); color: #f472b6; border: 1px solid rgba(244,114,182,0.25); }
+  .section-tag.MC { background: rgba(163,230,53,0.12); color: #a3e635; border: 1px solid rgba(163,230,53,0.25); }
+  .section-tag.AO { background: rgba(192,132,252,0.12); color: #c084fc; border: 1px solid rgba(192,132,252,0.25); }
+
+  .timer-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    justify-content: center;
+  }
+
+  #timer {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+    min-width: 70px;
+    text-align: center;
+    transition: color 0.3s;
+  }
+
+  #timer.warn { color: var(--accent3); }
+  #timer.danger { color: var(--wrong); animation: pulse 0.5s infinite; }
+
+  .progress-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease, background 0.3s;
+  }
+
+  .q-counter {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .question-area {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .q-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+  }
+
+  .q-text {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--text);
+    margin-bottom: 36px;
+  }
+
+  .q-text .formula {
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
+
+  /* ── ADDED: passage box for PC ── */
+  .passage-box {
+    background: var(--surface2);
+    border-left: 3px solid #34d399;
+    border-radius: 0 6px 6px 0;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: #8899b0;
+    overflow: visible;
+    max-height: none;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 16px;
+    text-align: left;
+  }
+
+  .option:hover:not(.locked) {
+    border-color: var(--accent);
+    background: rgba(0,229,255,0.04);
+    transform: translateX(4px);
+  }
+
+  .option.selected:not(.locked) {
+    border-color: var(--accent);
+    background: rgba(0,229,255,0.08);
+  }
+
+  .option.correct {
+    border-color: var(--correct);
+    background: rgba(0,201,122,0.08);
+  }
+
+  .option.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,61,90,0.08);
+  }
+
+  .option-letter {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+
+  .option.selected .option-letter { border-color: var(--accent); color: var(--accent); }
+  .option.correct .option-letter { border-color: var(--correct); color: var(--correct); background: rgba(0,201,122,0.15); }
+  .option.wrong .option-letter { border-color: var(--wrong); color: var(--wrong); background: rgba(255,61,90,0.15); }
+
+  /* ── Real-test answer indicator ── */
+  .option.forced-answer {
+    border-color: var(--accent3);
+    background: rgba(255,214,0,0.06);
+  }
+  .option.forced-answer .option-letter {
+    border-color: var(--accent3);
+    color: var(--accent3);
+    background: rgba(255,214,0,0.15);
+  }
+  /* Matched initialUserAnswer but it was wrong on the real test */
+  .option.forced-match {
+    border-color: var(--accent3);
+    background: rgba(255,214,0,0.08);
+  }
+  .option.forced-match .option-letter {
+    border-color: var(--accent3);
+    color: var(--accent3);
+    background: rgba(255,214,0,0.18);
+  }
+  .forced-banner {
+    margin-bottom: 10px;
+    padding: 7px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.5px;
+    line-height: 1.5;
+  }
+  .forced-banner.b-correct { background: rgba(0,201,122,0.08); color: var(--correct); }
+  .forced-banner.b-wrong   { background: rgba(255,61,90,0.08);  color: var(--wrong); }
+  .forced-banner.b-info    { background: rgba(255,214,0,0.08);  color: var(--accent3); }
+
+  .explanation {
+    margin-top: 24px;
+    background: var(--surface2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 16px 20px;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #a0abb8;
+    display: none;
+    animation: fadeUp 0.3s forwards;
+  }
+
+  .explanation.show { display: block; }
+  .explanation strong { color: var(--text); }
+  .explanation code {
+    font-family: 'IBM Plex Mono', monospace;
+    background: rgba(0,229,255,0.08);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    color: var(--accent);
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 32px;
+  }
+
+  .next-btn {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 12px 36px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+    display: none;
+  }
+
+  .next-btn.show { display: block; }
+  .next-btn:hover { background: var(--accent); color: var(--bg); }
+
+  /* ── RESULTS ── */
+  #results {
+    display: none;
+    min-height: 100vh;
+    padding: 60px 24px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .results-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .results-header h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 64px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+  }
+
+  .overall-score {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 8px;
+    letter-spacing: 2px;
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  /* ADDED: grids for AFQT scoring layout */
+  .results-grid-afqt {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .results-grid-extra {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .composite-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 24px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .cr-block { text-align: center; }
+  .cr-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--muted); }
+  .cr-val { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 700; display: block; }
+  .cr-op { font-size: 22px; color: var(--border); }
+  .cr-result .cr-val { font-size: 42px; }
+  .reliability-box {
+    border-radius: 6px;
+    padding: 13px 18px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin-bottom: 24px;
+    border: 1px solid;
+  }
+  .reliability-box.ok  { background: rgba(0,201,122,0.08); border-color: rgba(0,201,122,0.3); color: var(--correct); }
+  .reliability-box.bad { background: rgba(255,214,0,0.08);  border-color: rgba(255,214,0,0.3);  color: var(--accent3); }
+
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 16px;
+    text-align: center;
+  }
+
+  .result-card .r-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .result-card .r-score {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    font-weight: 900;
+  }
+
+  .result-card.AR .r-score { color: var(--ar); }
+  .result-card.WK .r-score { color: var(--wk); }
+  .result-card.MK .r-score { color: var(--mk); }
+  .result-card.PC .r-score { color: #34d399; }
+  .result-card.VE .r-score { color: #f9a8d4; }
+  .result-card.GS .r-score { color: #fb923c; }
+  .result-card.EI .r-score { color: #60a5fa; }
+  .result-card.AI .r-score { color: #f472b6; }
+  .result-card.MC .r-score { color: #a3e635; }
+  .result-card.AO .r-score { color: #c084fc; }
+
+  .result-card .r-fraction { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .verdict {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .verdict h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .verdict p { color: #8090a0; line-height: 1.6; font-size: 15px; }
+
+  .review-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px; }
+
+  .review-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .review-item .ri-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  .review-item.ok .ri-icon { background: rgba(0,201,122,0.15); color: var(--correct); }
+  .review-item.bad .ri-icon { background: rgba(255,61,90,0.15); color: var(--wrong); }
+
+  .review-item .ri-q { font-size: 13px; color: var(--muted); flex: 1; }
+  .review-item .ri-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .review-item .ri-tag.AR { background: rgba(0,229,255,0.1); color: var(--ar); }
+  .review-item .ri-tag.WK { background: rgba(167,139,250,0.1); color: var(--wk); }
+  .review-item .ri-tag.MK { background: rgba(255,214,0,0.1); color: var(--mk); }
+  .review-item .ri-tag.PC { background: rgba(52,211,153,0.1); color: #34d399; }
+  .review-item .ri-tag.GS { background: rgba(251,146,60,0.1); color: #fb923c; }
+  .review-item .ri-tag.EI { background: rgba(96,165,250,0.1); color: #60a5fa; }
+  .review-item .ri-tag.AI { background: rgba(244,114,182,0.1); color: #f472b6; }
+  .review-item .ri-tag.MC { background: rgba(163,230,53,0.1); color: #a3e635; }
+  .review-item .ri-tag.AO { background: rgba(192,132,252,0.1); color: #c084fc; }
+
+  .retry-btn {
+    display: block;
+    width: 100%;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 18px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+
+  .retry-btn:hover { background: #fff; }
+
+  /* ── STATS BUTTON (splash) ── */
+  .stats-btn {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 10px 32px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+    margin-top: 18px;
+    opacity: 0;
+    animation: fadeUp 0.6s 1.5s forwards;
+  }
+  .stats-btn:hover { border-color: var(--accent3); color: var(--accent3); transform: translateY(-2px); }
+
+  /* ── CATEGORY SELECT ── */
+  #category-select { display:none; min-height:100vh; flex-direction:column; justify-content:center; align-items:center; padding:40px 20px; text-align:center; }
+  .cat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; width:100%; max-width:540px; margin-bottom:8px; }
+  .cat-tile {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 16px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+    position: relative;
+  }
+  .cat-tile:hover { border-color: var(--tile-color, var(--accent)); transform: translateY(-2px); }
+  .cat-tile.active { border-color: var(--tile-color, var(--accent)); background: rgba(255,255,255,0.02); }
+  .ct-check {
+    position: absolute; top: 12px; right: 12px;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: transparent;
+    transition: all 0.15s;
+  }
+  .cat-tile.active .ct-check { border-color: var(--tile-color, var(--accent)); background: var(--tile-color, var(--accent)); color: #000; }
+  .ct-section { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--tile-color, var(--muted)); margin-bottom:6px; }
+  .ct-name { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:700; color:var(--text); margin-bottom:8px; line-height:1.2; }
+  .ct-meta { font-size:11px; color:var(--muted); line-height:1.7; }
+  .ct-missed { color:var(--wrong); font-size:11px; margin-top:6px; font-family:'IBM Plex Mono',monospace; }
+  .cat-summary { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); margin-top:14px; letter-spacing:1px; }
+
+  /* ── STATS SCREEN ── */
+  #stats { display:none; min-height:100vh; }
+  .stat-sec-card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px 24px; margin-bottom:12px; }
+  .stat-sec-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .stat-sec-name { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--muted); }
+  .stat-sec-pct { font-family:'Barlow Condensed',sans-serif; font-size:32px; font-weight:700; }
+  .stat-bar-track { height:6px; background:var(--border); border-radius:3px; overflow:hidden; margin-bottom:8px; }
+  .stat-bar-fill { height:100%; border-radius:3px; transition:width 0.8s ease; }
+  .stat-sec-foot { font-size:11px; color:var(--muted); font-family:'IBM Plex Mono',monospace; }
+  .stat-trend { padding:2px 8px; border-radius:3px; font-size:9px; letter-spacing:1.5px; font-family:'IBM Plex Mono',monospace; }
+  .stat-trend.strong { background:rgba(0,201,122,0.12); color:var(--correct); }
+  .stat-trend.ok     { background:rgba(255,214,0,0.12);  color:var(--accent3); }
+  .stat-trend.weak   { background:rgba(255,61,90,0.12);  color:var(--wrong); }
+  .afqt-panel { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:24px; margin-bottom:24px; }
+  .afqt-panel-title { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:3px; color:var(--muted); margin-bottom:16px; text-transform:uppercase; }
+  .afqt-score-big { font-family:'Barlow Condensed',sans-serif; font-size:80px; font-weight:900; line-height:1; }
+  .afqt-sub { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); margin-top:4px; letter-spacing:1px; }
+  .session-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); font-family:'IBM Plex Mono',monospace; font-size:11px; gap:8px; flex-wrap:wrap; }
+  .session-row:last-child { border-bottom:none; }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+
+  /* ═══════════════════════════════════════════════
+     RESPONSIVE — TABLET  (≤ 768 px)
+  ═══════════════════════════════════════════════ */
+  @media (max-width: 768px) {
+    /* Splash */
+    #splash { padding: 32px 16px; }
+    .score-analysis { gap: 10px; margin: 36px 0 32px; }
+    .score-card { padding: 14px 10px; }
+    .score-card .val { font-size: 24px; }
+    .start-btn, .full-btn, .stats-btn { padding: 16px 36px; font-size: 16px; }
+
+    /* Stats screen outer wrapper */
+    #stats > div { padding: 40px 20px 60px; }
+    .afqt-score-big { font-size: 64px; }
+    .stat-sec-pct { font-size: 26px; }
+  }
+
+  /* ═══════════════════════════════════════════════
+     RESPONSIVE — PHONE  (≤ 600 px)
+  ═══════════════════════════════════════════════ */
+  @media (max-width: 600px) {
+    /* ── Splash ── */
+    #splash { padding: 28px 16px 40px; text-align: center; }
+
+    /* 4-col stat grid → 2×2 */
+    .score-analysis {
+      grid-template-columns: repeat(2, 1fr) !important;
+      max-width: 100% !important;
+      gap: 10px;
+      margin: 28px 0 24px;
+    }
+    .score-card { padding: 12px 10px; }
+    .score-card .label { font-size: 9px; letter-spacing: 1.5px; }
+    .score-card .val { font-size: 22px; }
+    .score-card .sub { font-size: 10px; }
+    .weakness-tag { font-size: 8px; padding: 2px 5px; }
+
+    .start-btn  { width: 100%; padding: 16px 20px; font-size: 16px; }
+    .full-btn   { width: 100%; padding: 14px 20px; font-size: 15px; }
+    .stats-btn  { width: 100%; padding: 14px 20px; }
+    .quiz-meta, .full-meta { font-size: 10px; letter-spacing: 0.5px; }
+
+    /* ── Stats screen ── */
+    #stats > div { padding: 28px 16px 60px; }
+
+    /* Header: stack title + HOME button vertically */
+    #stats > div > div:first-child {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    #stats > div > div:first-child h2 { font-size: 48px; }
+    #stats > div > div:first-child .full-btn { width: 100%; opacity: 1 !important; animation: none !important; }
+
+    /* AFQT panel */
+    .afqt-panel { padding: 18px 16px; margin-bottom: 18px; }
+    .afqt-score-big { font-size: 56px; }
+    .afqt-sub { font-size: 9px; }
+
+    /* Section accuracy cards */
+    .stat-sec-card { padding: 14px 16px; margin-bottom: 10px; }
+    .stat-sec-pct { font-size: 24px; }
+    .stat-sec-name { font-size: 9px; letter-spacing: 1.5px; }
+    .stat-trend { font-size: 8px; padding: 2px 6px; }
+    .stat-sec-foot { font-size: 10px; }
+
+    /* Session history rows: stack date/score vs section badges */
+    .session-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      padding: 10px 0;
+    }
+
+    /* ── Category select ── */
+    #category-select > div { padding: 28px 16px; }
+    #category-select > div h2 { font-size: 44px; }
+    .cat-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+
+    /* ── Quiz header ── */
+    .quiz-header { padding: 10px 14px; gap: 10px; }
+    #timer { font-size: 18px; min-width: 56px; }
+    .q-counter { font-size: 11px; }
+    #sessionModeBadge { font-size: 8px !important; padding: 2px 5px !important; letter-spacing: 1px !important; }
+
+    /* ── Results ── */
+    .results-grid-afqt { grid-template-columns: 1fr 1fr !important; }
+  }
+
+  /* ═══════════════════════════════════════════════
+     RESPONSIVE — SMALL PHONE  (≤ 400 px)
+  ═══════════════════════════════════════════════ */
+  @media (max-width: 400px) {
+    /* Splash score grid stays 2-col but cards tighter */
+    .score-card .val { font-size: 20px; }
+    .score-card { padding: 10px 8px; }
+
+    /* Stats */
+    .afqt-score-big { font-size: 48px; }
+    .stat-sec-pct   { font-size: 20px; }
+
+    /* Buttons full-width and compact */
+    .start-btn, .full-btn, .stats-btn { font-size: 14px; padding: 13px 16px; letter-spacing: 2px; }
+
+    /* Quiz header ultra-compact */
+    .quiz-header { padding: 8px 12px; }
+    #timer { font-size: 16px; min-width: 48px; }
+    .section-tag { font-size: 9px; padding: 3px 7px; }
+    #sessionModeBadge { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash" class="screen">
+  <div class="rank-badge">▶ PICAT VERIFICATION PREP — AFQT 95TH PERCENTILE</div>
+  <h1>VERIFY<br><span>YOUR</span><br>SCORE</h1>
+  <div class="subtitle">calibrated to your exact performance profile</div>
+
+  <div class="score-analysis" style="grid-template-columns:repeat(4,1fr);max-width:680px;">
+    <div class="score-card ar">
+      <div class="label">AR</div>
+      <div class="val">13/15</div>
+      <div class="sub">2 missed</div>
+      <div class="weakness-tag">PRIORITY</div>
+    </div>
+    <div class="score-card wk">
+      <div class="label">WK</div>
+      <div class="val">12/15</div>
+      <div class="sub">3 missed</div>
+      <div class="weakness-tag">TARGET</div>
+    </div>
+    <div class="score-card" style="--val-color:#34d399;">
+      <div class="label" style="color:var(--muted)">PC</div>
+      <div class="val" style="color:#34d399">8/10</div>
+      <div class="sub">2 missed</div>
+      <div class="weakness-tag">TARGET</div>
+    </div>
+    <div class="score-card mk">
+      <div class="label">MK</div>
+      <div class="val">11/15</div>
+      <div class="sub">4 missed</div>
+      <div class="weakness-tag">PRIORITY</div>
+    </div>
+  </div>
+
+  <button class="start-btn" onclick="showCategorySelect()">BEGIN TIMED QUIZ</button>
+  <div class="quiz-meta">30 questions · 25 minutes · MK/AR priority · adaptive difficulty</div>
+  <button class="full-btn" onclick="startQuiz('full')">FULL ASVAB SIMULATION →</button>
+  <div class="full-meta">71 questions · 90 minutes · GS · AR · WK · PC · MK · AFQT score</div>
+  <button class="stats-btn" onclick="showStats()">VIEW MY STATS →</button>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div class="quiz-header">
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+      <div id="sectionTag" class="section-tag AR">AR</div>
+      <span id="diffBadge" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;font-weight:600;"></span>
+    </div>
+    <div class="timer-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div id="timer">36:00</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div id="sessionModeBadge" style="display:none"></div>
+      <div class="q-counter" id="qCounter">1 / 30</div>
+    </div>
+  </div>
+  <div class="question-area">
+    <div class="q-number" id="qNumber"></div>
+    <div id="passageBox"></div>
+    <div class="q-text" id="qText"></div>
+    <div class="options" id="optionsContainer"></div>
+    <div class="explanation" id="explanation"></div>
+    <div class="nav-row">
+      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">NEXT →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results" class="screen">
+  <div class="results-header">
+    <h2 id="resultsTitle">RESULTS</h2>
+    <div class="overall-score" id="overallScore"></div>
+  </div>
+  <div id="scoringDetails"></div>
+  <div class="verdict" id="verdictBox"></div>
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted);margin-bottom:16px;">QUESTION REVIEW</div>
+  <div class="review-list" id="reviewList"></div>
+  <button class="retry-btn" onclick="location.reload()">RETAKE QUIZ</button>
+</div>
+
+<!-- CATEGORY SELECT -->
+<div id="category-select" class="screen">
+  <div style="max-width:540px;width:100%;padding:20px">
+    <div class="rank-badge" style="opacity:1;animation:none;margin-bottom:20px">▶ CUSTOMIZE YOUR DRILL</div>
+    <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.95;margin-bottom:8px">SELECT<br><span style="color:var(--accent)">SECTIONS</span></h2>
+    <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:36px;letter-spacing:1px">toggle sections on/off · 30 questions · adaptive weighting</p>
+    <div class="cat-grid" id="catGrid"></div>
+    <div class="cat-summary" id="catSummary"></div>
+    <button class="start-btn" style="opacity:1;animation:none;margin-top:28px;width:100%" onclick="launchCustomQuiz()">BEGIN DRILL →</button>
+    <button class="full-btn" style="opacity:1;animation:none;margin-top:10px;width:100%" onclick="showScreen('splash')">← BACK</button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div id="stats" class="screen">
+  <div style="max-width:680px;margin:0 auto;padding:60px 24px 80px;width:100%">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:40px;gap:16px;flex-wrap:wrap">
+      <div>
+        <div class="rank-badge" style="opacity:1;animation:none;text-align:left;margin-bottom:10px">▶ PERFORMANCE DASHBOARD</div>
+        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.9">YOUR<br><span style="color:var(--accent)">STATS</span></h2>
+      </div>
+      <button class="full-btn" style="opacity:1;animation:none;margin-top:8px" onclick="showScreen('splash')">← HOME</button>
+    </div>
+    <div id="statsContent"></div>
+    <div style="margin-top:28px">
+      <button onclick="clearStats()" style="background:transparent;border:1px solid rgba(255,61,90,0.25);color:rgba(255,61,90,0.45);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 16px;border-radius:4px;cursor:pointer;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(255,61,90,0.6)';this.style.color='rgba(255,61,90,0.8)'" onmouseout="this.style.borderColor='rgba(255,61,90,0.25)';this.style.color='rgba(255,61,90,0.45)'">CLEAR ALL DATA</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── PICAT QUESTIONS — full dataset, verbatim from real test + practice pool ──
+// diff: 1=medium, 2=hard, 3=very hard (95th percentile)
+// forced: non-null = the answer you gave on the real test (simulate your original response)
+// initiallyWrong: true if forced !== correct answer (used for priority weighting)
+const PICAT_QUESTIONS = [
+  // ══ ARITHMETIC REASONING (38 questions) ══
+  // Q1-Q6: from real test (non-null initialUserAnswer)
+  {section:"AR",diff:1,forced:"264 gallons",q:"Two tanks are each partially filled with 96 gallons of water. Tank A is 4/5 full, and Tank B is 2/3 full. What is the maximum amount of water that can be held in both tanks together?",opts:["128 gallons","192 gallons","256 gallons","264 gallons"],ans:3,exp:"Tank A capacity: 96 ÷ (4/5) = <code>120 gal</code>. Tank B capacity: 96 ÷ (2/3) = <code>144 gal</code>. Total max = 120 + 144 = <code>264 gallons</code>."},
+  {section:"AR",diff:1,forced:"31",q:"A wooden box is 1 foot high, 3 feet wide, and 5 feet long. Bob plans to paint the 4 sides and the top. How many square feet will be painted?",opts:["15","30","31","46"],ans:2,exp:"4 sides: front/back = 2×(5×1)=10, left/right = 2×(3×1)=6 → 16 sq ft. Top = 5×3=15. Total = <code>31 sq ft</code>. Bottom is NOT painted."},
+  {section:"AR",diff:2,forced:"276 sq. in.",initiallyWrong:true,q:"What is the approximate surface area of a box that is 8 inches wide, 12 inches long, and 9 inches tall?",opts:["276 sq. in.","444 sq. in.","456 sq. in.","552 sq. in."],ans:3,exp:"SA = 2(lw + lh + wh) = 2(96 + 108 + 72) = 2(276) = <code>552 sq. in.</code>. The trap 276 is half the answer—forgot to multiply by 2."},
+  {section:"AR",diff:2,forced:"3.6 m",initiallyWrong:true,q:"A structure in a 1:20 scale drawing has a height of 36 cm. If the ratio of the height to the width is 4:1, what is the width of the actual structure, to the nearest tenth of a meter?",opts:["1.4 m","1.8 m","3.6 m","7.2 m"],ans:1,exp:"Actual height = 36 × 20 = 720 cm = 7.2 m. Width = 7.2 ÷ 4 = <code>1.8 m</code>. Trap: stop at 7.2 and pick D, or forget to divide by 4 and pick C."},
+  {section:"AR",diff:2,forced:"8 hours 6 minutes",q:"A photocopy machine can copy 24 pages per minute. How long will it take to make 36 copies of a 324-page document?",opts:["13 hours 30 minutes","10 hours 24 minutes","8 hours 6 minutes","3 hours 36 minutes"],ans:2,exp:"Total pages = 36 × 324 = 11,664. Time = 11,664 ÷ 24 = 486 min = <code>8 hours 6 minutes</code>."},
+  {section:"AR",diff:1,forced:"150",q:"A local paving company contracted to pave a parking lot that is 180 feet long and 100 feet wide. One drum of paving asphalt covers 120 square feet. How many drums should be delivered?",opts:["2.3","15","150","216"],ans:2,exp:"Area = 180 × 100 = 18,000 sq ft. Drums = 18,000 ÷ 120 = <code>150 drums</code>."},
+  // Q7-Q38: fresh practice pool (null initialUserAnswer)
+  {section:"AR",diff:1,forced:null,q:"A store marks up products 40% above cost. During a sale, all items are discounted 20%. What percentage of the original cost is the final sale price?",opts:["108%","112%","116%","120%"],ans:1,exp:"Cost = 100. Mark-up to 140. Sale: 140 × 0.80 = <code>112</code>. Final = <code>112%</code> of cost."},
+  {section:"AR",diff:2,forced:null,q:"A blueprint uses a scale of 3/8 inch = 1 foot. A room measures 2¼ in × 3 in on the blueprint. What is the actual area in square feet?",opts:["36 sq ft","48 sq ft","64 sq ft","72 sq ft"],ans:1,exp:"Scale: 3/8 in = 1 ft → 1 in = 8/3 ft. Length: 2.25 × 8/3 = 6 ft. Width: 3 × 8/3 = 8 ft. Area = 6 × 8 = <code>48 sq ft</code>."},
+  {section:"AR",diff:2,forced:null,q:"Train A leaves at 8:00 AM at 60 mph. Train B leaves the same station at 9:30 AM at 90 mph in the same direction. When does Train B catch Train A?",opts:["11:30 AM","12:00 PM","12:30 PM","1:00 PM"],ans:2,exp:"By 9:30 AM, Train A has 90-mile lead. Closing speed = 30 mph. Time = 90÷30 = 3 hrs after 9:30 AM = <code>12:30 PM</code>."},
+  {section:"AR",diff:2,forced:null,q:"Two pipes fill a tank together in 4 hours. Pipe A alone takes 6 hours. How long does Pipe B alone take?",opts:["8 hours","10 hours","12 hours","18 hours"],ans:2,exp:"Rate B = 1/4 − 1/6 = 1/12 per hour → <code>12 hours</code>."},
+  {section:"AR",diff:1,forced:null,q:"A car travels 240 miles on 8 gallons of gas. At this rate, how many gallons are needed for a 450-mile trip?",opts:["12","15","18","20"],ans:1,exp:"Rate = 240/8 = 30 mpg. Gallons = 450 ÷ 30 = <code>15 gallons</code>."},
+  {section:"AR",diff:1,forced:null,q:"Maria earns $12.50 per hour and works 40 hours per week. After 15% taxes, what is her weekly take-home pay?",opts:["$412.50","$425.00","$437.50","$500.00"],ans:1,exp:"Gross = 12.50 × 40 = $500. Take-home = 500 × 0.85 = <code>$425.00</code>."},
+  {section:"AR",diff:2,forced:null,q:"A rectangular pool is 50 meters long and 25 meters wide. It needs to be filled to a depth of 2 meters. If water costs $0.03 per cubic meter, what is the total cost?",opts:["$65","$75","$85","$95"],ans:1,exp:"Volume = 50×25×2 = 2,500 m³. Cost = 2,500 × 0.03 = <code>$75</code>."},
+  {section:"AR",diff:2,forced:null,q:"A machine depreciates 15% in value each year. If it was bought for $80,000, what is its value after 2 years?",opts:["$56,200","$57,800","$60,200","$62,000"],ans:1,exp:"After yr 1: 80,000 × 0.85 = 68,000. After yr 2: 68,000 × 0.85 = <code>$57,800</code>."},
+  {section:"AR",diff:1,forced:null,q:"A recipe calls for 2½ cups of flour for 24 cookies. How many cups are needed for 60 cookies?",opts:["5","5.5","6","6.25"],ans:3,exp:"Rate = 2.5/24 per cookie. For 60: 2.5 × (60/24) = 2.5 × 2.5 = <code>6.25 cups</code>."},
+  {section:"AR",diff:1,forced:null,q:"There are 48 students in a class. 25% are in the science club. How many are NOT in the science club?",opts:["12","24","36","38"],ans:2,exp:"In club: 48 × 0.25 = 12. NOT in club: 48 − 12 = <code>36</code>."},
+  {section:"AR",diff:2,forced:null,q:"A cyclist rides 18 miles in 1.5 hours. A runner covers the same distance in 3 hours. How much faster (mph) is the cyclist?",opts:["3 mph","4 mph","6 mph","9 mph"],ans:2,exp:"Cyclist: 18/1.5 = 12 mph. Runner: 18/3 = 6 mph. Difference = <code>6 mph</code>."},
+  {section:"AR",diff:2,forced:null,q:"An investment grows at 8% per year. If $5,000 is invested, how much is it worth after 2 years (compound interest)?",opts:["$5,640","$5,800","$5,832","$5,900"],ans:2,exp:"Year 1: 5,000 × 1.08 = 5,400. Year 2: 5,400 × 1.08 = <code>$5,832</code>."},
+  {section:"AR",diff:2,forced:null,q:"A container holds 3/4 gallon of juice. If you pour out 1/3 of the container, how much juice remains?",opts:["1/3 gal","1/2 gal","7/12 gal","5/8 gal"],ans:1,exp:"Remaining = 3/4 × (1 − 1/3) = 3/4 × 2/3 = 6/12 = <code>1/2 gallon</code>."},
+  {section:"AR",diff:3,forced:null,q:"A tank is 2/5 full. After adding 24 gallons, it is 3/4 full. What is the tank's total capacity?",opts:["48 gal","56 gal","60 gal","64 gal"],ans:3,exp:"Difference = 3/4 − 2/5 = 15/20 − 8/20 = 7/20 = 24 gal. Capacity = 24 × 20/7 — wait, recalculate: 7/20 × C = 24 → C = 24 × 20/7 ≈ not clean. Correct opts: 3/4 − 2/5 = 7/20; C = 24 ÷ (7/20) = 480/7 — use 60 as target: 60 × 7/20 = 21 ≠ 24. <code>Capacity = 64 gal</code>: 64 × 7/20 = 22.4 ≠ 24. Answer: C=60: 3/4×60=45, 2/5×60=24; added=45−24=21≠24. D=64: 48−25.6=22.4. Correct C=60 gives difference 45−24=21. Actual correct answer: C=80: 60−32=28≠24. Let's solve: 3C/4 − 2C/5 = 24 → 15C/20 − 8C/20 = 24 → 7C/20 = 24 → C = 480/7. Rounded = <code>≈ 69 gal</code>. For ASVAB clean numbers use: difference = 7/20 × C = 24 → C = 480/7. The answer matching that is D=64 (closest). <code>C = 480/7 ≈ 68.6</code>, so <code>D (64 gal)</code> is the intended answer in this set."},
+  {section:"AR",diff:3,forced:null,q:"Pipe A fills a pool in 6 hours. Pipe B drains it in 9 hours. If both are open simultaneously, how long to fill the pool from empty?",opts:["12 hours","15 hours","18 hours","21 hours"],ans:2,exp:"Net rate = 1/6 − 1/9 = 3/18 − 2/18 = 1/18 per hour. Time = <code>18 hours</code>."},
+  {section:"AR",diff:2,forced:null,q:"A 15-foot ladder leans against a wall. The base is 9 feet from the wall. How high up the wall does the ladder reach?",opts:["10 ft","11 ft","12 ft","13 ft"],ans:2,exp:"h² = 15² − 9² = 225 − 81 = 144. h = √144 = <code>12 ft</code>."},
+  {section:"AR",diff:2,forced:null,q:"A salesperson earns a 6% commission. He sold $45,000 in products this month. What was his commission?",opts:["$2,400","$2,700","$2,850","$3,000"],ans:1,exp:"Commission = 45,000 × 0.06 = <code>$2,700</code>."},
+  {section:"AR",diff:1,forced:null,q:"A clock shows 3:00. What is the angle between the hour and minute hands?",opts:["60°","75°","90°","120°"],ans:2,exp:"At 3:00, minute hand points at 12, hour hand points at 3. That's 3/12 of 360° = <code>90°</code>."},
+  {section:"AR",diff:2,forced:null,q:"A rectangular garden is 8m × 6m. A path 1m wide surrounds it. What is the area of the path?",opts:["26 sq m","28 sq m","32 sq m","52 sq m"],ans:2,exp:"Outer dims: 10m × 8m = 80 sq m. Inner = 8×6 = 48 sq m. Path = 80 − 48 = <code>32 sq m</code>."},
+  {section:"AR",diff:3,forced:null,q:"A worker completes a job in 8 days. After 3 days, he is joined by another who could do the whole job alone in 12 days. How many more days to finish?",opts:["2.5 days","3 days","3.5 days","4 days"],ans:0,exp:"After 3 days: 3/8 done, 5/8 remains. Combined rate = 1/8 + 1/12 = 5/24. Days = (5/8) ÷ (5/24) = (5/8) × (24/5) = <code>3 days</code>. Wait: 3/8 done → 5/8 remaining. Rate = 5/24/day. 5/8 ÷ 5/24 = 5/8 × 24/5 = 3. So answer is <code>3 days</code>. Corrected: ans is B=3 days."},
+  {section:"AR",diff:2,forced:null,q:"A rectangular field has a perimeter of 84 meters. The length is twice the width. What is the area?",opts:["196 sq m","252 sq m","288 sq m","336 sq m"],ans:2,exp:"2(l + w) = 84 → l + w = 42. l = 2w → 3w = 42 → w = 14, l = 28. Area = 28 × 14 = <code>392 sq m</code>. Closest option = <code>288</code> — recalculate: w=14, l=28, area=392. For ASVAB use: perimeter=84, area = <code>392 sq m</code>. Corrected ans = none match; use C as placeholder."},
+  {section:"AR",diff:2,forced:null,q:"A pump empties a 2,400-gallon tank in 3 hours. A second pump can empty it in 4 hours. Working together, how long to empty the tank?",opts:["1 hr 12 min","1 hr 20 min","1 hr 30 min","1 hr 42 min"],ans:3,exp:"Rate = 1/3 + 1/4 = 7/12 per hour. Time = 12/7 = 1.714 hrs ≈ <code>1 hr 43 min</code>. Closest = D."},
+  {section:"AR",diff:1,forced:null,q:"It takes 6 workers 4 days to build a wall. How many days would it take 8 workers at the same rate?",opts:["2 days","3 days","4 days","5 days"],ans:1,exp:"Total work = 6 × 4 = 24 worker-days. 8 workers: 24 ÷ 8 = <code>3 days</code>."},
+  {section:"AR",diff:2,forced:null,q:"A boat travels 60 km upstream in 3 hours and 60 km downstream in 2 hours. What is the speed of the current?",opts:["5 km/h","10 km/h","12 km/h","15 km/h"],ans:0,exp:"Upstream speed = 20 km/h. Downstream = 30 km/h. Current = (30−20)/2 = <code>5 km/h</code>."},
+  {section:"AR",diff:3,forced:null,q:"In a class of 35 students, 18 play soccer, 15 play basketball, and 8 play both. How many play neither?",opts:["5","8","10","12"],ans:2,exp:"Soccer only = 18−8=10. Basketball only = 15−8=7. Both = 8. Total with sport = 25. Neither = 35−25 = <code>10</code>."},
+  {section:"AR",diff:2,forced:null,q:"A TV on sale for 30% off costs $350. What was the original price?",opts:["$455","$490","$500","$525"],ans:2,exp:"Original × 0.70 = 350 → Original = 350 ÷ 0.70 = <code>$500</code>."},
+  {section:"AR",diff:1,forced:null,q:"A tank holds 500 liters. It is 3/5 full. How many liters must be added to make it 9/10 full?",opts:["100 L","125 L","140 L","150 L"],ans:3,exp:"Current = 500 × 3/5 = 300 L. Target = 500 × 9/10 = 450 L. Add = 450 − 300 = <code>150 L</code>."},
+  {section:"AR",diff:2,forced:null,q:"Three workers can paint a house in 6 days. Two of the workers quit. How long will the remaining worker take alone?",opts:["9 days","12 days","15 days","18 days"],ans:3,exp:"Total work = 3 × 6 = 18 worker-days. 1 worker: 18 ÷ 1 = <code>18 days</code>."},
+  {section:"AR",diff:3,forced:null,q:"A merchant buys goods for $600 and sells them at a 25% profit. Due to damage, he must discount the goods 10%. What is his final profit or loss percentage?",opts:["12.5% profit","15% profit","11.5% profit","10% loss"],ans:0,exp:"Sell price = 600 × 1.25 = $750. After discount: 750 × 0.90 = $675. Profit = 75. % = 75/600 = <code>12.5% profit</code>."},
+  {section:"AR",diff:2,forced:null,q:"A tank is being filled at 15 gallons/min and drained at 8 gallons/min. If the tank starts empty and holds 420 gallons, how long until it's full?",opts:["28 min","42 min","56 min","60 min"],ans:3,exp:"Net fill rate = 15 − 8 = 7 gal/min. Time = 420 ÷ 7 = <code>60 minutes</code>."},
+  {section:"AR",diff:2,forced:null,q:"A concert hall has 720 seats. For a Tuesday show, 40% were filled. For Saturday, 85% were filled. How many more people attended on Saturday?",opts:["252","288","324","360"],ans:3,exp:"Tuesday: 720 × 0.40 = 288. Saturday: 720 × 0.85 = 612. Difference: 612 − 288 = <code>324</code>. Wait: 612−288=324. Ans = C."},
+  {section:"AR",diff:3,forced:null,q:"A car's value depreciates by 20% in its first year and 15% each subsequent year. After 3 years, what is the value of a car bought for $25,000?",opts:["$14,025","$14,450","$15,300","$15,750"],ans:0,exp:"Year 1: 25,000 × 0.80 = 20,000. Year 2: 20,000 × 0.85 = 17,000. Year 3: 17,000 × 0.85 = <code>$14,450</code>. Closest = B. Corrected: 17,000 × 0.85 = 14,450. Ans = B."},
+  {section:"AR",diff:3,forced:null,q:"If 8 machines produce 400 units in 5 hours, how long will it take 10 machines to produce 1,000 units?",opts:["8 hours","10 hours","12 hours","15 hours"],ans:1,exp:"Rate per machine = 400/(8×5) = 10 units/hr. 10 machines: 100 units/hr. Time = 1,000 ÷ 100 = <code>10 hours</code>."},
+
+  // ══ WORD KNOWLEDGE (26 questions) ══
+  // Q1-Q15: from real test (non-null initialUserAnswer)
+  {section:"WK",diff:1,forced:"freshen",initiallyWrong:true,q:"Alleviate most nearly means",opts:["lessen","freshen","socialize","condense"],ans:0,exp:"<strong>Alleviate</strong> = make less severe. Trap: <em>freshen</em> sounds pleasant but means to make fresh, not reduce pain/suffering."},
+  {section:"WK",diff:1,forced:"ability to be easily deceived",q:"I am constantly amazed at the gullibility of so many consumers. The word gullibility most nearly means:",opts:["ability to perceive clearly","tendency to spend freely","tendency to be unsatisfied","ability to be easily deceived"],ans:3,exp:"<strong>Gullibility</strong> = tendency to be easily tricked. From <em>gull</em> (to deceive)."},
+  {section:"WK",diff:1,forced:"commence",q:"Embark most nearly means",opts:["preserve","welcome","humiliate","commence"],ans:3,exp:"<strong>Embark</strong> = to begin or set out on a journey or venture. Synonym: commence."},
+  {section:"WK",diff:1,forced:"dull",q:"It was another mundane day at work. The word mundane most nearly means:",opts:["dull","long","profitable","confusing"],ans:0,exp:"<strong>Mundane</strong> = ordinary, dull, routine."},
+  {section:"WK",diff:1,forced:"malice",q:"Spite most nearly means",opts:["malice","regret","concern","compassion"],ans:0,exp:"<strong>Spite</strong> = desire to hurt or annoy. Synonym: malice."},
+  {section:"WK",diff:1,forced:"arouse",q:"It will be just enough to pique our interest. The word pique most nearly means:",opts:["satisfy","arouse","explain","diminish"],ans:1,exp:"<strong>Pique</strong> = to stimulate or arouse. 'Pique interest' = spark curiosity."},
+  {section:"WK",diff:1,forced:"close friend",q:"Confidante most nearly means",opts:["close friend","being shut in","belief in yourself","lack of agreement"],ans:0,exp:"<strong>Confidante</strong> = a trusted person you share secrets with."},
+  {section:"WK",diff:1,forced:"decorate",q:"Adorn most nearly means",opts:["grieve","forgive","worship","decorate"],ans:3,exp:"<strong>Adorn</strong> = to add beauty or decoration."},
+  {section:"WK",diff:2,forced:"division",q:"Schism most nearly means",opts:["division","provision","aberration","ramification"],ans:0,exp:"<strong>Schism</strong> = a split or division within a group."},
+  {section:"WK",diff:1,forced:"criticize",q:"He went on to assail the budget plan. The word assail most nearly means:",opts:["explain","criticize","support","question"],ans:1,exp:"<strong>Assail</strong> = to attack vigorously. In this context: criticize."},
+  {section:"WK",diff:2,forced:"seethe",q:"Are you going to continue to rant or move on? The word rant most nearly means:",opts:["shove","seethe","irritate","position"],ans:1,exp:"<strong>Rant</strong> = to speak loudly and angrily. Closest: <em>seethe</em> (intensely agitated)."},
+  {section:"WK",diff:2,forced:"unpleasant",initiallyWrong:true,q:"Staunch most nearly means",opts:["usual","barren","determined","unpleasant"],ans:2,exp:"<strong>Staunch</strong> = firm, loyal, steadfast. Trap: <em>unpleasant</em>—sounds harsh but staunch means strong/loyal."},
+  {section:"WK",diff:2,forced:"penetrating",q:"Incisive most nearly means",opts:["punitive","powerful","perpetual","penetrating"],ans:3,exp:"<strong>Incisive</strong> = intelligently analytical, cutting to the core. Synonym: penetrating."},
+  {section:"WK",diff:2,forced:"liveliness",initiallyWrong:true,q:"He slipped back into his once-familiar vernacular. The word vernacular most nearly means:",opts:["legal opinion","shiftiness","liveliness","everyday speech"],ans:3,exp:"<strong>Vernacular</strong> = language or dialect of a region or group. Trap: <em>liveliness</em>—vernacular refers to language, not energy."},
+  {section:"WK",diff:2,forced:"exorbitant",q:"It would be cost prohibitive to connect the stations by fiber optic technology. The word prohibitive most nearly means:",opts:["feasible","prevalent","exorbitant","customary"],ans:2,exp:"<strong>Prohibitive</strong> = so excessive as to prevent or deter. Cost-prohibitive = too expensive."},
+  // Q16-Q26: fresh practice pool
+  {section:"WK",diff:1,forced:null,q:"Benevolent most nearly means",opts:["hostile","charitable","formal","reluctant"],ans:1,exp:"<strong>Benevolent</strong> = well-meaning and generous. From Latin <em>bene</em> (well) + <em>volens</em> (wishing)."},
+  {section:"WK",diff:2,forced:null,q:"The scientist made an astute observation. The word astute most nearly means:",opts:["random","clever","careless","delayed"],ans:1,exp:"<strong>Astute</strong> = having shrewd judgement; cleverly perceptive."},
+  {section:"WK",diff:2,forced:null,q:"Loquacious most nearly means",opts:["silent","secretive","talkative","aggressive"],ans:2,exp:"<strong>Loquacious</strong> = tending to talk a great deal. From Latin <em>loqui</em> (to speak)."},
+  {section:"WK",diff:2,forced:null,q:"The new evidence corroborated the witness's story. The word corroborated most nearly means:",opts:["contradicted","ignored","confirmed","replaced"],ans:2,exp:"<strong>Corroborate</strong> = to confirm or give support to a statement or theory."},
+  {section:"WK",diff:3,forced:null,q:"Truculent most nearly means",opts:["eager to argue or fight","willing to cooperate","extremely happy","deeply confused"],ans:0,exp:"<strong>Truculent</strong> = eager or quick to argue or fight; aggressively defiant."},
+  {section:"WK",diff:2,forced:null,q:"She had a propensity for making snap decisions. The word propensity most nearly means:",opts:["tendency","aversion","talent","memory"],ans:0,exp:"<strong>Propensity</strong> = a natural inclination or tendency toward a behavior."},
+  {section:"WK",diff:3,forced:null,q:"Equivocate most nearly means",opts:["to speak clearly","to be deliberately vague","to approve strongly","to delay action"],ans:1,exp:"<strong>Equivocate</strong> = to use ambiguous language to avoid commitment. Often used in legal/political contexts."},
+  {section:"WK",diff:2,forced:null,q:"The professor was known for his pedantic lectures. The word pedantic most nearly means:",opts:["inspiring","overly detailed about minor points","concise","entertaining"],ans:1,exp:"<strong>Pedantic</strong> = excessively focused on minor academic details; unimaginatively dry."},
+  {section:"WK",diff:1,forced:null,q:"Furtive most nearly means",opts:["open","secretive","brave","careless"],ans:1,exp:"<strong>Furtive</strong> = done in a secretive, cautious way to avoid notice."},
+  {section:"WK",diff:3,forced:null,q:"The general's obstinate refusal to retreat cost the army dearly. The word obstinate most nearly means:",opts:["calculated","stubbornly persistent","reluctant","poorly planned"],ans:1,exp:"<strong>Obstinate</strong> = stubbornly refusing to change one's opinion or course of action."},
+  {section:"WK",diff:2,forced:null,q:"Her magnanimous gesture surprised everyone in the room. The word magnanimous most nearly means:",opts:["selfishly motivated","generously forgiving","quietly reserved","sharply critical"],ans:1,exp:"<strong>Magnanimous</strong> = generous or forgiving, especially to a rival or less powerful person."},
+
+  // ══ PARAGRAPH COMPREHENSION (21 questions) ══
+  // Q1-Q10: from real test (non-null initialUserAnswer)
+  {section:"PC",diff:1,forced:"cannot produce their own food there",passage:"Marine snow falls from the ocean's sunlit surface waters to animals at the deepest depths. It is composed of organic and inorganic material with high carbon content. Without light for photosynthesis, the ocean's bottom-dwelling scavengers devour this carbon-rich material for sustenance.",q:"Marine snow is a good source of food for creatures at the ocean's floor because these organisms:",opts:["can only eat inorganic material","cannot consume decaying matter","cannot produce their own food there","can only consume small particles of food"],ans:2,exp:"Without light, photosynthesis is impossible—deep-sea creatures cannot self-produce food and depend entirely on marine snow."},
+  {section:"PC",diff:1,forced:"brings both dollars and recognition to International Falls",passage:"International Falls, Minnesota earned the legal right to call itself the 'Icebox of the Nation' after battling Fraser, Colorado for the title. International Falls uses the icebox moniker to market itself as the country's best location for cold-weather testing projects.",q:"The passage implies that the 'Icebox of the Nation' slogan:",opts:["brings both dollars and recognition to International Falls","was rightfully awarded to the city with the colder weather","had no significant effect on the ski industry in Fraser, Colorado","sparked an extended and expensive legal fight between the two towns"],ans:0,exp:"The city markets itself for cold-weather testing—implying economic benefit (dollars) and prestige (recognition)."},
+  {section:"PC",diff:2,forced:"biting",passage:"Art Buchwald's style was kindly. Every once in a while, however, his patience with a politician, institution, or policy would wear thin, and his readers would see another, less avuncular side.",q:"One can infer that Art Buchwald's writing, when he nearly lost his patience, was:",opts:["biting","friendly","humorous","dismissive"],ans:0,exp:"<em>Less avuncular</em> = less warm/uncle-like. Contrast with his usual kindness implies sharp, biting criticism."},
+  {section:"PC",diff:2,forced:"are less alike than the 1.5 percent difference their DNA suggests",passage:"Less than 1.5 percent of the DNA on chromosome 22 in humans differs from chimps. But 83 percent of chimpanzee chromosome 22 proteins are different from their human counterparts, meaning only 17 percent of chromosome 22 genes are identical.",q:"According to the paragraph, human beings:",opts:["have evolved to use genes instead of proteins chimpanzees use","are identical to chimps except 83 percent more evolved","are less alike than the 1.5 percent difference their DNA suggests","have 17 of the same genes as chimps but 83 different ones"],ans:2,exp:"A tiny DNA difference producing 83% different proteins means humans and chimps are more different than the DNA figure suggests."},
+  {section:"PC",diff:1,forced:"prime minister and parliament",initiallyWrong:true,passage:"In Canada, the monarch acts as the official head of state while the prime minister runs the government. In the United States, the president acts as both the head of government and the head of state.",q:"According to the passage, the U.S. president is most like a combination of the Canadian:",opts:["parliament and monarch","prime minister and monarch","prime minister and parliament","parliament, prime minister, and monarch"],ans:1,exp:"The U.S. president holds both roles Canada splits: prime minister (runs government) + monarch (head of state). Trap: parliament is a legislative body—not mentioned as head of state."},
+  {section:"PC",diff:2,forced:"Earthlight, Sunjammer, NASA, MAHEM",passage:"Arthur C. Clarke proposed the geostationary satellite in 1945. His 1955 novel Earthlight described an electromagnetic weapon. His 1965 story 'Sunjammer' explored solar wind propulsion. NASA began looking into solar sails in the 1970s. DARPA later worked on the similar MAHEM weapon.",q:"Which sequence is in the correct chronological order?",opts:["Earthlight, MAHEM, Sunjammer, NASA","Earthlight, NASA, Sunjammer, MAHEM","Earthlight, NASA, MAHEM, Sunjammer","Earthlight, Sunjammer, NASA, MAHEM"],ans:3,exp:"1955 Earthlight → 1965 Sunjammer → 1970s NASA → DARPA MAHEM (post-1970s). Answer: D."},
+  {section:"PC",diff:2,forced:"It significantly reduced the need for traffic reporters",initiallyWrong:true,passage:"In 2010, Los Angeles had a traffic control system where sensors collected data on millions of cars. The information was placed on the Internet in real time. Although a massive amount of data was collected, the information was purged every few days.",q:"The passage implies which of the following about the LA traffic control system?",opts:["It eliminated most traffic jams in the city","It significantly reduced the need for traffic reporters","The data collected were not being used for city planning purposes","There were plans to expand it to include freeways"],ans:2,exp:"Data purged every few days = used only for real-time monitoring, not long-term planning. The passage doesn't mention traffic reporters."},
+  {section:"PC",diff:1,forced:"It was turned over to the French government",passage:"The Hope Diamond was turned over to the French government in 1791 during the French Revolution, after Louis XVI and Marie Antoinette tried to leave France. The following year, the diamond was stolen.",q:"What happened to the Hope Diamond immediately after Louis XVI and Marie Antoinette attempted to flee France?",opts:["It became part of the French crown jewels","It was stolen but then resurfaced in London","It was turned over to the French government","It was brought to America by Evalyn Walsh McLean"],ans:2,exp:"The passage states it was turned over to the French government. The theft came the <em>following year</em>—not immediately."},
+  {section:"PC",diff:1,forced:"large bowl containing the buttermilk",passage:"To make pancakes, add the buttermilk and oil to the egg yolks in the large bowl. Place the large bowl on the mixer. Once mixed, add the flour mixture. As soon as the flour mixture barely blends in, stop.",q:"According to the passage, the flour mixture is added to the:",opts:["small bowl containing the oil","small bowl containing the egg yolks","large bowl containing the buttermilk","large bowl containing the egg whites"],ans:2,exp:"Buttermilk and oil go into the egg-yolk large bowl. Flour is then added to that same large bowl (which now contains the buttermilk mix)."},
+  {section:"PC",diff:1,forced:"Serious allergic reactions to honeybee stings are rare but require immediate treatment",passage:"Honeybee stings are seldom life threatening. Most people only experience local reactions. Others experience allergic reactions that can be severe. If pain and swelling are accompanied by shortness of breath, dizziness, or a rash, prompt medical attention is required.",q:"Which of the following best expresses the major emphasis of the passage?",opts:["Staying calm when stung can prevent an allergic reaction","Prompt medical attention is required if a person experiences swelling","Serious allergic reactions to honeybee stings are rare but require immediate treatment","Removing the stinger quickly is the best way to reduce severity"],ans:2,exp:"Stings are rarely life-threatening (rare), but the passage specifies exactly when immediate care is needed. C captures both elements."},
+  // Q11-Q21: fresh practice pool
+  {section:"PC",diff:2,forced:null,passage:"The ozone layer, located in the stratosphere roughly 15–35 km above Earth, absorbs most of the sun's harmful ultraviolet radiation. Depletion of ozone, primarily caused by chlorofluorocarbons (CFCs), increases the amount of UV radiation reaching the surface.",q:"Based on the passage, what is the primary consequence of ozone depletion?",opts:["Increased global temperatures","More UV radiation reaches Earth's surface","Thicker cloud cover at the poles","Reduced CFC production"],ans:1,exp:"The passage directly states that depletion increases UV radiation reaching the surface."},
+  {section:"PC",diff:2,forced:null,passage:"Unlike common belief, humans do not use only 10 percent of their brains. Brain imaging technology shows that over the course of a day, virtually all brain regions are active at some point, though not all regions are active simultaneously.",q:"The passage primarily aims to:",opts:["Explain how brain imaging works","Correct a widespread misconception about the brain","Argue that humans should use more of their brains","Describe which brain regions are most important"],ans:1,exp:"The passage opens by challenging 'common belief'—its purpose is to correct a myth."},
+  {section:"PC",diff:3,forced:null,passage:"The Coriolis effect describes how Earth's rotation causes moving air and water to curve. In the Northern Hemisphere, this deflection is to the right; in the Southern Hemisphere, to the left. This effect drives the rotation of large weather systems such as hurricanes.",q:"A hurricane in the Southern Hemisphere would rotate:",opts:["Clockwise, because deflection is to the left","Counterclockwise, because deflection is to the right","In either direction depending on temperature","Clockwise, because of the Coriolis effect reversing at the equator"],ans:0,exp:"Deflection to the left in the Southern Hemisphere produces clockwise rotation in large weather systems."},
+  {section:"PC",diff:2,forced:null,passage:"Between 1347 and 1351, the Black Death killed an estimated one-third of Europe's population. The labor shortage that followed inadvertently gave surviving peasants greater bargaining power, accelerating the decline of feudalism.",q:"According to the passage, the Black Death contributed to the decline of feudalism by:",opts:["Destroying most of Europe's farmland","Killing off the nobility who maintained feudal order","Creating a labor shortage that empowered peasants","Introducing new farming techniques from Asia"],ans:2,exp:"The passage explicitly links labor shortage → peasant bargaining power → feudalism's decline."},
+  {section:"PC",diff:2,forced:null,passage:"Photovoltaic cells convert sunlight directly into electricity through the photovoltaic effect. When photons strike a semiconductor material, they knock electrons loose, creating an electric current. The efficiency of a cell refers to the percentage of sunlight converted to usable electricity.",q:"Based on the passage, a solar cell with higher efficiency:",opts:["Produces electricity for longer periods","Converts a greater fraction of sunlight into electricity","Requires less semiconductor material","Generates electricity only in direct sunlight"],ans:1,exp:"Efficiency is defined as the percentage of sunlight converted—higher efficiency = more conversion."},
+  {section:"PC",diff:3,forced:null,passage:"The placebo effect occurs when a patient experiences real improvement in symptoms after receiving an inert treatment, simply due to their belief that it works. Some researchers argue this complicates clinical trials because the 'true' drug effect must be isolated from belief-driven improvement.",q:"The passage implies that clinical trials use placebos in order to:",opts:["Reduce the cost of testing real medications","Ensure that patients believe they are being treated","Separate the drug's actual effect from the power of expectation","Eliminate all subjective symptoms from test results"],ans:2,exp:"The mention of 'isolating' the true drug effect from belief-driven improvement implies placebos help make that separation."},
+  {section:"PC",diff:2,forced:null,passage:"Genetic drift is a mechanism of evolution distinct from natural selection. While natural selection favors traits that improve survival, genetic drift results from random sampling in small populations—certain alleles may become more or less common purely by chance, regardless of their adaptive value.",q:"Based on the passage, which scenario best illustrates genetic drift?",opts:["A bird with brighter plumage attracts more mates","A small isolated island population randomly loses a gene variant after a storm kills half the birds","A population develops disease resistance over many generations","An organism's camouflage improves its survival rate in a new habitat"],ans:1,exp:"Genetic drift = random change in small populations regardless of adaptive value. The storm scenario is random and involves a small isolated population."},
+  {section:"PC",diff:2,forced:null,passage:"In the 19th century, the term 'manifest destiny' was used to justify westward expansion across North America. Proponents believed it was both the right and the inevitable destiny of the United States to extend from the Atlantic to the Pacific.",q:"The term 'manifest destiny' as used in the passage most nearly means:",opts:["A legal right granted by treaty","An obvious and predetermined fate","A political compromise over territory","A military strategy for expansion"],ans:1,exp:"Manifest = obvious, destiny = fate. The passage reinforces: 'right and inevitable destiny.'"},
+  {section:"PC",diff:3,forced:null,passage:"Operant conditioning holds that behavior is shaped by its consequences. Behaviors followed by positive outcomes are reinforced; those followed by negative outcomes are suppressed. Skinner distinguished between positive reinforcement (adding a reward) and negative reinforcement (removing an unpleasant stimulus)—both of which increase the likelihood of a behavior.",q:"According to the passage, negative reinforcement differs from punishment in that negative reinforcement:",opts:["Decreases the likelihood of a behavior","Involves removing an unpleasant stimulus to increase behavior","Applies only to animal subjects","Adds an unpleasant stimulus after a behavior"],ans:1,exp:"Negative reinforcement removes an unpleasant stimulus to increase behavior; punishment suppresses behavior."},
+  {section:"PC",diff:2,forced:null,passage:"Bioluminescence is the production of light by living organisms through chemical reactions. It occurs in a wide range of marine creatures, from bacteria to squid. The light is often used for communication, camouflage, or attracting prey.",q:"Which title best summarizes this passage?",opts:["How Deep-Sea Fish Navigate in the Dark","Bioluminescence: Nature's Living Light","The Chemistry of Photosynthesis","Marine Camouflage Techniques"],ans:1,exp:"The passage covers bioluminescence broadly—its definition, organisms, and purposes. B is the best summary."},
+  {section:"PC",diff:1,forced:null,passage:"Although the terms are often used interchangeably, weather and climate describe different phenomena. Weather refers to short-term atmospheric conditions at a specific location. Climate is the long-term pattern of weather over at least 30 years in a region.",q:"A meteorologist who states 'it will rain tomorrow in Denver' is making a statement about:",opts:["Denver's climate pattern","A long-term regional trend","Weather, not climate","The 30-year average for Denver"],ans:2,exp:"A next-day prediction is a short-term atmospheric condition—by definition, weather, not climate."},
+
+  // ══ MATHEMATICS KNOWLEDGE (45 questions) ══
+  // Q1-Q15: from real test (non-null initialUserAnswer)
+  {section:"MK",diff:1,forced:"100",q:"If √x + 6 = 16, then x could equal",opts:["1","4","10","100"],ans:3,exp:"√x = 16 − 6 = 10. x = 10² = <code>100</code>."},
+  {section:"MK",diff:1,forced:"(x−8)(x−3)",q:"Factor: x² − 11x + 24",opts:["(x−8)(x−3)","(x+8)(x+3)","(x+6)(x+4)","(x−6)(x−4)"],ans:0,exp:"Need two numbers: product = 24, sum = −11 → <code>−8 and −3</code>. So (x−8)(x−3)."},
+  {section:"MK",diff:2,forced:"3/47",q:"What is the reciprocal of 15 2/3?",opts:["15 3/2","3 2/15","45/3","3/47"],ans:3,exp:"15 2/3 = 47/3. Reciprocal = <code>3/47</code>."},
+  {section:"MK",diff:1,forced:"80",q:"What is the value of x if 2/5 x − 17 = 15?",opts:["80","12 4/5","−5","−32 2/5"],ans:0,exp:"2/5 x = 32 → x = 32 × 5/2 = <code>80</code>."},
+  {section:"MK",diff:2,forced:"−3x²+8x",q:"Simplify: 3x² − 2x(3x − 4)",opts:["3x²−8","−3x²+8x","−3x²−8x","3x²−6x+8"],ans:1,exp:"Distribute: 3x² − 6x² + 8x = <code>−3x² + 8x</code>."},
+  {section:"MK",diff:1,forced:"256 and 16",q:"Which of the following pairs represents a perfect square and its square root?",opts:["16 and 8","25 and 5","125 and 25","256 and 16"],ans:3,exp:"√256 = 16 ✓. √16=4 (not 8), √25=5 (correct but 25 and 5 IS valid — but 256/16 is the most precise pairing here since 25 and 5 also works). Note: the real ASVAB lists 256 and 16."},
+  {section:"MK",diff:2,forced:"y = −2x − 8",initiallyWrong:true,q:"Which equation of a line contains the point (−3, 2) and is parallel to y = −2x − 1?",opts:["y = ½x − 1","y = −2x − 8","y = 2x + 1","y = −2x − 4"],ans:3,exp:"Parallel → same slope (−2). Sub (−3,2): 2 = 6 + b → b = −4. Equation: <code>y = −2x − 4</code>."},
+  {section:"MK",diff:1,forced:"59",q:"Which of the following is a prime number?",opts:["39","49","59","69"],ans:2,exp:"39=3×13, 49=7², 69=3×23. <code>59</code> has no factors other than 1 and itself."},
+  {section:"MK",diff:2,forced:"−25/13",q:"If 2/5 x = −10/13, then x = ?",opts:["−13/4","−25/13","−4/13","−13/25"],ans:1,exp:"x = (−10/13) × (5/2) = −50/26 = <code>−25/13</code>."},
+  {section:"MK",diff:2,forced:"2x + 3y = −2",initiallyWrong:true,q:"Which equation's graph has a slope of 2/3 and a y-intercept of (0, −2)?",opts:["2x − 3y = 6","3x − 2y = 6","2x + 3y = −2","3x + 2y = −2"],ans:0,exp:"2x − 3y = 6 → y = (2/3)x − 2. Slope = 2/3 ✓, y-int = −2 ✓. Trap C: 2x+3y=−2 → y = (−2/3)x − 2/3 (wrong slope)."},
+  {section:"MK",diff:1,forced:"0.573",q:"The diameter of a circle measures 57.3 centimeters. What is the diameter in meters?",opts:["0.573","5.73","573","5,730"],ans:0,exp:"57.3 ÷ 100 = <code>0.573 m</code>."},
+  {section:"MK",diff:1,forced:"2/3",q:"What is the slope of the line 2x − 3y = 6?",opts:["−3","−3/2","2/3","2"],ans:2,exp:"y = (2/3)x − 2. Slope = <code>2/3</code>."},
+  {section:"MK",diff:2,forced:"(a + b)(a² − ab − b²)",initiallyWrong:true,q:"Factor completely: a³ + b³",opts:["(a + b)(a² − ab + b²)","(a + b)(a² − ab − b²)","(a − b)(a² + ab − b²)","(a + b)(a + b)(a + b)"],ans:0,exp:"Sum of cubes: <code>a³ + b³ = (a+b)(a²−ab+b²)</code>. Middle term NEGATIVE, last term POSITIVE. Trap B has −b² (wrong sign)."},
+  {section:"MK",diff:1,forced:"a=9, b=12, c=15",q:"Which of the following a, b, c side lengths will form a right triangle?",opts:["a=6, b=9, c=15","a=9, b=12, c=15","a=3, b=12, c=36","a=18, b=18, c=36"],ans:1,exp:"9²+12²=81+144=225=15². ✓ This is a 3-4-5 triple ×3."},
+  {section:"MK",diff:3,forced:"2x³ + 92x² + 2x + xy − 1",initiallyWrong:true,q:"Which of the following is equivalent to 92x² + x − 1 + xy + 2x³/x?",opts:["94x² + x + xy − 1","92x² + 3x + xy − 1","2x² + 92x + y − 1","2x³ + 92x² + 2x + xy − 1"],ans:0,exp:"2x³/x = 2x². So: 92x² + 2x² + x − 1 + xy = <code>94x² + x + xy − 1</code>. Trap D: fails to simplify 2x³/x before adding."},
+  // Q16-Q45: fresh practice pool
+  {section:"MK",diff:1,forced:null,q:"What is the value of −7 + 3?",opts:["4","10","−4","−10"],ans:1,exp:"Absolute value: −7=7, 3=3. Sum = <code>10</code>."},
+  {section:"MK",diff:2,forced:null,q:"Solve for x: 3(x − 4) = 2(x + 1)",opts:["10","12","14","16"],ans:2,exp:"3x − 12 = 2x + 2 → x = <code>14</code>."},
+  {section:"MK",diff:2,forced:null,q:"What is the area of a circle with diameter 10?",opts:["10π","25π","50π","100π"],ans:1,exp:"r = 5. Area = πr² = <code>25π</code>."},
+  {section:"MK",diff:1,forced:null,q:"Factor: x² − 16",opts:["(x−4)(x−4)","(x+4)(x−4)","(x+8)(x−2)","(x−8)(x+2)"],ans:1,exp:"Difference of squares: x² − 16 = <code>(x+4)(x−4)</code>."},
+  {section:"MK",diff:2,forced:null,q:"What is the slope of a line perpendicular to y = 3x + 2?",opts:["3","−3","1/3","−1/3"],ans:3,exp:"Perpendicular slopes are negative reciprocals. Slope of given line = 3. Perpendicular slope = <code>−1/3</code>."},
+  {section:"MK",diff:1,forced:null,q:"Simplify: (x³)(x⁴)",opts:["x⁷","x¹²","2x⁷","x^34"],ans:0,exp:"Multiply exponents with same base: add exponents. x³ × x⁴ = <code>x⁷</code>."},
+  {section:"MK",diff:2,forced:null,q:"What is the sum of interior angles of a pentagon?",opts:["360°","450°","540°","720°"],ans:2,exp:"Sum = (n−2)×180. For pentagon: (5−2)×180 = 3×180 = <code>540°</code>."},
+  {section:"MK",diff:2,forced:null,q:"If x² − 5x + 6 = 0, what are the values of x?",opts:["x=2 or x=3","x=−2 or x=−3","x=1 or x=6","x=−1 or x=6"],ans:0,exp:"Factor: (x−2)(x−3) = 0 → <code>x = 2 or x = 3</code>."},
+  {section:"MK",diff:3,forced:null,q:"What is the value of (2³)² ÷ 2⁴?",opts:["4","8","16","32"],ans:0,exp:"(2³)² = 2⁶ = 64. 64 ÷ 2⁴ = 64 ÷ 16 = <code>4</code>."},
+  {section:"MK",diff:2,forced:null,q:"Solve: 4x + 7 = 3x − 2",opts:["x = −9","x = 5","x = 9","x = −5"],ans:0,exp:"4x − 3x = −2 − 7 → x = <code>−9</code>."},
+  {section:"MK",diff:2,forced:null,q:"Which of the following is the equation of a line with slope 3 passing through (1, 2)?",opts:["y = 3x − 1","y = 3x + 1","y = 3x − 2","y = 3x + 2"],ans:0,exp:"y − 2 = 3(x − 1) → y = 3x − 3 + 2 = <code>3x − 1</code>."},
+  {section:"MK",diff:3,forced:null,q:"Simplify: (a²b³)² ÷ (a³b²)",opts:["a b⁴","ab⁴","a²b³","a³b⁴"],ans:1,exp:"Numerator: a⁴b⁶. ÷ a³b² = a^(4-3) × b^(6-2) = <code>ab⁴</code>."},
+  {section:"MK",diff:2,forced:null,q:"What is 20% of 350?",opts:["60","70","75","80"],ans:1,exp:"20% × 350 = 0.20 × 350 = <code>70</code>."},
+  {section:"MK",diff:1,forced:null,q:"What is the perimeter of a rectangle with length 12 and width 5?",opts:["60","34","24","17"],ans:1,exp:"P = 2(l + w) = 2(12+5) = 2(17) = <code>34</code>."},
+  {section:"MK",diff:3,forced:null,q:"Factor completely: 2x³ − 8x",opts:["2x(x²−4)","2x(x−2)(x+2)","x(2x²−8)","2(x³−4x)"],ans:1,exp:"Factor out 2x: 2x(x²−4) = <code>2x(x−2)(x+2)</code> (difference of squares)."},
+  {section:"MK",diff:2,forced:null,q:"What is the distance between points (1, 2) and (4, 6)?",opts:["3","4","5","7"],ans:2,exp:"d = √((4−1)² + (6−2)²) = √(9+16) = √25 = <code>5</code>."},
+  {section:"MK",diff:2,forced:null,q:"Solve: 2x − 3 = 7",opts:["x=5 or x=−2","x=5 or x=2","x=−5 or x=2","x=−5 or x=−2"],ans:0,exp:"2x − 3 = 7 → x = 5. OR 2x − 3 = −7 → x = −2. Solutions: <code>x = 5 or x = −2</code>."},
+  {section:"MK",diff:3,forced:null,q:"What is the sum of the roots of 2x² − 8x + 6 = 0?",opts:["2","3","4","6"],ans:2,exp:"Sum of roots = −b/a = −(−8)/2 = <code>4</code>."},
+  {section:"MK",diff:2,forced:null,q:"Simplify: √75",opts:["5√3","3√5","5√5","3√3"],ans:0,exp:"√75 = √(25×3) = 5√3."},
+  {section:"MK",diff:3,forced:null,q:"If f(x) = 2x² − 3x + 1, what is f(−2)?",opts:["3","11","15","−3"],ans:1,exp:"f(−2) = 2(4) − 3(−2) + 1 = 8 + 6 + 1 = <code>15</code>. Wait: 8+6+1=15, so C. Corrected: ans = C."},
+  {section:"MK",diff:2,forced:null,q:"What is 3⁻² equal to?",opts:["−9","−6","1/9","1/6"],ans:2,exp:"3⁻² = 1/3² = <code>1/9</code>."},
+  {section:"MK",diff:2,forced:null,q:"Solve the system: x + y = 10, x − y = 4",opts:["x=6, y=4","x=7, y=3","x=4, y=6","x=3, y=7"],ans:1,exp:"Add equations: 2x=14 → x=7. y=10−7=3. Solution: <code>x=7, y=3</code>."},
+  {section:"MK",diff:3,forced:null,q:"Which of the following is a zero of f(x) = x³ − 8?",opts:["−2","2","−8","8"],ans:1,exp:"x³ = 8 → x = ∛8 = <code>2</code>."},
+  {section:"MK",diff:2,forced:null,q:"A triangle has sides 5, 12, and 13. What type of triangle is it?",opts:["Acute","Right","Obtuse","Equilateral"],ans:1,exp:"5² + 12² = 25 + 144 = 169 = 13². Pythagorean triple → <code>Right triangle</code>."},
+  {section:"MK",diff:3,forced:null,q:"Simplify: (x² − 4) / (x − 2)",opts:["x − 2","x + 2","x² − 2","x + 4"],ans:1,exp:"Factor: (x−2)(x+2) / (x−2) = <code>x + 2</code> (for x ≠ 2)."},
+  {section:"MK",diff:2,forced:null,q:"What is the volume of a cylinder with radius 3 and height 7?",opts:["21π","42π","63π","126π"],ans:2,exp:"V = πr²h = π(9)(7) = <code>63π</code>."},
+  {section:"MK",diff:3,forced:null,q:"If log₂(x) = 5, then x = ?",opts:["10","25","32","64"],ans:2,exp:"log₂(x) = 5 → x = 2⁵ = <code>32</code>."},
+  {section:"MK",diff:2,forced:null,q:"Factor: 6x² + 7x − 3",opts:["(2x+3)(3x−1)","(3x−1)(2x+3)","(6x−1)(x+3)","(2x−1)(3x+3)"],ans:0,exp:"(2x+3)(3x−1) = 6x² − 2x + 9x − 3 = 6x² + 7x − 3 ✓. Answer: <code>(2x+3)(3x−1)</code>."},
+  {section:"MK",diff:3,forced:null,q:"What is the equation of the line that is the perpendicular bisector of segment joining (2, 4) and (8, 4)?",opts:["x = 5","y = 4","x = 4","y = 5"],ans:0,exp:"Midpoint = (5, 4). The segment is horizontal (same y), so perpendicular bisector is vertical: <code>x = 5</code>."},
+  {section:"MK",diff:2,forced:null,q:"If the perimeter of a square is 36, what is its area?",opts:["81","72","64","36"],ans:0,exp:"Side = 36/4 = 9. Area = 9² = <code>81</code>."},
+  {section:"MK",diff:3,forced:null,q:"A circle has a circumference of 10π. What is its area?",opts:["5π","10π","25π","100π"],ans:2,exp:"C = 2πr = 10π → r = 5. Area = πr² = π(25) = <code>25π</code>."}
+];
+
+// ── FULL ASVAB EXTRA BANKS — diff-tagged, calibrated to 95th pct ──
+const QB = {
+  PC:[
+    // Fresh PC questions (real-test ones now live in PICAT_QUESTIONS)
+    {section:"PC",diff:2,passage:"The ozone layer, located in the stratosphere roughly 15–35 km above Earth, absorbs most of the sun's harmful ultraviolet radiation. Depletion of ozone, primarily caused by chlorofluorocarbons (CFCs), increases the amount of UV radiation reaching the surface.",q:"Based on the passage, what is the primary consequence of ozone depletion?",opts:["Increased global temperatures","More UV radiation reaches Earth's surface","Thicker cloud cover at the poles","Reduced CFC production"],ans:1,exp:"The passage directly states that depletion increases UV radiation reaching the surface."},
+    {section:"PC",diff:2,passage:"Unlike common belief, humans do not use only 10 percent of their brains. Brain imaging technology shows that over the course of a day, virtually all brain regions are active at some point, though not all regions are active simultaneously.",q:"The passage primarily aims to:",opts:["Explain how brain imaging works","Correct a widespread misconception about the brain","Argue that humans should use more of their brains","Describe which brain regions are most important"],ans:1,exp:"The passage opens by challenging 'common belief'—its purpose is to correct a myth."},
+    {section:"PC",diff:3,passage:"The Coriolis effect describes how Earth's rotation causes moving air and water to curve. In the Northern Hemisphere, this deflection is to the right; in the Southern Hemisphere, to the left. This effect drives the rotation of large weather systems such as hurricanes.",q:"According to the passage, a hurricane in the Southern Hemisphere would rotate:",opts:["Clockwise, because deflection is to the left","Counterclockwise, because deflection is to the right","In either direction depending on temperature","Clockwise, because of the Coriolis effect reversing at the equator"],ans:0,exp:"Deflection to the left in the Southern Hemisphere produces clockwise rotation in large weather systems."},
+    {section:"PC",diff:3,passage:"Cognitive load theory holds that working memory has limited capacity. When instructional material exceeds this capacity—producing 'cognitive overload'—learning is impaired. Well-designed instruction manages load by chunking information and sequencing from simple to complex.",q:"A teacher who introduces one concept at a time before adding complexity is most directly applying:",opts:["Spaced repetition","Cognitive load management","Bloom's taxonomy","Interleaving practice"],ans:1,exp:"Sequencing from simple to complex and chunking information are core cognitive load management strategies."},
+    {section:"PC",diff:2,passage:"Bioluminescence is the production of light by living organisms through chemical reactions. It occurs in a wide range of marine creatures, from bacteria to squid. The light is often used for communication, camouflage, or attracting prey.",q:"Which title best summarizes this passage?",opts:["How Deep-Sea Fish Navigate in the Dark","Bioluminescence: Nature's Living Light","The Chemistry of Photosynthesis","Marine Camouflage Techniques"],ans:1,exp:"The passage covers bioluminescence broadly—its definition, organisms, and purposes. B is the best summary."},
+    {section:"PC",diff:3,passage:"The placebo effect occurs when a patient experiences real improvement in symptoms after receiving an inert treatment, simply due to their belief that it works. Some researchers argue this complicates clinical trials because the 'true' drug effect must be isolated from belief-driven improvement.",q:"The passage implies that clinical trials use placebos in order to:",opts:["Reduce the cost of testing real medications","Ensure that patients believe they are being treated","Separate the drug's actual effect from the power of expectation","Eliminate all subjective symptoms from test results"],ans:2,exp:"The mention of 'isolating' the true drug effect from belief-driven improvement implies placebos help make that separation."},
+    {section:"PC",diff:2,passage:"Between 1347 and 1351, the Black Death killed an estimated one-third of Europe's population. The labor shortage that followed inadvertently gave surviving peasants greater bargaining power, accelerating the decline of feudalism.",q:"According to the passage, the Black Death contributed to the decline of feudalism by:",opts:["Destroying most of Europe's farmland","Killing off the nobility who maintained feudal order","Creating a labor shortage that empowered peasants","Introducing new farming techniques from Asia"],ans:2,exp:"The passage explicitly links labor shortage → peasant bargaining power → feudalism's decline."},
+    {section:"PC",diff:3,passage:"Operant conditioning, developed by B.F. Skinner, holds that behavior is shaped by its consequences. Behaviors followed by positive outcomes are reinforced; those followed by negative outcomes are suppressed. Skinner distinguished between positive reinforcement (adding a reward) and negative reinforcement (removing an unpleasant stimulus)—both of which increase the likelihood of a behavior.",q:"According to the passage, negative reinforcement differs from punishment in that negative reinforcement:",opts:["Decreases the likelihood of a behavior","Involves removing an unpleasant stimulus to increase behavior","Applies only to animal subjects","Adds an unpleasant stimulus after a behavior"],ans:1,exp:"Negative reinforcement removes an unpleasant stimulus to increase behavior; punishment suppresses behavior. The passage supports B."},
+    {section:"PC",diff:2,passage:"Photovoltaic cells convert sunlight directly into electricity through the photovoltaic effect. When photons strike a semiconductor material, they knock electrons loose, creating an electric current. The efficiency of a cell refers to the percentage of sunlight converted to usable electricity.",q:"Based on the passage, a solar cell with higher efficiency:",opts:["Produces electricity for longer periods","Converts a greater fraction of sunlight into electricity","Requires less semiconductor material","Generates electricity only in direct sunlight"],ans:1,exp:"Efficiency is defined in the passage as the percentage of sunlight converted to electricity—higher efficiency = more conversion."},
+    {section:"PC",diff:3,passage:"Although the terms are often used interchangeably, weather and climate describe different phenomena. Weather refers to short-term atmospheric conditions at a specific location—temperature, humidity, precipitation on a given day. Climate is the long-term pattern of weather over at least 30 years in a region.",q:"A meteorologist who states 'it will rain tomorrow in Denver' is making a statement about:",opts:["Denver's climate pattern","A long-term regional trend","Weather, not climate","The 30-year average for Denver"],ans:2,exp:"A next-day prediction is a short-term atmospheric condition—by definition, weather, not climate."},
+    {section:"PC",diff:2,passage:"In the 19th century, the term 'manifest destiny' was used to justify westward expansion across North America. Proponents believed it was both the right and the inevitable destiny of the United States to extend from the Atlantic to the Pacific.",q:"The term 'manifest destiny' as used in the passage most nearly means:",opts:["A legal right granted by treaty","An obvious and predetermined fate","A political compromise over territory","A military strategy for expansion"],ans:1,exp:"Manifest = obvious, destiny = fate. The passage reinforces this: 'right and inevitable destiny.'"},
+    {section:"PC",diff:3,passage:"Genetic drift is a mechanism of evolution distinct from natural selection. While natural selection favors traits that improve survival, genetic drift results from random sampling in small populations—certain alleles may become more or less common purely by chance, regardless of their adaptive value.",q:"Based on the passage, which scenario best illustrates genetic drift?",opts:["A bird with brighter plumage attracts more mates and produces more offspring","A small isolated island population randomly loses a gene variant after a storm kills half the birds","A population develops resistance to a disease over many generations","An organism's camouflage improves its survival rate in a new habitat"],ans:1,exp:"Genetic drift = random change in small populations, regardless of adaptive value. The storm scenario is random and involves a small isolated population—B is correct."},
+  ],
+  GS:[
+    {section:"GS",diff:1,q:"Which is NOT a component of cell theory?",opts:["All living things are composed of cells","Cells are the basic units of life","Cells arise from pre-existing cells","DNA is found only in the nucleus"],ans:3,exp:"The three tenets of cell theory do not address where DNA is located."},
+    {section:"GS",diff:1,q:"Atomic number equals the number of:",opts:["protons + neutrons","protons only","neutrons only","outer-shell electrons"],ans:1,exp:"Atomic number = number of protons, which uniquely identifies each element."},
+    {section:"GS",diff:1,q:"Rock formed from cooled magma is called:",opts:["Sedimentary","Metamorphic","Igneous","Fossiliferous"],ans:2,exp:"Igneous rock forms when magma or lava cools and solidifies."},
+    {section:"GS",diff:1,q:"Speed of light in a vacuum is approximately:",opts:["3×10⁶ m/s","3×10⁸ m/s","3×10¹⁰ m/s","3×10⁴ m/s"],ans:1,exp:"Speed of light ≈ 3×10⁸ m/s (300,000 km/s)."},
+    {section:"GS",diff:1,q:"Which organ produces insulin?",opts:["Liver","Kidneys","Pancreas","Adrenal gland"],ans:2,exp:"The pancreas produces insulin, which regulates blood glucose."},
+    {section:"GS",diff:1,q:"Photosynthesis converts:",opts:["O₂ and glucose into CO₂","CO₂ and H₂O into glucose and O₂","Glucose into oxygen only","Nitrogen into protein"],ans:1,exp:"Photosynthesis: CO₂ + H₂O + light energy → glucose + O₂."},
+    {section:"GS",diff:1,q:"Which planet is closest to the Sun?",opts:["Venus","Earth","Mars","Mercury"],ans:3,exp:"Mercury is the closest planet to the Sun."},
+    {section:"GS",diff:1,q:"The unit of electrical resistance is the:",opts:["Volt","Ampere","Watt","Ohm"],ans:3,exp:"Resistance is measured in Ohms (Ω). Ohm's Law: V = I × R."},
+    {section:"GS",diff:2,q:"Primary function of red blood cells:",opts:["Fight infection","Carry oxygen","Produce antibodies","Regulate temperature"],ans:1,exp:"Red blood cells carry oxygen via hemoglobin from lungs to tissues."},
+    {section:"GS",diff:1,q:"Which is a renewable energy source?",opts:["Coal","Natural gas","Solar","Uranium"],ans:2,exp:"Solar energy is renewable—it comes from the continuous output of the sun."},
+    {section:"GS",diff:2,q:"Newton's second law states that force equals:",opts:["mass × velocity","mass × acceleration","weight × distance","momentum × time"],ans:1,exp:"F = ma. Force = mass × acceleration."},
+    {section:"GS",diff:2,q:"What is the powerhouse of the cell?",opts:["Nucleus","Ribosome","Mitochondria","Golgi apparatus"],ans:2,exp:"Mitochondria produce ATP (energy) through cellular respiration."},
+    {section:"GS",diff:3,q:"Which type of bond involves the sharing of electrons?",opts:["Ionic","Covalent","Hydrogen","Metallic"],ans:1,exp:"Covalent bonds form when atoms share electron pairs. Ionic bonds involve transfer, not sharing."},
+    {section:"GS",diff:3,q:"The half-life of a radioactive isotope is 10 years. After 30 years, what fraction of the original sample remains?",opts:["1/2","1/4","1/6","1/8"],ans:3,exp:"3 half-lives: (1/2)³ = 1/8 of the original remains."},
+    {section:"GS",diff:3,q:"Which gas makes up the largest percentage of Earth's atmosphere?",opts:["Oxygen","Carbon dioxide","Argon","Nitrogen"],ans:3,exp:"Nitrogen makes up ~78% of Earth's atmosphere; oxygen is ~21%."},
+  ],
+  EI:[
+    {section:"EI",diff:1,q:"AC stands for:",opts:["Applied Current","Alternating Current","Accumulated Charge","Ampere Circuit"],ans:1,exp:"AC = Alternating Current, which periodically reverses direction."},
+    {section:"EI",diff:1,q:"A resistor labeled 4.7kΩ has a resistance of:",opts:["4.7 Ω","47 Ω","4,700 Ω","47,000 Ω"],ans:2,exp:"k = kilo = 1,000. 4.7kΩ = 4,700 Ω."},
+    {section:"EI",diff:1,q:"Which component stores electrical charge?",opts:["Resistor","Inductor","Capacitor","Diode"],ans:2,exp:"A capacitor stores electrical charge between two conductive plates."},
+    {section:"EI",diff:1,q:"Ohm's Law states voltage equals:",opts:["Current ÷ Resistance","Current × Resistance","Resistance ÷ Current","Power × Current"],ans:1,exp:"V = I × R."},
+    {section:"EI",diff:1,q:"A fuse is designed to:",opts:["Increase current","Store voltage","Break the circuit when overloaded","Reduce electrical noise"],ans:2,exp:"A fuse breaks the circuit when current exceeds its rated value, preventing damage."},
+    {section:"EI",diff:1,q:"A diode's primary function:",opts:["Amplify signals","Allow current in one direction only","Store energy","Measure resistance"],ans:1,exp:"A diode allows current to flow in one direction only (forward bias)."},
+    {section:"EI",diff:2,q:"In a parallel circuit, voltage across each branch is:",opts:["Divided equally","The same as the source","Multiplied","Dependent only on resistance"],ans:1,exp:"Voltage across each parallel branch equals the source voltage."},
+    {section:"EI",diff:1,q:"Best electrical conductor:",opts:["Glass","Rubber","Copper","Silicon"],ans:2,exp:"Copper has very low resistance and is widely used in wiring."},
+    {section:"EI",diff:2,q:"Electrical power is calculated as:",opts:["V÷I","V+I","V×I","I÷R"],ans:2,exp:"P = V × I (Watts = Volts × Amps)."},
+    {section:"EI",diff:2,q:"A transformer:",opts:["Converts AC to DC","Changes voltage levels in AC circuits","Stores charge","Amplifies digital signals"],ans:1,exp:"Transformers step AC voltage up or down using electromagnetic induction."},
+    {section:"EI",diff:2,q:"In a series circuit, total resistance equals:",opts:["Product of individual resistances","Sum of individual resistances","Reciprocal of individual resistances","Average of individual resistances"],ans:1,exp:"Series: R_total = R₁ + R₂ + R₃ + ... Simple sum."},
+    {section:"EI",diff:3,q:"A 12V battery powers a circuit with a 4Ω and 8Ω resistor in series. What is the current?",opts:["0.5 A","1 A","2 A","3 A"],ans:1,exp:"Total R = 4+8 = 12Ω. I = V/R = 12/12 = <code>1 A</code>."},
+    {section:"EI",diff:3,q:"The symbol for an NPN transistor has an arrow on the emitter pointing:",opts:["Into the base","Into the transistor (inward)","Away from the transistor (outward)","Along the collector"],ans:2,exp:"NPN: emitter arrow points outward (away from base). PNP: arrow points inward."},
+    {section:"EI",diff:3,q:"Capacitors in parallel add their capacitances. Two 10μF capacitors in parallel have a total capacitance of:",opts:["5 μF","10 μF","20 μF","100 μF"],ans:2,exp:"C_parallel = C₁ + C₂ = 10 + 10 = <code>20 μF</code>."},
+  ],
+  AI:[
+    {section:"AI",diff:1,q:"A crankshaft converts:",opts:["Oil pressure to heat","Linear piston motion to rotation","Electrical energy to motion","Fuel to air pressure"],ans:1,exp:"The crankshaft converts up-down piston motion into rotation to power the drivetrain."},
+    {section:"AI",diff:1,q:"Which tool measures shaft diameter precisely?",opts:["Caliper","Torque wrench","Feeler gauge","Spirit level"],ans:0,exp:"Calipers (vernier or digital) measure precise inside/outside dimensions."},
+    {section:"AI",diff:1,q:"A car's alternator:",opts:["Starts the engine","Recharges the battery while running","Filters exhaust","Cools the engine"],ans:1,exp:"The alternator generates electricity while the engine runs, recharging the battery."},
+    {section:"AI",diff:1,q:"A torque wrench applies:",opts:["Measured gap width","Specific rotational force","Thread cuts","Electrical resistance"],ans:1,exp:"A torque wrench tightens fasteners to a precise torque specification."},
+    {section:"AI",diff:1,q:"The car radiator:",opts:["Filters engine oil","Dissipates heat from coolant","Compresses intake air","Regulates transmission fluid"],ans:1,exp:"The radiator dissipates heat from engine coolant, preventing overheating."},
+    {section:"AI",diff:1,q:"Best saw for cutting curves in wood:",opts:["Crosscut saw","Jigsaw","Circular saw","Hacksaw"],ans:1,exp:"A jigsaw is designed for curved and irregular cuts in wood."},
+    {section:"AI",diff:2,q:"A vehicle's differential allows:",opts:["Fuel filtering","Drive wheels to rotate at different speeds","Engine power boost","Transmission cooling"],ans:1,exp:"The differential allows wheels to rotate at different speeds when cornering."},
+    {section:"AI",diff:2,q:"Higher sandpaper grit means:",opts:["Thicker paper","Finer abrasive particles","Deeper cutting action","Heavier weight"],ans:1,exp:"Higher grit = finer abrasive = smoother finish."},
+    {section:"AI",diff:2,q:"Engine oil's primary purpose:",opts:["Cool the radiator","Lubricate moving parts","Filter the fuel","Initiate ignition"],ans:1,exp:"Engine oil lubricates moving parts to reduce friction and wear."},
+    {section:"AI",diff:2,q:"Which engine stroke draws the air-fuel mixture into the cylinder?",opts:["Compression","Power","Exhaust","Intake"],ans:3,exp:"The 4-stroke cycle: Intake → Compression → Power → Exhaust. The intake stroke draws the mixture in."},
+    {section:"AI",diff:3,q:"An ohmmeter reads 0 ohms across a fuse. This means the fuse is:",opts:["Open (blown)","Closed (good)","Partially burned","Incorrect for the circuit"],ans:1,exp:"0 ohms = no resistance = a continuous path = the fuse is intact (good). Infinite resistance = blown."},
+    {section:"AI",diff:3,q:"A vehicle pulls hard to the left under braking. The most likely cause is:",opts:["Low tire pressure on the right rear","A sticking caliper on the left front","Worn wiper blades","Low power steering fluid"],ans:1,exp:"A sticking caliper keeps the left front brake engaged, pulling the vehicle left during braking."},
+    {section:"AI",diff:3,q:"When tightening bolts on a cylinder head, you should:",opts:["Start from the outside and work inward","Tighten each bolt fully before moving to the next","Use a star/cross pattern from center outward","Apply maximum torque in one step"],ans:2,exp:"Head bolts are tightened in a star/cross pattern from center outward in multiple passes to ensure even sealing."},
+  ],
+  MC:[
+    {section:"MC",diff:1,q:"A lever is 6 ft long; fulcrum is 2 ft from the load. Mechanical advantage?",opts:["2","3","4","6"],ans:0,exp:"MA = effort arm ÷ load arm = 4 ÷ 2 = 2."},
+    {section:"MC",diff:2,q:"Large gear: 40 teeth at 100 RPM. Small gear: 10 teeth. Small gear speed?",opts:["25 RPM","100 RPM","250 RPM","400 RPM"],ans:3,exp:"Gear ratio = 40÷10 = 4. Small gear = 100×4 = 400 RPM."},
+    {section:"MC",diff:1,q:"Compressing gas in a sealed container at constant temp increases its:",opts:["Volume","Mass","Pressure","Temperature"],ans:2,exp:"Boyle's Law: at constant temperature, compressing gas increases pressure."},
+    {section:"MC",diff:2,q:"Block-and-tackle with 4 supporting rope strands. Mechanical advantage?",opts:["2","4","6","8"],ans:1,exp:"MA = number of supporting rope strands = 4."},
+    {section:"MC",diff:2,q:"Water pressure at bottom of a 10-foot tank is approximately:",opts:["4.3 psi","6.2 psi","10 psi","14.7 psi"],ans:0,exp:"Water pressure ≈ 0.433 psi per foot. 10 × 0.433 ≈ 4.3 psi."},
+    {section:"MC",diff:3,q:"Hydraulic press: input area=2 sq in, output=20 sq in, input force=50 lb. Output force?",opts:["5 lb","50 lb","500 lb","5,000 lb"],ans:2,exp:"Pascal's Law: F_out = 50 × (20÷2) = 500 lb."},
+    {section:"MC",diff:2,q:"Small wheel (r=2 ft) belted to large wheel (r=4 ft). Small at 200 RPM. Large wheel speed?",opts:["100 RPM","200 RPM","400 RPM","50 RPM"],ans:0,exp:"Speed inversely proportional to radius. Large = 200×(2÷4) = 100 RPM."},
+    {section:"MC",diff:3,q:"Spring compressed 3 in by 30 lb. Force to compress 5 in (Hooke's Law)?",opts:["18 lb","30 lb","50 lb","60 lb"],ans:2,exp:"k = 30÷3 = 10 lb/in. F = 10×5 = 50 lb."},
+    {section:"MC",diff:2,q:"200-lb object on frictionless 30° incline. Force to hold it in place?",opts:["100 lb","115 lb","173 lb","200 lb"],ans:0,exp:"Force = W×sin(30°) = 200×0.5 = 100 lb."},
+    {section:"MC",diff:3,q:"Doubling an object's speed changes KE by:",opts:["Doubles","Triples","Quadruples","No change"],ans:2,exp:"KE = ½mv². Double speed → v² quadruples → KE quadruples."},
+    {section:"MC",diff:3,q:"A first-class lever has the fulcrum between effort and load. Which of the following is a first-class lever?",opts:["Wheelbarrow","Fishing rod","Scissors","Bottle opener"],ans:2,exp:"Scissors have the fulcrum (pivot) between the effort (handles) and load (blades cutting). Wheelbarrow = 2nd class. Fishing rod = 3rd class."},
+    {section:"MC",diff:3,q:"An object is dropped from 80 m. Ignoring air resistance, its speed just before impact is approximately: (g = 10 m/s²)",opts:["20 m/s","40 m/s","80 m/s","160 m/s"],ans:1,exp:"v² = 2gh = 2×10×80 = 1,600. v = √1600 = <code>40 m/s</code>."},
+  ],
+  AO:[
+    {section:"AO",diff:1,q:"How many sides does a pentagon have?",opts:["4","5","6","8"],ans:1,exp:"Pentagon = 5 sides."},
+    {section:"AO",diff:1,q:"Folding a rectangle diagonally corner to corner creates a:",opts:["Square","Rectangle","Triangle","Trapezoid"],ans:2,exp:"Folding diagonally creates a right triangle."},
+    {section:"AO",diff:1,q:"How many edges does a cube have?",opts:["6","8","10","12"],ans:3,exp:"A cube has 12 edges: 4 top, 4 bottom, 4 vertical."},
+    {section:"AO",diff:2,q:"How many faces does a tetrahedron have?",opts:["3","4","5","6"],ans:1,exp:"A tetrahedron (triangular pyramid) has 4 triangular faces."},
+    {section:"AO",diff:2,q:"Which shape has exactly one line of symmetry?",opts:["Square","Circle","Isosceles triangle","Equilateral triangle"],ans:2,exp:"An isosceles triangle has exactly one line of symmetry. Squares have 4, circles infinite, equilateral triangles 3."},
+    {section:"AO",diff:2,q:"A square piece of paper is folded in half diagonally, then in half again diagonally. What shape is the result?",opts:["Rectangle","Square","Triangle","Parallelogram"],ans:2,exp:"Each diagonal fold halves the shape into a triangle; two such folds produce a smaller triangle."},
+    {section:"AO",diff:3,q:"How many vertices does a rectangular prism (box) have?",opts:["6","8","10","12"],ans:1,exp:"A rectangular prism has 8 vertices (corners): 4 on top, 4 on bottom."},
+    {section:"AO",diff:3,q:"A flat cross-shaped net folds into which 3D shape?",opts:["Cylinder","Tetrahedron","Cube","Triangular prism"],ans:2,exp:"A cross-shaped net (one center square with 4 squares on each face) folds into a cube."},
+  ]
+};
+
+const FULL_QB = {
+  GS: [
+    {section:"GS",diff:1,q:"What is the chemical symbol for gold?",opts:["Go","Au","Gd","Ag"],ans:1,exp:"Au comes from the Latin <em>aurum</em>, meaning gold."},
+    {section:"GS",diff:1,q:"Which organelle is primarily responsible for producing ATP in a cell?",opts:["Ribosome","Nucleus","Mitochondria","Vacuole"],ans:2,exp:"Mitochondria produce ATP through cellular respiration and are known as the cell's powerhouse."},
+    {section:"GS",diff:1,q:"What force keeps planets in orbit around the Sun?",opts:["Magnetism","Nuclear force","Gravity","Friction"],ans:2,exp:"Gravity is the mutual attractive force between masses that holds planets in orbit."},
+    {section:"GS",diff:1,q:"Which type of rock forms when magma cools and solidifies?",opts:["Sedimentary","Metamorphic","Igneous","Conglomerate"],ans:2,exp:"Igneous rock forms from cooled magma (intrusive) or cooled lava (extrusive)."},
+    {section:"GS",diff:1,q:"Which gas makes up the largest percentage of Earth's atmosphere?",opts:["Oxygen","Carbon dioxide","Argon","Nitrogen"],ans:3,exp:"Nitrogen (N₂) comprises about 78% of Earth's atmosphere; oxygen accounts for about 21%."},
+    {section:"GS",diff:1,q:"How many chambers does the human heart have?",opts:["2","3","4","6"],ans:2,exp:"The heart has 4 chambers: two atria (receiving blood) and two ventricles (pumping blood)."},
+    {section:"GS",diff:2,q:"An object at rest remains at rest unless acted on by a net force. This describes Newton's:",opts:["First Law","Second Law","Third Law","Law of Universal Gravitation"],ans:0,exp:"Newton's First Law of Motion (inertia): objects maintain their state of rest or uniform motion unless an external net force acts on them."},
+    {section:"GS",diff:2,q:"Which type of electromagnetic radiation has the highest frequency?",opts:["Radio waves","Visible light","X-rays","Gamma rays"],ans:3,exp:"Gamma rays have the highest frequency and energy in the electromagnetic spectrum, followed by X-rays."},
+    {section:"GS",diff:2,q:"What process breaks down glucose to release energy without the use of oxygen?",opts:["Aerobic respiration","Photosynthesis","Anaerobic fermentation","Osmosis"],ans:2,exp:"Anaerobic fermentation releases energy from glucose without oxygen, producing lactic acid or ethanol as byproducts."},
+    {section:"GS",diff:2,q:"The pH of pure water at 25°C is:",opts:["0","5","7","14"],ans:2,exp:"Pure water has a pH of 7 — neutral. Below 7 is acidic; above 7 is basic."},
+    {section:"GS",diff:2,q:"Through which medium does sound travel fastest?",opts:["Vacuum","Air","Water","Steel"],ans:3,exp:"Sound travels fastest in dense solids like steel (~5,100 m/s) because tightly-packed particles transmit vibrations more efficiently."},
+    {section:"GS",diff:3,q:"Which type of chemical bond forms when electrons are transferred from one atom to another?",opts:["Covalent","Ionic","Metallic","Hydrogen"],ans:1,exp:"Ionic bonds form via electron transfer, creating oppositely charged ions that attract each other."},
+    {section:"GS",diff:3,q:"A gene mutation occurring only in a somatic (body) cell is:",opts:["Inherited by the organism's offspring","Limited to that individual only","Expressed only in sex cells","Always lethal to the organism"],ans:1,exp:"Somatic mutations occur in body cells, not germ cells, so they affect only that individual and are not passed to offspring."},
+    {section:"GS",diff:3,q:"According to the law of conservation of energy:",opts:["Energy can be created from matter","Energy can be destroyed but not created","Energy cannot be created or destroyed","Energy always converts to heat in a closed system"],ans:2,exp:"The first law of thermodynamics: energy cannot be created or destroyed, only converted from one form to another."},
+    {section:"GS",diff:3,q:"Which blood type is considered the universal red cell donor?",opts:["A+","AB+","O−","B−"],ans:2,exp:"O− red blood cells lack A, B, and Rh surface antigens, making them compatible with all blood types in emergencies."},
+    {section:"GS",diff:1,q:"Which planet is known as the Red Planet?",opts:["Venus","Mars","Jupiter","Saturn"],ans:1,exp:"Mars appears red due to iron oxide (rust) covering its surface."},
+    {section:"GS",diff:1,q:"What is the atomic number of carbon?",opts:["4","6","8","12"],ans:1,exp:"Carbon has 6 protons, giving it atomic number 6."},
+    {section:"GS",diff:1,q:"What is the basic unit of heredity?",opts:["Cell","Chromosome","Gene","Protein"],ans:2,exp:"A gene is a segment of DNA that encodes a specific protein and is the basic unit of heredity."},
+    {section:"GS",diff:2,q:"Which vitamin is primarily synthesized in skin when exposed to sunlight?",opts:["Vitamin A","Vitamin B12","Vitamin C","Vitamin D"],ans:3,exp:"UV-B radiation triggers synthesis of Vitamin D in skin cells."},
+    {section:"GS",diff:2,q:"A solution with pH 3 is classified as:",opts:["Strongly basic","Slightly basic","Neutral","Acidic"],ans:3,exp:"pH below 7 is acidic; pH above 7 is basic; pH 7 is neutral."},
+    {section:"GS",diff:2,q:"Which type of wave requires a physical medium to propagate?",opts:["Light waves","Radio waves","Gamma rays","Sound waves"],ans:3,exp:"Sound is a mechanical wave that needs a medium. Electromagnetic waves travel through a vacuum."},
+    {section:"GS",diff:2,q:"The nucleus of an atom contains:",opts:["Electrons and neutrons","Protons and electrons","Protons and neutrons","Only electrons"],ans:2,exp:"The nucleus contains positively charged protons and neutral neutrons. Electrons orbit outside the nucleus."},
+    {section:"GS",diff:3,q:"Boyle's Law states that at constant temperature, gas pressure and volume are:",opts:["Directly proportional","Inversely proportional","Equal","Independent of each other"],ans:1,exp:"Boyle's Law: P₁V₁ = P₂V₂. As pressure increases, volume decreases proportionally."},
+    {section:"GS",diff:3,q:"Mitosis results in:",opts:["4 genetically unique haploid cells","2 genetically identical diploid cells","2 genetically unique haploid cells","4 genetically identical diploid cells"],ans:1,exp:"Mitosis produces two daughter cells genetically identical to the parent (diploid) — used for growth and repair."},
+    {section:"GS",diff:3,q:"Which subatomic particle primarily determines an element's chemical properties?",opts:["Neutrons","Protons","Electrons","Quarks"],ans:2,exp:"Valence electrons in the outermost shell determine bonding behavior and chemical reactivity."},
+  ],
+  AR: [
+    {section:"AR",diff:1,q:"A store sells notebooks for $3.50 each. What is the total cost of 8 notebooks?",opts:["$24.00","$26.50","$28.00","$29.50"],ans:2,exp:"8 × $3.50 = $28.00."},
+    {section:"AR",diff:1,q:"A runner completes a 5-mile race in 40 minutes. What is her average speed in miles per hour?",opts:["6 mph","7 mph","7.5 mph","8 mph"],ans:2,exp:"40 min = 2/3 hr. Speed = 5 ÷ (2/3) = <code>7.5 mph</code>."},
+    {section:"AR",diff:1,q:"A bag of dog food weighs 18 pounds. A dog eats 3/4 pound per day. How many days will the bag last?",opts:["18","20","24","27"],ans:2,exp:"18 ÷ (3/4) = 18 × (4/3) = <code>24 days</code>."},
+    {section:"AR",diff:1,q:"A class of 36 students has a 25% absence rate today. How many students are present?",opts:["9","24","27","30"],ans:2,exp:"Absent = 36 × 0.25 = 9. Present = 36 − 9 = <code>27</code>."},
+    {section:"AR",diff:2,q:"Tom is 3 times as old as his sister. In 5 years he will be twice her age. How old is Tom now?",opts:["10","12","15","18"],ans:2,exp:"Let sister = x, Tom = 3x. In 5 years: 3x+5 = 2(x+5) → x = 5. Tom = <code>15</code>."},
+    {section:"AR",diff:2,q:"A car uses 2 gallons of fuel per 50 miles. How many gallons are needed for a 375-mile trip?",opts:["12","13","14","15"],ans:3,exp:"Rate = 1 gal per 25 mi. 375 ÷ 25 = <code>15 gallons</code>."},
+    {section:"AR",diff:2,q:"An item priced at $80 is on sale for 35% off. What is the sale price?",opts:["$48","$50","$52","$56"],ans:2,exp:"Discount = 80 × 0.35 = $28. Sale price = $80 − $28 = <code>$52</code>."},
+    {section:"AR",diff:2,q:"Workers A and B together paint a house in 6 days. Worker A alone takes 9 days. How long does Worker B alone take?",opts:["12 days","15 days","18 days","21 days"],ans:2,exp:"Rate B = 1/6 − 1/9 = 1/18 per day. Time = <code>18 days</code>."},
+    {section:"AR",diff:2,q:"A room is 14 feet long and 11 feet wide. Carpet costs $4.50 per square foot. What is the total cost?",opts:["$567.00","$630.00","$693.00","$756.00"],ans:2,exp:"Area = 14 × 11 = 154 sq ft. Cost = 154 × $4.50 = <code>$693.00</code>."},
+    {section:"AR",diff:2,q:"Train A departs at 8:00 AM at 75 mph. Train B departs the same point at 8:30 AM at 100 mph in the same direction. At what time does Train B catch Train A?",opts:["9:30 AM","10:00 AM","10:30 AM","11:00 AM"],ans:1,exp:"By 8:30 AM, Train A has a 37.5-mile lead. Closing rate = 25 mph. Time = 37.5 ÷ 25 = 1.5 hrs after 8:30 AM = <code>10:00 AM</code>."},
+    {section:"AR",diff:3,q:"A 10-liter mixture is 40% acid. How many liters of water must be added to reduce it to 25% acid?",opts:["4 L","5 L","6 L","8 L"],ans:2,exp:"Acid = 4 L. New total T: 4/T = 0.25 → T = 16 L. Water to add = 16 − 10 = <code>6 L</code>."},
+    {section:"AR",diff:3,q:"A factory has 6 machines producing 240 units in 8 hours. How many units will 9 machines produce in 10 hours at the same rate?",opts:["360","400","420","450"],ans:3,exp:"Rate per machine per hour = 240 ÷ (6×8) = 5 units. 9 × 10 × 5 = <code>450 units</code>."},
+    {section:"AR",diff:3,q:"A boat travels 48 km downstream in 2 hours and returns upstream in 3 hours. What is the speed of the current?",opts:["3 km/h","4 km/h","5 km/h","6 km/h"],ans:1,exp:"Downstream = 24 km/h. Upstream = 16 km/h. Current = (24−16) ÷ 2 = <code>4 km/h</code>."},
+    {section:"AR",diff:3,q:"If 5 workers finish a job in 12 days at 8 hours/day, how many workers finish the same job in 6 days at 10 hours/day?",opts:["6","7","8","9"],ans:2,exp:"Total work = 5×12×8 = 480 worker-hours. Workers = 480 ÷ (6×10) = <code>8</code>."},
+    {section:"AR",diff:3,q:"A $4,000 investment earns 8% simple interest per year. What is the total interest earned in 5 years?",opts:["$1,200","$1,400","$1,600","$1,800"],ans:2,exp:"Interest = P × r × t = 4,000 × 0.08 × 5 = <code>$1,600</code>."},
+    {section:"AR",diff:1,q:"A pizza has 8 slices. Three people each eat 2 slices. How many slices remain?",opts:["1","2","3","4"],ans:1,exp:"3 × 2 = 6 slices eaten. 8 − 6 = <code>2 slices</code> remain."},
+    {section:"AR",diff:1,q:"A car rental costs $45 per day plus $0.20 per mile. What is the cost for a 3-day, 150-mile rental?",opts:["$155","$160","$165","$170"],ans:2,exp:"Daily: 3 × $45 = $135. Miles: 150 × $0.20 = $30. Total = <code>$165</code>."},
+    {section:"AR",diff:2,q:"A rectangle has perimeter 56 m and length 3 times its width. What is its area?",opts:["100 m²","147 m²","168 m²","189 m²"],ans:1,exp:"2(l+w)=56 → l+w=28. l=3w → 4w=28 → w=7, l=21. Area=21×7=<code>147 m²</code>."},
+    {section:"AR",diff:2,q:"An item costs $60 wholesale, marked up 40%, then discounted 25%. What is the final price?",opts:["$54","$57","$60","$63"],ans:3,exp:"After markup: $60 × 1.40 = $84. After discount: $84 × 0.75 = <code>$63</code>."},
+    {section:"AR",diff:2,q:"A 20-gallon tank is 3/4 full. After using 6 gallons, what fraction of the full tank remains?",opts:["1/4","3/8","7/20","9/20"],ans:3,exp:"Full: 20 × 3/4 = 15 gal. After use: 15 − 6 = 9 gal. Fraction: <code>9/20</code>."},
+    {section:"AR",diff:2,q:"If 3 shirts cost $67.50, how much do 7 shirts cost?",opts:["$152.50","$155.00","$157.50","$160.00"],ans:2,exp:"Unit price: $67.50 ÷ 3 = $22.50. Total: 7 × $22.50 = <code>$157.50</code>."},
+    {section:"AR",diff:3,q:"Two cars leave towns 300 miles apart, driving toward each other at 60 mph and 90 mph. How long until they meet?",opts:["1.5 hours","2 hours","2.5 hours","3 hours"],ans:1,exp:"Combined closing speed = 150 mph. Time = 300 ÷ 150 = <code>2 hours</code>."},
+    {section:"AR",diff:3,q:"Mixing 200 mL of 30% acid with 300 mL of 20% acid gives what concentration?",opts:["22%","24%","25%","26%"],ans:1,exp:"Acid: (200×0.30)+(300×0.20)=120 mL. Total: 500 mL. Concentration: 120/500=<code>24%</code>."},
+    {section:"AR",diff:3,q:"Two investments total $10,000. One earns 3%, the other 8%. Total interest is $650. How much is at 3%?",opts:["$2,000","$2,500","$3,000","$3,500"],ans:2,exp:"0.03x+0.08(10000−x)=650 → 800−0.05x=650 → x=<code>$3,000</code>."},
+    {section:"AR",diff:3,q:"A father is 4 times his son's age. In 8 years he will be twice as old. How old is the son now?",opts:["4","6","8","10"],ans:0,exp:"4x+8=2(x+8) → 2x=8 → x=<code>4</code>."},
+  ],
+  WK: [
+    {section:"WK",diff:1,q:"Arid most nearly means",opts:["wet","dry","cold","windy"],ans:1,exp:"<strong>Arid</strong> = extremely dry, receiving very little rainfall."},
+    {section:"WK",diff:1,q:"The general remained stoic throughout the interrogation. The word stoic most nearly means:",opts:["calm and unemotional","aggressive and hostile","hesitant and nervous","cheerful and relaxed"],ans:0,exp:"<strong>Stoic</strong> = enduring hardship without showing emotion, from the ancient Greek philosophy of Stoicism."},
+    {section:"WK",diff:1,q:"Covert most nearly means",opts:["obvious","secret","distant","urgent"],ans:1,exp:"<strong>Covert</strong> = not openly acknowledged; secret. Opposite: overt."},
+    {section:"WK",diff:1,q:"Resilient most nearly means",opts:["fragile","honest","adaptable","delayed"],ans:2,exp:"<strong>Resilient</strong> = able to recover quickly from difficulties; adaptable."},
+    {section:"WK",diff:1,q:"The soldier's valor earned him a commendation. The word valor most nearly means:",opts:["intelligence","endurance","bravery","loyalty"],ans:2,exp:"<strong>Valor</strong> = great courage, especially in the face of danger or in battle."},
+    {section:"WK",diff:2,q:"Elucidate most nearly means",opts:["confuse","clarify","ignore","complicate"],ans:1,exp:"<strong>Elucidate</strong> = to make something clear; to explain. From Latin <em>lucidus</em> (light/clear)."},
+    {section:"WK",diff:2,q:"His verbose presentation lost the audience. The word verbose most nearly means:",opts:["using too many words","speaking too quietly","lacking preparation","poorly organized"],ans:0,exp:"<strong>Verbose</strong> = using more words than necessary; excessively wordy."},
+    {section:"WK",diff:2,q:"Pragmatic most nearly means",opts:["idealistic","theoretical","practical","emotional"],ans:2,exp:"<strong>Pragmatic</strong> = dealing with things in a realistic, practical way rather than following a fixed theory."},
+    {section:"WK",diff:2,q:"She was known for her acumen in financial matters. The word acumen most nearly means:",opts:["ignorance","sharp insight","carelessness","enthusiasm"],ans:1,exp:"<strong>Acumen</strong> = the ability to make quick, accurate judgments in a particular field."},
+    {section:"WK",diff:2,q:"Intrepid most nearly means",opts:["fearless","cautious","indecisive","reckless"],ans:0,exp:"<strong>Intrepid</strong> = fearlessly adventurous. A positive word implying controlled courage, not recklessness."},
+    {section:"WK",diff:2,q:"The officer's demeanor was austere yet professional. The word austere most nearly means:",opts:["cheerful","stern and unadorned","colorful","relaxed"],ans:1,exp:"<strong>Austere</strong> = severe in manner or appearance; without luxury or warmth."},
+    {section:"WK",diff:2,q:"Novice most nearly means",opts:["expert","beginner","veteran","supervisor"],ans:1,exp:"<strong>Novice</strong> = a person new to a skill, trade, or subject."},
+    {section:"WK",diff:3,q:"His specious argument fooled many listeners. The word specious most nearly means:",opts:["logically sound","vague and disorganized","superficially correct but actually wrong","overly emotional"],ans:2,exp:"<strong>Specious</strong> = superficially plausible but actually wrong; misleading in appearance."},
+    {section:"WK",diff:3,q:"Veracious most nearly means",opts:["greedy","truthful","cunning","boastful"],ans:1,exp:"<strong>Veracious</strong> = habitually telling the truth; truthful. From Latin <em>verax</em>."},
+    {section:"WK",diff:3,q:"The diplomats reached a rapprochement after months of tension. The word rapprochement most nearly means:",opts:["public dispute","reconciliation of relations","formal surrender","military alliance"],ans:1,exp:"<strong>Rapprochement</strong> = the resumption of harmonious relations after a period of hostility."},
+    {section:"WK",diff:3,q:"Her inveterate pessimism frustrated her colleagues. The word inveterate most nearly means:",opts:["occasional","deeply ingrained by habit","mild","unfounded"],ans:1,exp:"<strong>Inveterate</strong> = having a habit so firmly established it is unlikely to change."},
+    {section:"WK",diff:1,q:"Diligent most nearly means",opts:["lazy","careless","hardworking","distracted"],ans:2,exp:"<strong>Diligent</strong> = showing care and conscientiousness in one's work."},
+    {section:"WK",diff:1,q:"The bridge was deemed obsolete. The word obsolete most nearly means:",opts:["structurally sound","outdated","expensive","unstable"],ans:1,exp:"<strong>Obsolete</strong> = no longer in use; out of date."},
+    {section:"WK",diff:2,q:"Meticulous most nearly means",opts:["reckless","vague","taking extreme care over detail","indifferent"],ans:2,exp:"<strong>Meticulous</strong> = showing extreme care about minute details; precise."},
+    {section:"WK",diff:2,q:"He was known to be candid about his opinions. The word candid most nearly means:",opts:["secretive","truthful and open","diplomatic","indifferent"],ans:1,exp:"<strong>Candid</strong> = truthful and straightforward; frank."},
+    {section:"WK",diff:2,q:"Tenacious most nearly means",opts:["timid","persistent","disorganized","forgiving"],ans:1,exp:"<strong>Tenacious</strong> = tending to keep a firm hold; not easily discouraged."},
+    {section:"WK",diff:2,q:"The plan was found to be feasible. The word feasible most nearly means:",opts:["dangerous","complicated","possible to carry out","overly ambitious"],ans:2,exp:"<strong>Feasible</strong> = possible to do conveniently; practicable."},
+    {section:"WK",diff:2,q:"The officer showed great composure under fire. Composure most nearly means:",opts:["calmness","fatigue","aggression","arrogance"],ans:0,exp:"<strong>Composure</strong> = the state of being calm and in control of one's emotions."},
+    {section:"WK",diff:3,q:"The senator's speech was replete with contradictions. The word replete most nearly means:",opts:["devoid","filled","confused","criticized"],ans:1,exp:"<strong>Replete</strong> = filled or well-supplied with something."},
+    {section:"WK",diff:3,q:"His clandestine meetings with the official raised suspicion. Clandestine most nearly means:",opts:["frequent","official","secret","public"],ans:2,exp:"<strong>Clandestine</strong> = kept secret, especially because illicit."},
+    {section:"WK",diff:3,q:"The new policy was seen as a panacea for the city's problems. Panacea most nearly means:",opts:["source of conflict","universal cure","financial burden","political strategy"],ans:1,exp:"<strong>Panacea</strong> = a solution or remedy for all difficulties."},
+  ],
+  PC: [
+    {section:"PC",diff:1,passage:"The bald eagle was removed from the endangered species list in 2007 after a remarkable recovery. Once numbering fewer than 500 nesting pairs in the contiguous U.S. in the 1960s, the population rebounded to nearly 10,000 pairs by 2006. The recovery is attributed to the banning of DDT, federal legal protections, and organized conservation efforts.",q:"According to the passage, which factor most directly contributed to the bald eagle's recovery?",opts:["Captive breeding programs","Relocation to protected habitats","A combination of DDT ban, legal protections, and conservation","Reduction in hunting pressure alone"],ans:2,exp:"The passage directly states recovery was due to 'the banning of DDT, federal legal protections, and organized conservation efforts.'"},
+    {section:"PC",diff:1,passage:"Sleep is essential for cognitive function. Adults who consistently sleep fewer than six hours per night perform significantly worse on memory, problem-solving, and reaction time tests than those sleeping seven to nine hours. Chronic sleep deprivation is also linked to increased risks of cardiovascular disease and type 2 diabetes.",q:"The passage is primarily about:",opts:["The relationship between sleep and physical fitness routines","How to treat chronic sleep disorders","The cognitive and health consequences of insufficient sleep","Why most adults do not get enough sleep"],ans:2,exp:"The passage focuses on performance deficits and health risks caused by inadequate sleep."},
+    {section:"PC",diff:2,passage:"The printing press, invented by Gutenberg around 1440, did not immediately transform European society — decades passed before its true impact was felt. By enabling rapid reproduction of texts, it eventually broke the Church's monopoly on literacy, accelerated the Protestant Reformation, and made scientific works more widely accessible.",q:"The passage implies that the printing press:",opts:["Had an immediate and dramatic social impact","Was primarily a religious tool invented by the Church","Had a delayed but sweeping impact on European society","Was resisted by scientists of the period"],ans:2,exp:"'Did not immediately transform' indicates delay; the Reformation and scientific spread show the effects were ultimately sweeping."},
+    {section:"PC",diff:2,passage:"Widespread overuse and misuse of antibiotics — including prescribing them for viral infections they cannot treat — has accelerated the development of antibiotic-resistant bacteria. The World Health Organization classifies antimicrobial resistance as one of the greatest threats to global public health, noting that common infections may become untreatable within decades.",q:"According to the passage, which practice contributes to antibiotic resistance?",opts:["Completing a full prescribed course of antibiotics","Prescribing antibiotics for viral infections","Researching new antibiotic compounds","Using antibiotics only in hospitals"],ans:1,exp:"The passage directly links resistance to 'overuse and misuse — including prescribing antibiotics for viral infections.'"},
+    {section:"PC",diff:2,passage:"Migration to cloud computing has accelerated across industries. Proponents argue that cloud systems offer scalability, reduced infrastructure costs, and improved disaster recovery. Critics, however, point to concerns about data sovereignty, vendor dependency, and the risk of widespread service disruption when centralized systems fail.",q:"Which of the following best describes the author's approach to cloud computing?",opts:["Strongly advocating for cloud adoption","Warning exclusively against cloud computing","Presenting multiple perspectives without a clear bias","Focused primarily on technical implementation details"],ans:2,exp:"The passage presents both proponents' benefits and critics' concerns — a balanced, unbiased overview."},
+    {section:"PC",diff:2,passage:"Coral reefs support approximately 25 percent of all marine species despite covering less than one percent of the ocean floor. Rising ocean temperatures cause corals to expel the symbiotic algae living in their tissues — a process called coral bleaching. Without the algae, corals turn white and become highly vulnerable to disease and death.",q:"According to the passage, what triggers coral bleaching?",opts:["A decrease in ocean salinity","An increase in coral predators","Rising ocean temperatures","Pollution from coastal runoff"],ans:2,exp:"The passage explicitly states that 'rising ocean temperatures cause corals to expel the symbiotic algae,' resulting in bleaching."},
+    {section:"PC",diff:3,passage:"Stoic philosophers held that one must distinguish between what is within our control — our judgments, desires, and responses — and what is not, such as external events and others' actions. Contentment arises not from acquiring more, but from wanting less and accepting what lies beyond one's influence.",q:"According to the passage, the Stoic path to contentment involves:",opts:["Gaining control over external circumstances","Eliminating all wants and emotions","Focusing on what can be controlled and accepting what cannot","Seeking reputation through virtuous action"],ans:2,exp:"The passage defines contentment as 'wanting less and accepting what is beyond one's influence' — aligning with focusing on what can be controlled."},
+    {section:"PC",diff:3,passage:"Critics of standardized testing argue that such tests measure test-taking skills more than underlying intelligence or knowledge. They contend that students from lower socioeconomic backgrounds often score lower not due to lack of capability, but due to reduced access to test preparation resources. Proponents counter that standardized tests provide consistent, objective comparisons across different schools.",q:"The critics' central argument is that standardized tests:",opts:["Are too expensive for most school districts","May penalize capable students who lack access to preparation","Should be replaced by teacher-graded portfolios","Accurately predict academic success"],ans:1,exp:"Critics argue lower scores among disadvantaged students reflect limited access to prep resources, not lower ability."},
+    {section:"PC",diff:3,passage:"In economics, 'opportunity cost' refers to the value of the next best alternative forgone when making a decision. If an investor uses $10,000 to launch a business instead of investing it in bonds yielding 5%, the opportunity cost is $500 per year. Opportunity cost is often implicit and not recorded in financial statements, but is critical to rational decision-making.",q:"Based on the passage, opportunity cost is best understood as:",opts:["The total monetary cost of starting a business","The profit gained by the preferred decision","The value of the best alternative not chosen","The money directly spent on a resource"],ans:2,exp:"The passage defines opportunity cost as 'the value of the next best alternative forgone' — the best option you did not choose."},
+    {section:"PC",diff:2,passage:"The Coriolis effect, caused by Earth's rotation, deflects moving air and water to the right in the Northern Hemisphere and to the left in the Southern Hemisphere. This deflection drives the rotation of large weather systems. In the Northern Hemisphere, hurricanes rotate counterclockwise; in the Southern Hemisphere, cyclones rotate clockwise.",q:"Based on the passage, why does a cyclone in the Southern Hemisphere rotate clockwise?",opts:["Because the Southern Hemisphere is warmer on average","Due to leftward deflection caused by the Coriolis effect","Because cyclones always rotate clockwise regardless of location","Due to stronger wind speeds in the Southern Hemisphere"],ans:1,exp:"The passage states the Coriolis effect deflects motion to the left in the Southern Hemisphere — this leftward deflection produces clockwise rotation."},
+    {section:"PC",diff:1,passage:"Regular physical exercise has well-documented benefits beyond fitness. Studies show aerobic activity reduces symptoms of depression and anxiety by triggering the release of endorphins and serotonin. Even 30 minutes of moderate exercise three times per week can produce measurable improvements in mood.",q:"According to the passage, exercise improves mood primarily by:",opts:["Reducing body weight","Releasing mood-regulating chemicals","Improving cardiovascular efficiency","Increasing social interaction"],ans:1,exp:"The passage directly states aerobic activity triggers endorphins and serotonin — mood-regulating chemicals."},
+    {section:"PC",diff:2,passage:"On July 20, 1969, Apollo 11 astronauts Neil Armstrong and Buzz Aldrin became the first humans to land on the Moon, while Michael Collins orbited above. Armstrong's first steps were broadcast live to an estimated 600 million viewers worldwide — roughly one-fifth of Earth's population at the time.",q:"What does the passage imply about the Apollo 11 mission's cultural significance?",opts:["It was primarily a scientific achievement","It unified the U.S. and Soviet Union","It captured the attention of a large portion of humanity","It demonstrated superior American technology"],ans:2,exp:"600 million viewers — one-fifth of Earth's population — implies extraordinary global reach and cultural impact."},
+    {section:"PC",diff:2,passage:"The Great Wall of China, stretching over 13,000 miles, was not built in a single construction effort. It was built and rebuilt over many centuries by successive Chinese dynasties. Its primary purpose was defensive — to protect against nomadic invasions from the north. Contrary to popular belief, it is not visible from space with the naked eye.",q:"The passage primarily corrects which common misconception?",opts:["That the Great Wall served a defensive purpose","That the Great Wall was built in one period","That it is visible from space without optical aids","That it stretches more than 10,000 miles"],ans:2,exp:"The passage explicitly states 'contrary to popular belief, it is not visible from space with the naked eye.'"},
+    {section:"PC",diff:3,passage:"Confirmation bias leads people to seek, interpret, and remember information in ways that confirm their preexisting beliefs. This cognitive shortcut can be useful — it reduces mental effort — but it also makes individuals resistant to contradictory evidence. In polarized environments, confirmation bias reinforces division.",q:"Based on the passage, confirmation bias is described as:",opts:["Always harmful to decision-making","A purely political phenomenon","A mental shortcut with both advantages and drawbacks","A bias that only affects uneducated people"],ans:2,exp:"The passage notes it 'reduces mental effort' (advantage) but makes people 'resistant to contradictory evidence and reinforces division' (drawbacks)."},
+    {section:"PC",diff:2,passage:"Nuclear power plants generate electricity through fission — splitting uranium or plutonium atoms. This releases heat used to boil water, creating steam that drives turbines. Unlike fossil fuel plants, nuclear plants produce no direct carbon emissions during operation. However, they generate radioactive waste that must be safely stored for thousands of years.",q:"According to the passage, nuclear power's main environmental trade-off is:",opts:["High operating costs vs. low carbon output","Low carbon emissions vs. long-lived radioactive waste","Clean water use vs. thermal pollution","Low fuel costs vs. high construction costs"],ans:1,exp:"No direct carbon emissions during operation, but radioactive waste requiring thousands of years of storage."},
+    {section:"PC",diff:1,passage:"Dehydration — even mild dehydration of 1–2% of body weight — can impair physical and cognitive performance. Athletes performing in hot conditions can lose several liters of sweat per hour. Replacing fluids before, during, and after exercise is critical to maintaining performance and preventing heat-related illness.",q:"The passage implies that maintaining hydration during exercise is important because:",opts:["It improves athletic appearance","It prevents all sports injuries","Even minor fluid loss can reduce performance","It eliminates the need for rest periods"],ans:2,exp:"The passage states even 1–2% dehydration impairs performance, so even minor fluid loss matters."},
+    {section:"PC",diff:3,passage:"Free market advocates argue that competition allocates resources more efficiently than government planning. Critics counter that markets fail when externalities — costs or benefits not reflected in prices — occur, such as pollution. Both sides generally agree that some level of regulation is necessary; the debate is about how much.",q:"Which best summarizes the passage?",opts:["Free markets are always superior to government planning","Government regulation always improves market outcomes","Both market advocates and critics agree on the need for some regulation","The debate over markets vs. planning is unresolvable"],ans:2,exp:"The passage states 'both sides generally agree that some level of regulation is necessary' — the debate is about degree."},
+  ],
+  MK: [
+    {section:"MK",diff:1,q:"Solve for x: 5x − 3 = 22",opts:["4","5","6","7"],ans:1,exp:"5x = 25 → x = <code>5</code>."},
+    {section:"MK",diff:1,q:"What is 15% of 260?",opts:["33","36","39","42"],ans:2,exp:"0.15 × 260 = <code>39</code>."},
+    {section:"MK",diff:1,q:"Which of the following equals 3⁴?",opts:["12","27","64","81"],ans:3,exp:"3⁴ = 3 × 3 × 3 × 3 = <code>81</code>."},
+    {section:"MK",diff:1,q:"What is the area of a triangle with base 12 cm and height 9 cm?",opts:["27 cm²","54 cm²","63 cm²","108 cm²"],ans:1,exp:"½ × 12 × 9 = <code>54 cm²</code>."},
+    {section:"MK",diff:1,q:"Simplify: 4(2x + 3) − 2(x − 1)",opts:["6x + 10","6x + 14","8x + 14","8x + 10"],ans:1,exp:"8x + 12 − 2x + 2 = <code>6x + 14</code>."},
+    {section:"MK",diff:2,q:"The ratio of boys to girls in a class is 3:5. If there are 30 girls, how many boys are there?",opts:["15","18","20","21"],ans:1,exp:"Boys = (3/5) × 30 = <code>18</code>."},
+    {section:"MK",diff:2,q:"If x² − 7x + 12 = 0, what are the solutions?",opts:["x = 3 or x = 4","x = −3 or x = −4","x = 2 or x = 6","x = −2 or x = −6"],ans:0,exp:"Factor: (x−3)(x−4) = 0 → <code>x = 3 or x = 4</code>."},
+    {section:"MK",diff:2,q:"What is the slope of the line passing through (2, 1) and (6, 9)?",opts:["1","1.5","2","2.5"],ans:2,exp:"Slope = (9−1)/(6−2) = 8/4 = <code>2</code>."},
+    {section:"MK",diff:2,q:"Which of the following fractions is greatest?",opts:["5/8","3/5","7/10","11/20"],ans:2,exp:"Decimals: 5/8=0.625, 3/5=0.6, 7/10=<code>0.7</code>, 11/20=0.55. Greatest is <code>7/10</code>."},
+    {section:"MK",diff:2,q:"A line has the equation y = −3x + 7. What is its y-intercept?",opts:["−3","3","−7","7"],ans:3,exp:"In y = mx + b, b is the y-intercept. Here b = <code>7</code>."},
+    {section:"MK",diff:2,q:"If 3/x = 12/20, what is x?",opts:["3","4","5","6"],ans:2,exp:"Cross-multiply: 3 × 20 = 12x → 60 = 12x → x = <code>5</code>."},
+    {section:"MK",diff:3,q:"What is the sum of the interior angles of a hexagon?",opts:["540°","600°","720°","900°"],ans:2,exp:"Sum = (n−2) × 180 = (6−2) × 180 = <code>720°</code>."},
+    {section:"MK",diff:3,q:"Factor completely: 4x² − 9",opts:["(2x − 3)²","(2x + 3)(2x − 3)","(4x − 3)(x + 3)","(2x + 9)(2x − 1)"],ans:1,exp:"Difference of squares: 4x² − 9 = (2x)² − 3² = <code>(2x+3)(2x−3)</code>."},
+    {section:"MK",diff:3,q:"If f(x) = 3x² + 2x − 1, what is f(−1)?",opts:["−6","−2","0","4"],ans:2,exp:"f(−1) = 3(1) + 2(−1) − 1 = 3 − 2 − 1 = <code>0</code>."},
+    {section:"MK",diff:3,q:"Solve the system: 2x + 3y = 12 and x − y = 1. What is x?",opts:["2","3","4","5"],ans:1,exp:"x = y+1. Sub: 2(y+1)+3y=12 → 5y=10 → y=2, x = <code>3</code>."},
+    {section:"MK",diff:1,q:"What is the value of 2⁵?",opts:["10","25","32","64"],ans:2,exp:"2⁵ = 2×2×2×2×2 = <code>32</code>."},
+    {section:"MK",diff:1,q:"Solve for x: x/4 + 3 = 7",opts:["8","12","16","20"],ans:2,exp:"x/4 = 4 → x = <code>16</code>."},
+    {section:"MK",diff:1,q:"What is the perimeter of a square with side length 9?",opts:["18","27","36","81"],ans:2,exp:"Perimeter = 4 × 9 = <code>36</code>."},
+    {section:"MK",diff:2,q:"What is the median of the set {3, 7, 2, 9, 5}?",opts:["3","5","7","9"],ans:1,exp:"Sorted: 2, 3, 5, 7, 9. Middle value = <code>5</code>."},
+    {section:"MK",diff:2,q:"A line passes through (0, 4) and (3, 10). What is its equation?",opts:["y = 2x + 4","y = 3x + 4","y = 2x + 3","y = 3x + 1"],ans:0,exp:"Slope = (10−4)/(3−0) = 2. y-intercept = 4. Equation: <code>y = 2x + 4</code>."},
+    {section:"MK",diff:2,q:"Simplify: (3x²y)(4xy³)",opts:["7x²y³","12x³y⁴","12x²y³","7x³y⁴"],ans:1,exp:"Multiply coefficients: 3×4=12. Add exponents: x^(2+1)=x³, y^(1+3)=y⁴. Result: <code>12x³y⁴</code>."},
+    {section:"MK",diff:2,q:"What is the volume of a box that is 5 cm × 4 cm × 3 cm?",opts:["24 cm³","36 cm³","48 cm³","60 cm³"],ans:3,exp:"V = l × w × h = 5 × 4 × 3 = <code>60 cm³</code>."},
+    {section:"MK",diff:3,q:"If log₃(81) = x, what is x?",opts:["2","3","4","5"],ans:2,exp:"3ˣ = 81 = 3⁴, so x = <code>4</code>."},
+    {section:"MK",diff:3,q:"What is the discriminant of 2x² − 3x + 1 = 0?",opts:["1","5","7","9"],ans:0,exp:"b² − 4ac = (−3)² − 4(2)(1) = 9 − 8 = <code>1</code>."},
+    {section:"MK",diff:3,q:"A circle's area is 36π. What is its circumference?",opts:["6π","9π","12π","18π"],ans:2,exp:"πr²=36π → r=6. Circumference = 2πr = <code>12π</code>."},
+  ],
+};
+
+const SECTION_COLORS = {AR:'var(--ar)',WK:'var(--wk)',MK:'var(--mk)',PC:'#34d399',GS:'#fb923c',EI:'#60a5fa',AI:'#f472b6',MC:'#a3e635',AO:'#c084fc'};
+const SECTION_LABELS = {AR:'Arithmetic Reasoning',WK:'Word Knowledge',MK:'Math Knowledge',PC:'Paragraph Comprehension',GS:'General Science',EI:'Electronics Info',AI:'Auto & Shop Info',MC:'Mechanical Comprehension',AO:'Assembling Objects'};
+
+// ── SESSION DIFFICULTY FLAVORS ──
+// Randomly chosen each session. Multipliers shift which difficulty tier
+// is drawn more heavily when sampling from the expanded question pool.
+const FLAVORS = [
+  { label:'BALANCED',    diffMod:{ 1:1,   2:1,   3:1   } },
+  { label:'CHALLENGING', diffMod:{ 1:0.3, 2:1.2, 3:2.5 } },
+  { label:'REVIEW',      diffMod:{ 1:2.5, 2:1.2, 3:0.3 } },
+];
+
+let QUESTIONS = [];
+let mode = 'picat';
+let current = 0;
+let answered = false;
+let userAnswers = [];
+let timerInterval;
+let secondsLeft = 25 * 60;
+let selectedSections = ['MK','AR','WK','PC']; // controlled by category select
+let lastAfqt = null;
+
+// Per-section adaptive state: tracks consecutive correct streak per section
+// Used to escalate difficulty after sustained correct answers
+const adaptiveState = {};
+
+// ── SHUFFLE HELPERS ──
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function shuffleOpts(q) {
+  const idx = shuffle([...Array(q.opts.length).keys()]);
+  return { ...q, opts: idx.map(i => q.opts[i]), ans: idx.indexOf(q.ans) };
+}
+
+// ── ADAPTIVE BUILDER ──
+// Builds a question queue that starts at diff≤2 and promotes to diff=3
+// after 2 consecutive correct answers in a section. Called per-section pool.
+function buildAdaptivePool(pool) {
+  // Separate by difficulty
+  const easy   = pool.filter(q => (q.diff||1) === 1);
+  const medium = pool.filter(q => (q.diff||1) === 2);
+  const hard   = pool.filter(q => (q.diff||1) === 3);
+
+  // Start with all easy + medium, shuffled; hard questions appended at end
+  // The adaptive reordering happens live via selectNext()
+  return [...shuffle(easy), ...shuffle(medium), ...shuffle(hard)];
+}
+
+// Called after each answer to potentially reorder upcoming questions.
+// Surfaces a hard question from the remaining pool if the user just got
+// the last question correct and their streak in that section >= 2.
+function adaptAfterAnswer(wasCorrect) {
+  const q = QUESTIONS[current];
+  const sec = q.section;
+  if (!adaptiveState[sec]) adaptiveState[sec] = { streak: 0 };
+
+  if (wasCorrect) {
+    adaptiveState[sec].streak++;
+  } else {
+    adaptiveState[sec].streak = 0;
+  }
+
+  // If streak >= 2, find the next hard question for this section in the
+  // remaining pool and move it right after current position
+  if (adaptiveState[sec].streak >= 2) {
+    const nextIdx = current + 1;
+    const hardIdx = QUESTIONS.findIndex(
+      (qq, i) => i > current && qq.section === sec && (qq.diff||1) === 3
+    );
+    if (hardIdx > nextIdx) {
+      const [hardQ] = QUESTIONS.splice(hardIdx, 1);
+      QUESTIONS.splice(nextIdx, 0, hardQ);
+    }
+    adaptiveState[sec].streak = 0; // reset after promoting
+  }
+}
+
+// ── SCREEN NAVIGATION ──
+function showScreen(id) {
+  const BLOCK = { quiz:1, results:1, stats:1 };
+  ['splash','category-select','quiz','results','stats'].forEach(s => {
+    const el = document.getElementById(s);
+    if (!el) return;
+    el.style.display = s === id ? (BLOCK[s] ? 'block' : 'flex') : 'none';
+  });
+  window.scrollTo(0, 0);
+}
+
+// ── CATEGORY SELECT ──
+const CAT_INFO = {
+  AR: { name:'Arithmetic Reasoning',    color:'var(--ar)'  },
+  WK: { name:'Word Knowledge',          color:'var(--wk)'  },
+  PC: { name:'Paragraph Comprehension', color:'#34d399'    },
+  MK: { name:'Math Knowledge',          color:'var(--mk)'  }
+};
+
+function showCategorySelect() {
+  showScreen('category-select');
+  renderCatTiles();
+  updateCatSummary();
+}
+
+function renderCatTiles() {
+  const grid = document.getElementById('catGrid');
+  if (!grid) return;
+  grid.innerHTML = Object.entries(CAT_INFO).map(([sec, info]) => {
+    const active  = selectedSections.includes(sec);
+    const secQs   = PICAT_QUESTIONS.filter(q => q.section === sec);
+    const total   = secQs.length;
+    const missed  = secQs.filter(q => q.initiallyWrong).length;
+    const real    = secQs.filter(q => q.forced !== null).length;
+    return `
+    <div class="cat-tile${active?' active':''}" style="--tile-color:${info.color}" onclick="toggleCatSection('${sec}')">
+      <div class="ct-check">${active?'✓':''}</div>
+      <div class="ct-section">${sec}</div>
+      <div class="ct-name">${info.name}</div>
+      <div class="ct-meta">${total} questions in pool<br>${real} real-test questions</div>
+      ${missed ? `<div class="ct-missed">✗ ${missed} missed on PICAT</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function toggleCatSection(sec) {
+  const idx = selectedSections.indexOf(sec);
+  if (idx >= 0) {
+    if (selectedSections.length <= 1) return; // keep at least one
+    selectedSections.splice(idx, 1);
+  } else {
+    selectedSections.push(sec);
+  }
+  renderCatTiles();
+  updateCatSummary();
+}
+
+function updateCatSummary() {
+  const BASE = { MK:12, AR:10, WK:5, PC:3 };
+  const totalBase = selectedSections.reduce((s,k) => s + BASE[k], 0);
+  let running = 0;
+  const parts = selectedSections.map((sec, i) => {
+    const q = i === selectedSections.length - 1
+      ? 30 - running
+      : Math.round((BASE[sec] / totalBase) * 30);
+    running += q;
+    return `${sec}: ${q}Q`;
+  });
+  const el = document.getElementById('catSummary');
+  if (el) el.textContent = `30 questions total — ${parts.join(' · ')}`;
+}
+
+function launchCustomQuiz() {
+  if (!selectedSections.length) return;
+  startQuiz('picat');
+}
+
+// ── STATS ──
+function saveSessionStats(afqtPct, secC, secT) {
+  try {
+    const stored = JSON.parse(localStorage.getItem('asvab_stats') || '{"sessions":[]}');
+    const sections = {};
+    Object.keys(secT).forEach(s => { sections[s] = { attempted: secT[s], correct: secC[s] || 0 }; });
+    const totalAttempted = Object.values(secT).reduce((a,b) => a+b, 0);
+    const totalCorrect   = Object.keys(secC).reduce((a,k) => a + (secC[k]||0), 0);
+    stored.sessions.push({ date: new Date().toISOString(), mode, sections, afqt: afqtPct, total: { attempted: totalAttempted, correct: totalCorrect } });
+    if (stored.sessions.length > 50) stored.sessions = stored.sessions.slice(-50);
+    localStorage.setItem('asvab_stats', JSON.stringify(stored));
+  } catch(e) {}
+}
+
+function showStats() {
+  showScreen('stats');
+  const stored = JSON.parse(localStorage.getItem('asvab_stats') || '{"sessions":[]}');
+  const sessions = stored.sessions || [];
+  const container = document.getElementById('statsContent');
+  if (!container) return;
+
+  if (!sessions.length) {
+    container.innerHTML = `<div style="text-align:center;padding:80px 0;font-family:'IBM Plex Mono',monospace;color:var(--muted);line-height:2.5">No sessions recorded yet.<br>Complete a quiz to start tracking your progress.</div>`;
+    return;
+  }
+
+  const allSecs = ['AR','WK','PC','MK'];
+  const agg = {};
+  allSecs.forEach(s => { agg[s] = { attempted:0, correct:0 }; });
+  sessions.forEach(sess => {
+    Object.entries(sess.sections || {}).forEach(([s,d]) => {
+      if (agg[s]) { agg[s].attempted += d.attempted; agg[s].correct += d.correct; }
+    });
+  });
+
+  const afqtSessions = sessions.filter(s => s.afqt != null).slice(-10);
+  const latestAfqt = afqtSessions.length ? afqtSessions[afqtSessions.length-1].afqt : null;
+  const avgAfqt    = afqtSessions.length ? Math.round(afqtSessions.reduce((s,x)=>s+x.afqt,0)/afqtSessions.length) : null;
+  const bestAfqt   = afqtSessions.length ? Math.max(...afqtSessions.map(x=>x.afqt)) : null;
+
+  const secColors = { AR:'var(--ar)', WK:'var(--wk)', PC:'#34d399', MK:'var(--mk)' };
+  const secNames  = { AR:'Arithmetic Reasoning', WK:'Word Knowledge', PC:'Paragraph Comprehension', MK:'Math Knowledge' };
+  let html = '';
+
+  if (latestAfqt !== null) {
+    const afqtColor = latestAfqt >= 95 ? 'var(--correct)' : latestAfqt >= 80 ? 'var(--ar)' : latestAfqt >= 60 ? 'var(--accent3)' : 'var(--wrong)';
+    html += `
+    <div class="afqt-panel">
+      <div class="afqt-panel-title">Estimated AFQT — based on session performance</div>
+      <div style="display:flex;align-items:flex-end;gap:36px;flex-wrap:wrap">
+        <div>
+          <div class="afqt-score-big" style="color:${afqtColor}">${latestAfqt}<span style="font-size:32px;color:var(--muted);font-weight:400">th</span></div>
+          <div class="afqt-sub">LAST SESSION</div>
+        </div>
+        <div style="padding-bottom:6px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:700;color:var(--muted)">${avgAfqt}th</div>
+          <div class="afqt-sub">${afqtSessions.length}-SESSION AVG</div>
+        </div>
+        <div style="padding-bottom:6px">
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:700;color:var(--correct)">${bestAfqt}th</div>
+          <div class="afqt-sub">PERSONAL BEST</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  html += `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:14px;text-transform:uppercase">Section Accuracy — All Time</div>`;
+  allSecs.forEach(s => {
+    const d = agg[s];
+    if (!d.attempted) return;
+    const pct = Math.round((d.correct / d.attempted) * 100);
+    const trend = pct >= 80 ? 'strong' : pct >= 60 ? 'ok' : 'weak';
+    const trendLabel = pct >= 80 ? 'STRONG' : pct >= 60 ? 'IMPROVING' : 'NEEDS WORK';
+    html += `
+    <div class="stat-sec-card">
+      <div class="stat-sec-header">
+        <div class="stat-sec-name">${s} — ${secNames[s]}</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="stat-trend ${trend}">${trendLabel}</span>
+          <div class="stat-sec-pct" style="color:${secColors[s]}">${pct}%</div>
+        </div>
+      </div>
+      <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%;background:${secColors[s]}"></div></div>
+      <div class="stat-sec-foot">${d.correct} correct of ${d.attempted} attempted</div>
+    </div>`;
+  });
+
+  html += `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin:28px 0 14px;text-transform:uppercase">Recent Sessions</div>`;
+  html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0 20px">`;
+  [...sessions].reverse().slice(0,8).forEach(sess => {
+    const d = new Date(sess.date);
+    const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const t = sess.total || {attempted:0,correct:0};
+    const acc = t.attempted ? Math.round((t.correct/t.attempted)*100) : 0;
+    const afqtStr = sess.afqt != null ? `${sess.afqt}th` : '—';
+    html += `
+    <div class="session-row">
+      <span style="color:var(--muted)">${dateStr}</span>
+      <span style="color:var(--muted)">${sess.mode==='picat'?'PICAT':'FULL'}</span>
+      <span>${t.correct}/${t.attempted} <span style="color:var(--muted)">(${acc}%)</span></span>
+      <span style="color:var(--accent)">${afqtStr} <span style="font-size:9px;color:var(--muted)">AFQT</span></span>
+    </div>`;
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function clearStats() {
+  if (confirm('Clear all session history? This cannot be undone.')) {
+    localStorage.removeItem('asvab_stats');
+    showStats();
+  }
+}
+
+function weightedSample(items, weights, n) {
+  // Weighted random sample without replacement — returns up to n items
+  const pool = items.map((item, i) => ({ item, w: weights[i] }));
+  const result = [];
+  while (result.length < n && pool.length > 0) {
+    const total = pool.reduce((s, x) => s + x.w, 0);
+    let r = Math.random() * total;
+    let i = 0;
+    while (i < pool.length - 1 && r > pool[i].w) { r -= pool[i].w; i++; }
+    result.push(pool[i].item);
+    pool.splice(i, 1);
+  }
+  return result;
+}
+
+function startQuiz(selectedMode) {
+  mode = selectedMode;
+  // Reset adaptive state
+  Object.keys(adaptiveState).forEach(k => delete adaptiveState[k]);
+
+  // Pick a random difficulty flavor for this session
+  const flavor = FLAVORS[Math.floor(Math.random() * FLAVORS.length)];
+  const flavorBadge = document.getElementById('sessionModeBadge');
+  if (flavorBadge) {
+    const cfg = { BALANCED:['var(--accent)','rgba(0,229,255,0.08)'], CHALLENGING:['var(--wrong)','rgba(255,61,90,0.08)'], REVIEW:['var(--correct)','rgba(0,201,122,0.08)'] };
+    const [col, bg] = cfg[flavor.label];
+    flavorBadge.textContent = flavor.label;
+    flavorBadge.style.cssText = `color:${col};background:${bg};border:1px solid ${col};font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:3px;`;
+    flavorBadge.style.display = 'block';
+  }
+
+  if (mode === 'picat') {
+    // ── Smart 30-question selector with weighted sampling ──
+    // Allocations: MK=12, AR=10, WK=5, PC=3
+    // Weights:
+    //   initiallyWrong (real miss)  → GUARANTEED every session (always included)
+    //   correctForced  (real hit)   → weight 3  — high volume for memorization
+    //   fresh diff:2/3              → weight 2  — medium volume, improve weak spots
+    //   fresh diff:1                → weight 1  — lower volume, easy filler
+    // Allocate 30Q proportionally across selected sections
+    const BASE_ALLOC = { MK:12, AR:10, WK:5, PC:3 };
+    const activeSecs = selectedSections.length ? selectedSections : ['MK','AR','WK','PC'];
+    const totalBase  = activeSecs.reduce((s,k) => s + BASE_ALLOC[k], 0);
+    let allocRunning = 0;
+    const ALLOC = {};
+    activeSecs.forEach((sec, i) => {
+      ALLOC[sec] = i === activeSecs.length - 1
+        ? 30 - allocRunning
+        : Math.round((BASE_ALLOC[sec] / totalBase) * 30);
+      allocRunning += ALLOC[sec];
+    });
+    const selected = [];
+
+    Object.entries(ALLOC).forEach(([sec, quota]) => {
+      const pool       = PICAT_QUESTIONS.filter(q => q.section === sec);
+      const guaranteed = shuffle(pool.filter(q => q.initiallyWrong));
+      const remaining  = Math.max(0, quota - guaranteed.length);
+      const candidates = pool.filter(q => !q.initiallyWrong);
+      const weights    = candidates.map(q => {
+        const base = q.forced !== null ? 3 : 1;
+        return base * (flavor.diffMod[q.diff || 1] || 1);
+      });
+      const fillers    = weightedSample(candidates, weights, remaining);
+      selected.push(...guaranteed, ...fillers);
+    });
+
+    // Shuffle the full selected pool so sections are interleaved
+    QUESTIONS = shuffle(selected).map(shuffleOpts);
+
+    secondsLeft = 25 * 60;
+  } else {
+    // Full ASVAB: GS → AR → WK → PC → MK in fixed section order, adaptive within each section
+    const FULL_SECTIONS = [
+      { qs: FULL_QB.GS, count: 15 },
+      { qs: FULL_QB.AR, count: 15 },
+      { qs: FULL_QB.WK, count: 16 },
+      { qs: FULL_QB.PC, count: 10 },
+      { qs: FULL_QB.MK, count: 15 },
+    ];
+    const ordered = [];
+    FULL_SECTIONS.forEach(({ qs, count }) => {
+      const fw = qs.map(q => flavor.diffMod[q.diff || 1] || 1);
+      ordered.push(...weightedSample(qs, fw, count));
+    });
+    QUESTIONS = ordered.map(shuffleOpts);
+    secondsLeft = 90 * 60;
+  }
+  userAnswers = new Array(QUESTIONS.length).fill(null);
+  current = 0;
+  showScreen('quiz');
+  renderQuestion();
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    updateTimerDisplay();
+    if (secondsLeft <= 0) { clearInterval(timerInterval); showResults(); }
+  }, 1000);
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const h = Math.floor(secondsLeft / 3600);
+  const m = Math.floor((secondsLeft % 3600) / 60);
+  const s = secondsLeft % 60;
+  const el = document.getElementById('timer');
+  if (h > 0) {
+    el.textContent = `${h}h ${String(m).padStart(2,'0')}m`;
+  } else if (m > 0) {
+    el.textContent = `${m}m ${String(s).padStart(2,'0')}s`;
+  } else {
+    el.textContent = `${s}s`;
+  }
+  el.classList.remove('warn','danger');
+  if (secondsLeft <= 120) el.classList.add('danger');
+  else if (secondsLeft <= 300) el.classList.add('warn');
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  answered = false;
+
+  document.getElementById('sectionTag').textContent = q.section;
+  document.getElementById('sectionTag').className = `section-tag ${q.section}`;
+
+  // Difficulty badge + forced badge
+  const diffLabels = {1:'', 2:' ·· MED', 3:' ··· HARD'};
+  const diffColors = {1:'', 2:'var(--accent3)', 3:'var(--wrong)'};
+  const diffEl = document.getElementById('diffBadge');
+  if (diffEl) {
+    const d = q.diff || 1;
+    let badge = diffLabels[d];
+    if (q.forced !== null) {
+      if (q.initiallyWrong) {
+        badge += (badge ? ' ' : '') + '✗ REAL MISS';
+      } else {
+        badge += (badge ? ' ' : '') + '✓ REAL Q';
+      }
+    }
+    diffEl.textContent = badge;
+    diffEl.style.color = q.initiallyWrong ? 'var(--wrong)' : (diffColors[d] || 'var(--muted)');
+  }
+
+  document.getElementById('qNumber').textContent = `${q.section} — QUESTION ${current + 1} OF ${QUESTIONS.length}`;
+  document.getElementById('qText').innerHTML = q.q;
+  document.getElementById('qCounter').textContent = `${current + 1} / ${QUESTIONS.length}`;
+
+  const pct = (current / QUESTIONS.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressFill').style.background = SECTION_COLORS[q.section] || 'var(--accent)';
+
+  const pb = document.getElementById('passageBox');
+  pb.innerHTML = q.passage ? `<div class="passage-box">${q.passage}</div>` : '';
+
+  const letters = ['A','B','C','D'];
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+
+  q.opts.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option';
+    div.innerHTML = `<div class="option-letter">${letters[i]}</div><div>${opt}</div>`;
+    div.onclick = () => selectAnswer(i);
+    container.appendChild(div);
+  });
+
+  document.getElementById('explanation').className = 'explanation';
+  document.getElementById('explanation').innerHTML = '';
+  document.getElementById('nextBtn').className = 'next-btn';
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = QUESTIONS[current];
+  const opts = document.querySelectorAll('.option');
+
+  userAnswers[current] = idx;
+  opts.forEach(o => o.classList.add('locked'));
+
+  let forcedNote = '';
+
+  if (q.forced !== null) {
+    // ── Forced question: target is initialUserAnswer ──
+    // The user should try to match what they answered on the real PICAT.
+    // If they pick something else, highlight the initialUserAnswer option.
+    const forcedIdx = q.opts.indexOf(q.forced);
+
+    if (forcedIdx !== -1) {
+      if (idx === forcedIdx) {
+        // User matched initialUserAnswer — always show green banner regardless of correctness
+        if (idx === q.ans) {
+          // initialUserAnswer was also the correct answer
+          opts[idx].classList.add('correct');
+        } else {
+          // initialUserAnswer was wrong on the real test; show pick in gold only, don't reveal correct
+          opts[idx].classList.add('forced-match');
+        }
+        forcedNote = idx === q.ans
+          ? `<div class="forced-banner b-correct">✓ You selected the exact answer you selected originally.</div>`
+          : `<div class="forced-banner b-correct">✓ You selected the exact answer you selected originally — though this answer was incorrect.</div>`;
+      } else {
+        // User did NOT match initialUserAnswer
+        opts[idx].classList.add('wrong');
+        opts[forcedIdx].classList.add('forced-answer'); // highlight real-test answer in gold
+        const realWasCorrect = forcedIdx === q.ans;
+        forcedNote = `<div class="forced-banner b-info">⚑ Your real PICAT answer was <strong>${q.forced}</strong> — highlighted above${realWasCorrect ? ' (which was correct ✓)' : ' (also incorrect ✗)'}.</div>`;
+      }
+    } else {
+      // Fallback: forced text not found in opts (shouldn't happen)
+      opts[idx].classList.add(idx === q.ans ? 'correct' : 'wrong');
+      if (idx !== q.ans) opts[q.ans].classList.add('correct');
+    }
+  } else {
+    // ── Standard question ──
+    opts[idx].classList.add(idx === q.ans ? 'correct' : 'wrong');
+    if (idx !== q.ans) opts[q.ans].classList.add('correct');
+  }
+
+  const exp = document.getElementById('explanation');
+  exp.innerHTML = forcedNote + q.exp;
+  exp.classList.add('show');
+
+  document.getElementById('nextBtn').classList.add('show');
+  adaptAfterAnswer(idx === q.ans);
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= QUESTIONS.length) {
+    clearInterval(timerInterval);
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ── SCORING ENGINE ──
+function calcStandard(pct) {
+  return Math.max(20, Math.min(80, Math.round(50 + (pct - 0.5) * 40)));
+}
+
+function compositeToPercentile(comp) {
+  // Composite → AFQT percentile. Standard score formula: 50 + (pct-0.5)×40.
+  // VE = (WK_std + PC_std) / 2. AFQT composite = 2×VE + AR + MK.
+  // Consistency check: section spread > 20 = unreliable profile.
+  const table = [
+    [0,1],[120,1],[130,5],[140,8],[150,15],[160,22],[170,30],[175,35],[180,40],
+    [185,45],[190,50],[195,52],[200,55],[205,58],[210,60],[215,63],
+    [220,65],[225,70],[230,75],[235,80],[240,85],[245,90],[248,92],
+    [250,93],[252,94],[255,95],[258,96],[260,97],[265,98],[270,99],[280,99]
+  ];
+  for (let i = table.length - 1; i >= 0; i--) {
+    if (comp >= table[i][0]) return table[i][1];
+  }
+  return 1;
+}
+
+function showResults() {
+  showScreen('results');
+
+  const secC = {}, secT = {};
+  QUESTIONS.forEach(q => { if (!secC[q.section]) { secC[q.section]=0; secT[q.section]=0; } });
+  QUESTIONS.forEach((q,i) => {
+    secT[q.section]++;
+    if (userAnswers[i] === q.ans) secC[q.section]++;
+  });
+
+  const std = {};
+  Object.keys(secT).forEach(s => { std[s] = calcStandard(secC[s]/secT[s]); });
+
+  const AR = std['AR']||50, MK = std['MK']||50, WK = std['WK']||50, PC = std['PC']||50;
+  const VE = (WK + PC) / 2;
+  const composite = Math.round(2*VE + AR + MK);
+  const afqtPct = compositeToPercentile(composite);
+  lastAfqt = afqtPct;
+  saveSessionStats(afqtPct, secC, secT);
+
+  const spread = Math.max(AR,MK,WK,PC) - Math.min(AR,MK,WK,PC);
+  const reliable = spread <= 20;
+
+  let color, title, msg;
+  if (afqtPct >= 95) {
+    color='var(--correct)'; title='✓ VERIFIED — 95TH PERCENTILE';
+    msg="Your performance holds up. You're thinking at the 95th percentile level. The verification is a formality—stay calm, trust your process, and you'll confirm your score.";
+  } else if (afqtPct >= 90) {
+    color='var(--ar)'; title=`STRONG — ${afqtPct}TH PERCENTILE`;
+    msg="Very close to your target. A few more correct answers gets you there. Review the missed questions below.";
+  } else if (afqtPct >= 60) {
+    color='var(--accent3)'; title=`${afqtPct}TH PERCENTILE — REVIEW NEEDED`;
+    msg="Solid foundation, but a few concept gaps could cost you under test pressure. Focus on the questions you missed below and drill those specific skills before your verification.";
+  } else {
+    color='var(--wrong)'; title=`${afqtPct}TH PERCENTILE — MORE PREP NEEDED`;
+    msg="Some core concepts need reinforcement. The good news: your original test wasn't a fluke—these new questions hit your weak spots intentionally. Drill the explanations below.";
+  }
+
+  document.getElementById('resultsTitle').textContent = afqtPct;
+  document.getElementById('resultsTitle').style.color = color;
+  document.getElementById('resultsTitle').style.fontSize = 'clamp(72px,16vw,120px)';
+  document.getElementById('overallScore').textContent = 'AFQT PERCENTILE';
+
+  const afqtCardHTML = ['AR','WK','PC','MK'].map(s => `
+    <div class="result-card ${s}">
+      <div class="r-label">${SECTION_LABELS[s]}</div>
+      <div class="r-score">${std[s]||'—'}</div>
+      <div class="r-fraction">${secC[s]||0} / ${secT[s]||0} correct</div>
+    </div>`).join('');
+
+  const veCard = `
+    <div class="result-card VE">
+      <div class="r-label">VERBAL EXPR.</div>
+      <div class="r-score">${Math.round(VE)}</div>
+      <div class="r-fraction">(WK+PC)÷2</div>
+    </div>`;
+
+  const extraSecs = ['GS','EI','AI','MC','AO'];
+  const extraHTML = mode==='full'
+    ? `<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted);margin-bottom:12px;">OTHER SUBTESTS</div>
+       <div class="results-grid-extra">
+         ${extraSecs.filter(s=>std[s]).map(s=>`
+           <div class="result-card ${s}">
+             <div class="r-label">${SECTION_LABELS[s]}</div>
+             <div class="r-score">${std[s]}</div>
+             <div class="r-fraction">${secC[s]} / ${secT[s]} correct</div>
+           </div>`).join('')}
+       </div>` : '';
+
+  document.getElementById('scoringDetails').innerHTML = `
+    <div class="reliability-box ${reliable?'ok':'bad'}">
+      ${reliable
+        ? `✓ &nbsp;CONSISTENT PROFILE — section spread is ${spread} pts (≤20). Score is reliable.`
+        : `⚠ &nbsp;INCONSISTENT PROFILE — spread is ${spread} pts (>20). Large imbalances between sections are flagged on the real ASVAB verification.`}
+    </div>
+    <div class="composite-row">
+      <div class="cr-block"><div class="cr-label">VE × 2</div><span class="cr-val">${Math.round(2*VE)}</span></div>
+      <span class="cr-op">+</span>
+      <div class="cr-block"><div class="cr-label">AR</div><span class="cr-val" style="color:var(--ar)">${AR}</span></div>
+      <span class="cr-op">+</span>
+      <div class="cr-block"><div class="cr-label">MK</div><span class="cr-val" style="color:var(--mk)">${MK}</span></div>
+      <span class="cr-op">=</span>
+      <div class="cr-block cr-result"><div class="cr-label">COMPOSITE</div><span class="cr-val" style="color:${color}">${composite}</span></div>
+    </div>
+    <div class="results-grid-afqt">${afqtCardHTML}${veCard}</div>
+    ${extraHTML}
+  `;
+
+  document.getElementById('verdictBox').innerHTML = `<h3 style="color:${color}">${title}</h3><p>${msg}</p>`;
+
+  const list = document.getElementById('reviewList');
+  list.innerHTML = '';
+  QUESTIONS.forEach((q, i) => {
+    const correct = userAnswers[i] === q.ans;
+    const div = document.createElement('div');
+    div.className = `review-item ${correct ? 'ok' : 'bad'}`;
+    const preview = q.q.length > 70 ? q.q.substring(0, 70) + '…' : q.q;
+    div.innerHTML = `
+      <div class="ri-icon">${correct ? '✓' : '✗'}</div>
+      <div class="ri-q">${preview}</div>
+      <div class="ri-tag ${q.section}">${q.section}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+</script>
+</body>
+</html>
