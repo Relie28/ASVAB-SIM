@@ -719,6 +719,12 @@
   .ct-meta { font-size:11px; color:var(--muted); line-height:1.7; }
   .ct-missed { color:var(--wrong); font-size:11px; margin-top:6px; font-family:'IBM Plex Mono',monospace; }
   .cat-summary { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); margin-top:14px; letter-spacing:1px; }
+  .mode-toggle { display:flex; gap:8px; width:100%; margin-top:4px; }
+  .mode-pill { flex:1; padding:11px 8px; border-radius:4px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; transition:all 0.15s; border:1px solid var(--border); background:transparent; color:var(--muted); text-align:center; }
+  .mode-pill:not(.drill-active):not(.practice-active):hover { border-color:var(--accent); color:var(--accent); }
+  .mode-pill.drill-active { border-color:var(--accent); background:var(--accent); color:var(--bg); }
+  .mode-pill.practice-active { border-color:#34d399; background:#34d399; color:var(--bg); }
+  .mode-desc { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.5px; min-height:30px; padding:6px 0 0; text-align:left; line-height:1.6; }
 
   /* ── STATS SCREEN ── */
   #stats { display:none; min-height:100vh; }
@@ -892,7 +898,7 @@
   </div>
 
   <button class="start-btn" onclick="showCategorySelect()">BEGIN TIMED QUIZ</button>
-  <div class="quiz-meta">30 questions · 25 minutes · MK/AR priority · adaptive difficulty</div>
+  <div class="quiz-meta">up to 50 questions · adaptive timer · MK/AR priority · adaptive difficulty</div>
   <button class="full-btn" onclick="startQuiz('full')">FULL ASVAB SIMULATION →</button>
   <div class="full-meta">71 questions · 90 minutes · GS · AR · WK · PC · MK · AFQT score</div>
   <button class="stats-btn" onclick="showStats()">VIEW MY STATS →</button>
@@ -944,10 +950,16 @@
   <div style="max-width:540px;width:100%;padding:20px">
     <div class="rank-badge" style="opacity:1;animation:none;margin-bottom:20px">▶ CUSTOMIZE YOUR DRILL</div>
     <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.95;margin-bottom:8px">SELECT<br><span style="color:var(--accent)">SECTIONS</span></h2>
-    <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:36px;letter-spacing:1px">toggle sections on/off · 30 questions · adaptive weighting</p>
+    <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:36px;letter-spacing:1px">toggle sections on/off · up to 50 questions · adaptive weighting</p>
     <div class="cat-grid" id="catGrid"></div>
     <div class="cat-summary" id="catSummary"></div>
-    <button class="start-btn" style="opacity:1;animation:none;margin-top:28px;width:100%" onclick="launchCustomQuiz()">BEGIN DRILL →</button>
+    <div style="margin-top:22px;margin-bottom:8px;text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted)">SELECT MODE</div>
+    <div class="mode-toggle">
+      <button id="modeDrillBtn" class="mode-pill drill-active" onclick="setDrillMode('drill')">⏱&nbsp; TIMED DRILL</button>
+      <button id="modePracticeBtn" class="mode-pill" onclick="setDrillMode('practice')">📖&nbsp; PRACTICE MODE</button>
+    </div>
+    <div id="modeDesc" class="mode-desc">Countdown timer · adaptive difficulty · AFQT percentile estimated at session end</div>
+    <button class="start-btn" id="launchBtn" style="opacity:1;animation:none;margin-top:20px;width:100%" onclick="launchCustomQuiz()">BEGIN DRILL →</button>
     <button class="full-btn" style="opacity:1;animation:none;margin-top:10px;width:100%" onclick="showScreen('splash')">← BACK</button>
   </div>
 </div>
@@ -1367,6 +1379,7 @@ let timerInterval;
 let secondsLeft = 25 * 60;
 let selectedSections = ['MK','AR','WK','PC']; // controlled by category select
 let lastAfqt = null;
+let isPracticeMode = false;
 
 // Per-section adaptive state: tracks consecutive correct streak per section
 // Used to escalate difficulty after sustained correct answers
@@ -1487,24 +1500,49 @@ function toggleCatSection(sec) {
   updateCatSummary();
 }
 
-function updateCatSummary() {
-  const BASE = { MK:12, AR:10, WK:5, PC:3 };
-  const totalBase = selectedSections.reduce((s,k) => s + BASE[k], 0);
+function calcQuestionAlloc(activeSecs) {
+  // Base proportions (ratio only — actual target scales to available pool)
+  const BASE_ALLOC = { MK:20, AR:16, WK:8, PC:6 }; // sums to 50
+  const TARGET = 50;
+  const totalBase = activeSecs.reduce((s,k) => s + (BASE_ALLOC[k] || 0), 0);
   let running = 0;
-  const parts = selectedSections.map((sec, i) => {
-    const q = i === selectedSections.length - 1
-      ? 30 - running
-      : Math.round((BASE[sec] / totalBase) * 30);
-    running += q;
-    return `${sec}: ${q}Q`;
+  const alloc = {};
+  activeSecs.forEach((sec, i) => {
+    const avail = PICAT_QUESTIONS.filter(q => q.section === sec).length;
+    const raw   = (i === activeSecs.length - 1)
+      ? TARGET - running
+      : Math.round((BASE_ALLOC[sec] / totalBase) * TARGET);
+    alloc[sec]  = Math.min(raw, avail);
+    running    += raw;
   });
+  return alloc;
+}
+
+function updateCatSummary() {
+  const alloc = calcQuestionAlloc(selectedSections);
+  const total = Object.values(alloc).reduce((s,v) => s+v, 0);
+  const parts = selectedSections.map(sec => `${sec}: ${alloc[sec]}Q`);
   const el = document.getElementById('catSummary');
-  if (el) el.textContent = `30 questions total — ${parts.join(' · ')}`;
+  if (el) el.textContent = `${total} questions total — ${parts.join(' · ')}`;
 }
 
 function launchCustomQuiz() {
   if (!selectedSections.length) return;
   startQuiz('picat');
+}
+
+function setDrillMode(m) {
+  isPracticeMode = (m === 'practice');
+  const drillBtn = document.getElementById('modeDrillBtn');
+  const practBtn = document.getElementById('modePracticeBtn');
+  const desc     = document.getElementById('modeDesc');
+  const beginBtn = document.getElementById('launchBtn');
+  if (drillBtn) { drillBtn.classList.toggle('drill-active', !isPracticeMode); }
+  if (practBtn) { practBtn.classList.toggle('practice-active', isPracticeMode); }
+  if (desc) desc.textContent = isPracticeMode
+    ? 'No time limit · study at your own pace · full explanations · results not counted toward AFQT'
+    : 'Countdown timer · adaptive difficulty · AFQT percentile estimated at session end';
+  if (beginBtn) beginBtn.textContent = isPracticeMode ? 'BEGIN PRACTICE →' : 'BEGIN DRILL →';
 }
 
 // ── STATS ──
@@ -1660,18 +1698,8 @@ function startQuiz(selectedMode) {
     //   correctForced  (real hit)   → weight 3  — high volume for memorization
     //   fresh diff:2/3              → weight 2  — medium volume, improve weak spots
     //   fresh diff:1                → weight 1  — lower volume, easy filler
-    // Allocate 30Q proportionally across selected sections
-    const BASE_ALLOC = { MK:12, AR:10, WK:5, PC:3 };
     const activeSecs = selectedSections.length ? selectedSections : ['MK','AR','WK','PC'];
-    const totalBase  = activeSecs.reduce((s,k) => s + BASE_ALLOC[k], 0);
-    let allocRunning = 0;
-    const ALLOC = {};
-    activeSecs.forEach((sec, i) => {
-      ALLOC[sec] = i === activeSecs.length - 1
-        ? 30 - allocRunning
-        : Math.round((BASE_ALLOC[sec] / totalBase) * 30);
-      allocRunning += ALLOC[sec];
-    });
+    const ALLOC = calcQuestionAlloc(activeSecs);
     const selected = [];
 
     Object.entries(ALLOC).forEach(([sec, quota]) => {
@@ -1690,7 +1718,9 @@ function startQuiz(selectedMode) {
     // Shuffle the full selected pool so sections are interleaved
     QUESTIONS = shuffle(selected).map(shuffleOpts);
 
-    secondsLeft = 25 * 60;
+    // Scale timer: ~50 seconds per question
+    const actualTotal = Object.values(ALLOC).reduce((s,v) => s+v, 0);
+    secondsLeft = Math.round(actualTotal * 50);
   } else {
     // Full ASVAB: GS → AR → WK → PC → MK in fixed section order, adaptive within each section
     const FULL_SECTIONS = [
@@ -1713,19 +1743,34 @@ function startQuiz(selectedMode) {
   showScreen('quiz');
   renderQuestion();
   clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    secondsLeft--;
+  const timerEl = document.getElementById('timer');
+  if (isPracticeMode) {
+    secondsLeft = 0;
+    if (timerEl) { timerEl.style.visibility = 'hidden'; timerEl.style.minWidth = '0'; timerEl.style.width = '0'; }
+    const badge = document.getElementById('sessionModeBadge');
+    if (badge) {
+      badge.textContent = 'PRACTICE MODE';
+      badge.style.cssText = 'color:#34d399;background:rgba(52,211,153,0.08);border:1px solid #34d399;font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:3px;display:block;';
+    }
+    // No timer interval — no counting, no display
+  } else {
+    if (timerEl) { timerEl.style.visibility = ''; timerEl.style.minWidth = ''; timerEl.style.width = ''; }
+    timerInterval = setInterval(() => {
+      secondsLeft--;
+      updateTimerDisplay();
+      if (secondsLeft <= 0) { clearInterval(timerInterval); showResults(); }
+    }, 1000);
     updateTimerDisplay();
-    if (secondsLeft <= 0) { clearInterval(timerInterval); showResults(); }
-  }, 1000);
-  updateTimerDisplay();
+  }
 }
 
 function updateTimerDisplay() {
+  const el = document.getElementById('timer');
+  if (!el) return;
+  el.style.color = '';
   const h = Math.floor(secondsLeft / 3600);
   const m = Math.floor((secondsLeft % 3600) / 60);
   const s = secondsLeft % 60;
-  const el = document.getElementById('timer');
   if (h > 0) {
     el.textContent = `${h}h ${String(m).padStart(2,'0')}m`;
   } else if (m > 0) {
@@ -1919,6 +1964,45 @@ function showResults() {
 
   const std = {};
   Object.keys(secT).forEach(s => { std[s] = calcStandard(secQs[s], secMask[s]); });
+
+  // ── Practice mode: section accuracy only, no AFQT calculation or stat save ──
+  if (isPracticeMode) {
+    const totalC = Object.values(secC).reduce((a,b) => a+b, 0);
+    const totalT = Object.values(secT).reduce((a,b) => a+b, 0);
+    const pct    = totalT ? Math.round(totalC / totalT * 100) : 0;
+    const col    = pct >= 80 ? 'var(--correct)' : pct >= 60 ? 'var(--accent3)' : 'var(--wrong)';
+    document.getElementById('resultsTitle').textContent = pct + '%';
+    document.getElementById('resultsTitle').style.color = col;
+    document.getElementById('resultsTitle').style.fontSize = 'clamp(72px,16vw,120px)';
+    document.getElementById('overallScore').textContent = 'PRACTICE SESSION — ACCURACY';
+    const cardHTML = Object.keys(secT).map(s => `
+      <div class="result-card ${s}">
+        <div class="r-label">${SECTION_LABELS[s] || s}</div>
+        <div class="r-score">${std[s] || '—'}</div>
+        <div class="r-fraction">${secC[s]||0} / ${secT[s]} correct</div>
+      </div>`).join('');
+    document.getElementById('scoringDetails').innerHTML = `
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;color:#34d399;margin-bottom:16px;padding:12px 16px;border:1px solid rgba(52,211,153,0.25);border-radius:4px;background:rgba(52,211,153,0.05)">
+        📖 &nbsp;PRACTICE SESSION &nbsp;·&nbsp; No time pressure &nbsp;·&nbsp; Not counted toward AFQT average
+      </div>
+      <div class="results-grid-afqt">${cardHTML}</div>`;
+    const msg = pct >= 80
+      ? "You're clearly absorbing the material. Keep drilling and your timed performance will follow."
+      : 'Review the missed questions and explanations below, then try a Timed Drill when you feel ready.';
+    const heading = pct >= 80 ? '✓ GREAT PRACTICE SESSION' : pct >= 60 ? 'SOLID EFFORT — KEEP REVIEWING' : 'KEEP AT IT — STUDY THE EXPLANATIONS BELOW';
+    document.getElementById('verdictBox').innerHTML = `<h3 style="color:${col}">${heading}</h3><p>${msg}</p>`;
+    const list = document.getElementById('reviewList');
+    list.innerHTML = '';
+    QUESTIONS.forEach((q, i) => {
+      const correct = userAnswers[i] === q.ans;
+      const div = document.createElement('div');
+      div.className = `review-item ${correct ? 'ok' : 'bad'}`;
+      const preview = q.q.length > 70 ? q.q.substring(0, 70) + '…' : q.q;
+      div.innerHTML = `<div class="ri-icon">${correct ? '✓' : '✗'}</div><div class="ri-q">${preview}</div><div class="ri-tag ${q.section}">${q.section}</div>`;
+      list.appendChild(div);
+    });
+    return;
+  }
 
   const AR = std['AR']||50, MK = std['MK']||50, WK = std['WK']||50, PC = std['PC']||50;
   const VE = (WK + PC) / 2;
