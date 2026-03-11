@@ -208,7 +208,7 @@ That composite is compared against a norming sample of thousands of Americans to
 | 265       | ~98th                  |
 | 270+      | ~99th                  |
 
-A composite of **256** → **AFQT 95th percentile** — verified. This is not an estimate: the scoring engine slope (`46`) was derived algebraically so that the real test scores above produce *exactly* composite 256, which sits at the 95th percentile threshold in the norming table.
+A composite of **256** → **AFQT 95th percentile** — verified. This is not an estimate: the scoring engine slope (`46`) was derived algebraically so that the real test scores above produce _exactly_ composite 256, which sits at the 95th percentile threshold in the norming table.
 
 ---
 
