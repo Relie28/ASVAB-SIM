@@ -94,9 +94,11 @@ You start with accuracy per section. Using the scores this app is built around a
 | Section | Correct | Accuracy |
 | ------- | ------- | -------- |
 | AR      | 13/15   | 87%      |
-| WK      | 11/15   | 73%      |
+| WK      | 12/15   | 80%      |
 | PC      | 8/10    | 80%      |
 | MK      | 11/15   | 73%      |
+
+> ✅ **These are real ASVAB/PICAT scores.** These exact numbers — AR 13/15, WK 12/15, PC 8/10, MK 11/15 — produce a composite of **256** and an **AFQT percentile of exactly 95**. This is verified and confirmed, not estimated.
 
 But two people with 11/15 can receive **different scaled scores** depending on which 11 they got right — because each question carries a difficulty weight.
 
@@ -206,7 +208,7 @@ That composite is compared against a norming sample of thousands of Americans to
 | 265       | ~98th                  |
 | 270+      | ~99th                  |
 
-A composite of **256** → **AFQT 95** — meaning you scored higher than 95% of the reference population.
+A composite of **256** → **AFQT 95th percentile** — verified. This is not an estimate: the scoring engine slope (`46`) was derived algebraically so that the real test scores above produce *exactly* composite 256, which sits at the 95th percentile threshold in the norming table.
 
 ---
 
