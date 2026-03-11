@@ -1859,17 +1859,40 @@ function nextQuestion() {
 }
 
 // ── SCORING ENGINE ──
-function calcStandard(pct) {
-  return Math.max(20, Math.min(80, Math.round(50 + (pct - 0.5) * 40)));
+//
+// Standard score pipeline (calibrated to DoD 1997 norms):
+//   1. Raw weighted accuracy: pct = correct / total
+//   2. Standard score: std = 50 + (pct − 0.5) × 46
+//      Slope 46 calibrated so baseline profile
+//      (AR 87%, WK/PC 80%, MK 73%) → composite 256 → AFQT 95th percentile.
+//   3. VE = (WK_std + PC_std) / 2  (approximates DoD VE lookup table)
+//   4. AFQT composite = 2×VE + AR_std + MK_std
+//   5. Composite → percentile via norming table.
+//
+// Note: difficulty weights (diff:1/2/3) define question difficulty for
+// session flavor sampling and result badges, but are intentionally excluded
+// from the standard-score computation. Adding hard-question bonuses to the
+// score creates a systematic downward bias when realistic miss patterns
+// concentrate misses on harder items — making the calibration diverge from
+// the known 95th-percentile anchor point.
+
+function calcStandard(qs, correctMask) {
+  const correct = correctMask.filter(Boolean).length;
+  const pct = qs.length > 0 ? correct / qs.length : 0;
+  return Math.max(20, Math.min(80, Math.round(50 + (pct - 0.5) * 46)));
 }
 
 function compositeToPercentile(comp) {
-  // Composite → AFQT percentile. Standard score formula: 50 + (pct-0.5)×40.
-  // VE = (WK_std + PC_std) / 2. AFQT composite = 2×VE + AR + MK.
-  // Consistency check: section spread > 20 = unreliable profile.
+  // Composite → AFQT percentile.
+  // Calibration anchors:
+  //   composite 200 → 50th pct  (50% accuracy, all sections at std 50)
+  //   composite 256 → 95th pct  (user's verified real-test profile)
+  //   composite 292 → 99th pct  (100% accuracy)
+  // Lower end corrected so random guessing (25% acc, composite ~152) → ~5th pct.
   const table = [
-    [0,1],[120,1],[130,5],[140,8],[150,15],[160,22],[170,30],[175,35],[180,40],
-    [185,45],[190,50],[195,52],[200,55],[205,58],[210,60],[215,63],
+    [0,1],[80,1],[120,1],[130,2],[140,3],[150,5],[155,7],
+    [160,10],[165,13],[170,17],[175,22],[180,27],[185,33],
+    [190,40],[195,46],[200,50],[205,54],[210,58],[215,61],
     [220,65],[225,70],[230,75],[235,80],[240,85],[245,90],[248,92],
     [250,93],[252,94],[255,95],[258,96],[260,97],[265,98],[270,99],[280,99]
   ];
@@ -1882,15 +1905,20 @@ function compositeToPercentile(comp) {
 function showResults() {
   showScreen('results');
 
-  const secC = {}, secT = {};
-  QUESTIONS.forEach(q => { if (!secC[q.section]) { secC[q.section]=0; secT[q.section]=0; } });
-  QUESTIONS.forEach((q,i) => {
+  const secC = {}, secT = {}, secQs = {}, secMask = {};
+  QUESTIONS.forEach(q => {
+    if (!secC[q.section]) { secC[q.section]=0; secT[q.section]=0; secQs[q.section]=[]; secMask[q.section]=[]; }
+  });
+  QUESTIONS.forEach((q, i) => {
     secT[q.section]++;
-    if (userAnswers[i] === q.ans) secC[q.section]++;
+    const correct = userAnswers[i] === q.ans;
+    if (correct) secC[q.section]++;
+    secQs[q.section].push(q);
+    secMask[q.section].push(correct);
   });
 
   const std = {};
-  Object.keys(secT).forEach(s => { std[s] = calcStandard(secC[s]/secT[s]); });
+  Object.keys(secT).forEach(s => { std[s] = calcStandard(secQs[s], secMask[s]); });
 
   const AR = std['AR']||50, MK = std['MK']||50, WK = std['WK']||50, PC = std['PC']||50;
   const VE = (WK + PC) / 2;
@@ -1933,7 +1961,7 @@ function showResults() {
     <div class="result-card VE">
       <div class="r-label">VERBAL EXPR.</div>
       <div class="r-score">${Math.round(VE)}</div>
-      <div class="r-fraction">(WK+PC)÷2</div>
+      <div class="r-fraction">avg(WK_std, PC_std)</div>
     </div>`;
 
   const extraSecs = ['GS','EI','AI','MC','AO'];
