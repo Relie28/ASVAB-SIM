@@ -81,14 +81,137 @@ Questions pulled directly from your real PICAT carry special behavior:
 
 Reports per-section accuracy and a raw score percentage at the end.
 
-### Full ASVAB
+### Full ASVAB — How the AFQT Is Actually Calculated
 
-Calculates a **standard score** (20–80 scale), **VE (Verbal Expression)** from WK + PC, and a **composite AFQT score** with percentile ranking.
+The AFQT is not a raw percentage. It's a **percentile rank** derived from a six-step pipeline that weights difficulty, normalizes scores, and compares you to a national reference population.
+
+---
+
+#### Step 1 — Raw Correct Answers
+
+You start with accuracy per section. Using the scores this app is built around as an example:
+
+| Section | Correct | Accuracy |
+| ------- | ------- | -------- |
+| AR      | 13/15   | 87%      |
+| WK      | 11/15   | 73%      |
+| PC      | 8/10    | 80%      |
+| MK      | 11/15   | 73%      |
+
+But two people with 11/15 can receive **different scaled scores** depending on which 11 they got right — because each question carries a difficulty weight.
+
+---
+
+#### Step 2 — Item Response Theory (Difficulty Weighting)
+
+The PICAT uses adaptive-style scoring. Each question has three parameters:
+
+- **Difficulty** — how hard the question is
+- **Discrimination** — how well it separates high vs. low ability test-takers
+- **Guess probability** — the likelihood of getting it right by chance
+
+These are combined to estimate your **ability level (θ, "theta")** per section — a continuous measure of true ability, not a raw count.
+
+Conceptually, the ability estimates for the above scores might look like:
 
 ```
-VE  = (WK% + PC%) / 2  → converted to standard score
-AFQT composite = 2×VE + AR_std + MK_std
+θ_AR ≈ 0.90   (very strong)
+θ_PC ≈ 0.70   (strong)
+θ_MK ≈ 0.80   (solid)
+θ_WK ≈ 0.50   (moderate)
 ```
+
+---
+
+#### Step 3 — Standard Scores (20–80 scale)
+
+Each theta estimate is converted to a **standard score** on a 20–80 scale. This scale is normalized so that:
+
+- **50** = population average
+- **60** ≈ top 16%
+- **70** ≈ top 2%
+
+Approximate standard scores for the example above:
+
+| Section | Estimated Standard Score |
+| ------- | ------------------------ |
+| AR      | ~65–70                   |
+| MK      | ~60–65                   |
+| PC      | ~60–65                   |
+| WK      | ~55–60                   |
+
+---
+
+#### Step 4 — Build VE (Verbal Expression)
+
+VE is a composite of WK and PC.
+
+```
+VE_raw = WK_standard + PC_standard
+       = 58 + 63 = 121
+```
+
+That raw sum is run through a **DoD lookup table** to produce a final VE standard score:
+
+```
+VE ≈ 62
+```
+
+---
+
+#### Step 5 — AFQT Composite
+
+The AFQT composite is calculated as:
+
+```
+AFQT = 2 × VE + AR + MK
+```
+
+Using the example values:
+
+```
+AFQT = 2(62) + 67 + 63
+     = 124 + 130
+     = 254
+```
+
+> **Note:** VE is doubled. This means Verbal (WK + PC) counts for **half** of your total AFQT. Improving your vocabulary by 2–3 questions has a disproportionately large effect on the final score.
+
+---
+
+#### Step 6 — Convert Composite → Percentile
+
+That composite is compared against a norming sample of thousands of Americans to produce your final **percentile rank**:
+
+| Composite | Approximate Percentile |
+| --------- | ---------------------- |
+| 235       | ~90th                  |
+| 245       | ~93rd                  |
+| 255       | ~95th                  |
+| 265       | ~97th                  |
+
+A composite of ~254 → **AFQT 95** — meaning you scored higher than 95% of the reference population.
+
+---
+
+#### What the Scores Actually Say
+
+| Section | Takeaway |
+| ------- | -------- |
+| AR      | Extremely strong — your math **carried** the test |
+| PC      | Strong |
+| MK      | Solid |
+| WK      | Moderate — the biggest lever for improvement |
+
+Because VE (WK + PC) is **doubled** in the formula, 2–3 more correct vocabulary answers could push the AFQT from 95 to **97–99**.
+
+---
+
+#### What a 95 Means for Enlistment
+
+- Anything above 93 is effectively the **same qualification tier**
+- You already qualify for nearly every enlisted MOS/rating
+- At this point, **line scores** (GT, ST, EL, etc.) matter more to your recruiter than the AFQT percentile
 
 ---
 
