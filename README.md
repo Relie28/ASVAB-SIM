@@ -1,4 +1,4 @@
-# ASVAB SIM — PICAT Verification Prep
+# ASVAB SIM — 95th Percentile Prep
 
 **🔗 Live app → [https://relie28.github.io/ASVAB-SIM/](https://relie28.github.io/ASVAB-SIM/)**
 
