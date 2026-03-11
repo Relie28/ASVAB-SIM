@@ -423,6 +423,67 @@
   .forced-banner.b-wrong   { background: rgba(255,61,90,0.08);  color: var(--wrong); }
   .forced-banner.b-info    { background: rgba(255,214,0,0.08);  color: var(--accent3); }
 
+  /* ── Flag button ── */
+  .flag-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 15px;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+  .flag-btn:hover { border-color: var(--accent3); color: var(--accent3); }
+  .flag-btn.flagged { border-color: var(--accent3); color: var(--accent3); background: rgba(255,214,0,0.10); }
+  .ri-flag { font-size: 13px; margin-left: 4px; color: var(--accent3); }
+
+  /* ── Flagged Review Screen ── */
+  #flagged-review .fr-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px 18px; margin-bottom: 12px;
+  }
+  #flagged-review .fr-item.expanded { border-color: var(--accent3); }
+  #flagged-review .fr-header { display:flex; align-items:flex-start; gap:12px; cursor:pointer; }
+  #flagged-review .fr-section {
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:1.5px;
+    padding:4px 8px; border-radius:3px; flex-shrink:0; margin-top:2px;
+  }
+  #flagged-review .fr-q { font-size:14px; color:var(--muted); line-height:1.5; flex:1; }
+  #flagged-review .fr-chevron { font-size:11px; color:var(--muted); flex-shrink:0; margin-top:3px; transition:transform 0.15s; }
+  #flagged-review .fr-item.expanded .fr-chevron { transform:rotate(90deg); }
+  #flagged-review .fr-body { display:none; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+  #flagged-review .fr-item.expanded .fr-body { display:block; }
+  #flagged-review .fr-opts { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+  #flagged-review .fr-opt {
+    display:flex; align-items:center; gap:8px; font-size:13px;
+    padding:6px 10px; border-radius:5px; border:1px solid var(--border);
+    background:var(--surface2); color:var(--muted);
+  }
+  #flagged-review .fr-opt.correct-opt { border-color:var(--correct); color:var(--correct); background:rgba(0,201,122,0.07); }
+  #flagged-review .fr-opt-letter {
+    font-family:'IBM Plex Mono',monospace; font-size:10px;
+    width:20px; height:20px; border-radius:50%; border:1px solid currentColor;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  #flagged-review .fr-exp {
+    font-size:12px; color:var(--muted); line-height:1.6;
+    background:var(--surface2); border-left:3px solid var(--accent3);
+    border-radius:0 4px 4px 0; padding:8px 12px; margin-bottom:10px;
+  }
+  #flagged-review .fr-unflag {
+    font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:1px;
+    background:transparent; border:1px solid rgba(255,61,90,0.3); color:rgba(255,61,90,0.5);
+    padding:5px 12px; border-radius:4px; cursor:pointer; transition:all 0.15s;
+  }
+  #flagged-review .fr-unflag:hover { border-color:var(--wrong); color:var(--wrong); }
+
   .explanation {
     margin-top: 24px;
     background: var(--surface2);
@@ -692,6 +753,7 @@
 
   /* ── CATEGORY SELECT ── */
   #category-select { display:none; min-height:100vh; flex-direction:column; justify-content:center; align-items:center; padding:40px 20px; text-align:center; }
+  #flagged-review  { display:none; min-height:100vh; }
   .cat-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; width:100%; max-width:540px; margin-bottom:8px; }
   .cat-tile {
     background: var(--surface);
@@ -901,7 +963,10 @@
   <div class="quiz-meta">up to 50 questions · adaptive timer · MK/AR priority · adaptive difficulty</div>
   <button class="full-btn" onclick="startQuiz('full')">FULL ASVAB SIMULATION →</button>
   <div class="full-meta">71 questions · 90 minutes · GS · AR · WK · PC · MK · AFQT score</div>
-  <button class="stats-btn" onclick="showStats()">VIEW MY STATS →</button>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:18px;opacity:0;animation:fadeUp 0.6s 1.5s forwards">
+    <button class="stats-btn" style="margin-top:0" onclick="showStats()">VIEW MY STATS →</button>
+    <button id="flaggedSplashBtn" class="stats-btn" style="margin-top:0;border-color:rgba(255,214,0,0.35);color:rgba(255,214,0,0.75)" onclick="showFlaggedReview()">&#x2691; FLAGGED QUESTIONS</button>
+  </div>
 </div>
 
 <!-- QUIZ -->
@@ -926,8 +991,9 @@
     <div class="q-text" id="qText"></div>
     <div class="options" id="optionsContainer"></div>
     <div class="explanation" id="explanation"></div>
-    <div class="nav-row">
-      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">NEXT →</button>
+    <div class="nav-row" style="display:flex;align-items:center;gap:10px;justify-content:flex-end">
+      <button class="flag-btn" id="flagBtn" onclick="toggleFlag()" title="Flag for review">&#x2691;</button>
+      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">NEXT &rarr;</button>
     </div>
   </div>
 </div>
@@ -943,6 +1009,23 @@
   <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted);margin-bottom:16px;">QUESTION REVIEW</div>
   <div class="review-list" id="reviewList"></div>
   <button class="retry-btn" onclick="location.reload()">RETAKE QUIZ</button>
+</div>
+
+<!-- FLAGGED REVIEW -->
+<div id="flagged-review" class="screen">
+  <div style="max-width:680px;margin:0 auto;padding:60px 24px 80px;width:100%">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:40px;gap:16px;flex-wrap:wrap">
+      <div>
+        <div class="rank-badge" style="opacity:1;animation:none;text-align:left;margin-bottom:10px">&#9873; FLAGGED FOR REVIEW</div>
+        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.9">FLAGGED<br><span style="color:var(--accent3)">QUESTIONS</span></h2>
+      </div>
+      <button class="full-btn" style="opacity:1;animation:none;margin-top:8px" onclick="showScreen('splash')">&#8592; HOME</button>
+    </div>
+    <div id="flaggedList"></div>
+    <div style="margin-top:20px">
+      <button onclick="clearAllFlags()" style="background:transparent;border:1px solid rgba(255,61,90,0.25);color:rgba(255,61,90,0.45);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 16px;border-radius:4px;cursor:pointer;text-transform:uppercase;transition:all 0.15s" onmouseover="this.style.borderColor='rgba(255,61,90,0.6)';this.style.color='rgba(255,61,90,0.8)'" onmouseout="this.style.borderColor='rgba(255,61,90,0.25)';this.style.color='rgba(255,61,90,0.45)'">CLEAR ALL FLAGS</button>
+    </div>
+  </div>
 </div>
 
 <!-- CATEGORY SELECT -->
@@ -1445,8 +1528,8 @@ function adaptAfterAnswer(wasCorrect) {
 
 // ── SCREEN NAVIGATION ──
 function showScreen(id) {
-  const BLOCK = { quiz:1, results:1, stats:1 };
-  ['splash','category-select','quiz','results','stats'].forEach(s => {
+  const BLOCK = { quiz:1, results:1, stats:1, 'flagged-review':1 };
+  ['splash','category-select','quiz','results','stats','flagged-review'].forEach(s => {
     const el = document.getElementById(s);
     if (!el) return;
     el.style.display = s === id ? (BLOCK[s] ? 'block' : 'flex') : 'none';
@@ -1531,6 +1614,172 @@ function launchCustomQuiz() {
   startQuiz('picat');
 }
 
+// ── FLAG / BOOKMARK SYSTEM ──
+const FLAGGED_KEY = 'asvab_flagged';
+
+function loadFlags() {
+  try { return new Set(JSON.parse(localStorage.getItem(FLAGGED_KEY) || '[]')); }
+  catch(e) { return new Set(); }
+}
+
+function saveFlags(set) {
+  try { localStorage.setItem(FLAGGED_KEY, JSON.stringify([...set])); } catch(e) {}
+}
+
+function flagId(q) {
+  return (q.section || '') + '::' + (q.q || '').substring(0, 80);
+}
+
+function toggleFlag() {
+  const q   = QUESTIONS[current];
+  const id  = flagId(q);
+  const set = loadFlags();
+  if (set.has(id)) { set.delete(id); } else { set.add(id); }
+  saveFlags(set);
+  updateFlagBtn(set.has(id));
+  updateFlaggedSplashBtn();
+}
+
+function updateFlagBtn(isFlagged) {
+  const btn = document.getElementById('flagBtn');
+  if (!btn) return;
+  btn.classList.toggle('flagged', isFlagged);
+  btn.title = isFlagged ? 'Remove flag' : 'Flag for review';
+}
+
+function updateFlaggedSplashBtn() {
+  const btn = document.getElementById('flaggedSplashBtn');
+  if (!btn) return;
+  const count = loadFlags().size;
+  btn.style.display = count > 0 ? '' : 'none';
+  btn.innerHTML = '&#x2691; FLAGGED QUESTIONS (' + count + ')';
+}
+
+function showFlaggedReview() {
+  showScreen('flagged-review');
+  const set  = loadFlags();
+  const list = document.getElementById('flaggedList');
+  list.innerHTML = '';
+
+  const allQ = [
+    ...PICAT_QUESTIONS,
+    ...Object.values(QB).flat(),
+    ...Object.values(FULL_QB).flat(),
+  ];
+  const seen = new Set();
+  const flaggedQ = [];
+  for (const q of allQ) {
+    const id = flagId(q);
+    if (set.has(id) && !seen.has(id)) {
+      seen.add(id);
+      flaggedQ.push({ ...q, _flagId: id });
+    }
+  }
+
+  if (flaggedQ.length === 0) {
+    list.innerHTML = '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--muted);padding:40px 0;text-align:center;">No flagged questions yet.<br><br>Hit the &#x2691; button on any question<br>during a quiz or practice session to flag it for later.</div>';
+    return;
+  }
+
+  const letters = ['A','B','C','D','E'];
+  flaggedQ.forEach(q => {
+    const secColor = SECTION_COLORS[q.section] || 'var(--accent)';
+    const optsHTML = (q.opts || []).map((opt, i) => {
+      const isCorrect = i === q.ans;
+      return `<div class="fr-opt${isCorrect ? ' correct-opt' : ''}">
+        <div class="fr-opt-letter">${letters[i]}</div>
+        <div>${opt}</div>
+        ${isCorrect ? '<div style="margin-left:auto;font-size:11px;">&#10003;</div>' : ''}
+      </div>`;
+    }).join('');
+    const passageHTML = q.passage
+      ? `<div style="font-size:12px;color:var(--muted);line-height:1.6;background:var(--surface2);border-radius:4px;padding:10px 12px;margin-bottom:10px;">${q.passage}</div>` : '';
+    const safeId = q._flagId.replace(/"/g, '&quot;');
+    const div = document.createElement('div');
+    div.className = 'fr-item';
+    div.innerHTML = `
+      <div class="fr-header" onclick="this.closest('.fr-item').classList.toggle('expanded')">
+        <div class="fr-section" style="background:transparent;color:${secColor};border:1px solid ${secColor};">${q.section}</div>
+        <div class="fr-q">${q.q}</div>
+        <div class="fr-chevron">&#9654;</div>
+      </div>
+      <div class="fr-body">
+        ${passageHTML}
+        <div class="fr-opts">${optsHTML}</div>
+        <div class="fr-exp">${q.exp || ''}</div>
+        <button class="fr-unflag" data-flagid="${safeId}" onclick="unflagFromReview(this)">REMOVE FLAG</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function unflagFromReview(btn) {
+  const id  = btn.dataset.flagid;
+  const set = loadFlags();
+  set.delete(id);
+  saveFlags(set);
+  updateFlaggedSplashBtn();
+  const item = btn.closest('.fr-item');
+  item.style.transition = 'opacity 0.2s';
+  item.style.opacity = '0';
+  setTimeout(() => {
+    item.remove();
+    if (document.getElementById('flaggedList').children.length === 0) showFlaggedReview();
+  }, 200);
+}
+
+function clearAllFlags() {
+  if (!confirm('Remove all flagged questions?')) return;
+  localStorage.removeItem(FLAGGED_KEY);
+  updateFlaggedSplashBtn();
+  showFlaggedReview();
+}
+
+// ── RESUME BANNER (injected at top of splash if save exists) ──
+function checkResumeBanner() {
+  const payload = loadPracticeProgress();
+  if (!payload) return;
+
+  // Don't show if already on the quiz screen
+  if (!document.getElementById('splash') || document.getElementById('splash').style.display === 'none') return;
+
+  const answered  = payload.userAnswers.filter(a => a !== null).length;
+  const total     = payload.questions.length;
+  const savedAt   = new Date(payload.savedAt);
+  const expiresAt = new Date(payload.savedAt + PRACTICE_TTL_MS);
+  const msLeft    = Math.max(0, expiresAt - Date.now());
+  const tlHours   = Math.floor(msLeft / 3600000);
+  const tlMins    = Math.floor((msLeft % 3600000) / 60000);
+  const timeLeft  = tlHours > 0 ? `${tlHours}h ${tlMins}m` : `${tlMins}m`;
+
+  const banner = document.createElement('div');
+  banner.id = 'resumeBanner';
+  banner.style.cssText = [
+    'position:fixed','top:0','left:0','right:0','z-index:999',
+    'background:#111318','border-bottom:1px solid rgba(52,211,153,0.3)',
+    'padding:12px 20px','display:flex','align-items:center',
+    'justify-content:space-between','gap:12px','flex-wrap:wrap'
+  ].join(';');
+  banner.innerHTML = `
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#34d399;">
+      ↩ PRACTICE RESUMED — ${answered}/${total} answered
+      <span style="color:#5a6070;margin-left:12px;">saved ${savedAt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})} · expires in ${timeLeft}</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="resumePractice(loadPracticeProgress());document.getElementById('resumeBanner').remove();"
+        style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;padding:6px 16px;
+               background:rgba(52,211,153,0.1);color:#34d399;border:1px solid #34d399;
+               border-radius:4px;cursor:pointer;">CONTINUE →</button>
+      <button onclick="clearPracticeProgress();document.getElementById('resumeBanner').remove();"
+        style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;padding:6px 14px;
+               background:transparent;color:#5a6070;border:1px solid #1e2330;
+               border-radius:4px;cursor:pointer;">DISCARD</button>
+    </div>
+  `;
+  document.body.prepend(banner);
+}
+
 function setDrillMode(m) {
   isPracticeMode = (m === 'practice');
   const drillBtn = document.getElementById('modeDrillBtn');
@@ -1543,6 +1792,72 @@ function setDrillMode(m) {
     ? 'No time limit · study at your own pace · full explanations · results not counted toward AFQT'
     : 'Countdown timer · adaptive difficulty · AFQT percentile estimated at session end';
   if (beginBtn) beginBtn.textContent = isPracticeMode ? 'BEGIN PRACTICE →' : 'BEGIN DRILL →';
+}
+
+// ── PRACTICE PROGRESS SAVE / RESTORE ──
+const PRACTICE_SAVE_KEY  = 'asvab_practice_save';
+const PRACTICE_TTL_MS    = 24 * 60 * 60 * 1000; // 24 hours
+
+function savePracticeProgress() {
+  if (!isPracticeMode) return;
+  try {
+    const payload = {
+      savedAt:     Date.now(),
+      mode,
+      questions:   QUESTIONS,
+      userAnswers,
+      current,
+      selectedSections,
+    };
+    localStorage.setItem(PRACTICE_SAVE_KEY, JSON.stringify(payload));
+  } catch(e) {}
+}
+
+function clearPracticeProgress() {
+  localStorage.removeItem(PRACTICE_SAVE_KEY);
+}
+
+function loadPracticeProgress() {
+  try {
+    const raw = localStorage.getItem(PRACTICE_SAVE_KEY);
+    if (!raw) return null;
+    const payload = JSON.parse(raw);
+    if (!payload || !payload.savedAt) return null;
+    if (Date.now() - payload.savedAt > PRACTICE_TTL_MS) {
+      localStorage.removeItem(PRACTICE_SAVE_KEY);
+      return null;
+    }
+    return payload;
+  } catch(e) { return null; }
+}
+
+function resumePractice(payload) {
+  isPracticeMode  = true;
+  mode            = payload.mode || 'picat';
+  QUESTIONS       = payload.questions;
+  userAnswers     = payload.userAnswers;
+  current         = payload.current;
+  selectedSections = payload.selectedSections || ['MK','AR','WK','PC'];
+
+  // Restore mode-pill UI
+  const drillBtn = document.getElementById('modeDrillBtn');
+  const practBtn = document.getElementById('modePracticeBtn');
+  if (drillBtn) drillBtn.classList.remove('drill-active');
+  if (practBtn) practBtn.classList.add('practice-active');
+
+  showScreen('quiz');
+  renderQuestion();
+
+  // Hide timer, show PRACTICE MODE badge
+  clearInterval(timerInterval);
+  secondsLeft = 0;
+  const timerEl = document.getElementById('timer');
+  if (timerEl) { timerEl.style.visibility = 'hidden'; timerEl.style.minWidth = '0'; timerEl.style.width = '0'; }
+  const badge = document.getElementById('sessionModeBadge');
+  if (badge) {
+    badge.textContent = 'PRACTICE MODE';
+    badge.style.cssText = 'color:#34d399;background:rgba(52,211,153,0.08);border:1px solid #34d399;font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:3px;display:block;';
+  }
 }
 
 // ── STATS ──
@@ -1676,6 +1991,12 @@ function weightedSample(items, weights, n) {
 
 function startQuiz(selectedMode) {
   mode = selectedMode;
+
+  // Clear any saved practice progress and dismiss the resume banner
+  clearPracticeProgress();
+  const banner = document.getElementById('resumeBanner');
+  if (banner) banner.remove();
+
   // Reset adaptive state
   Object.keys(adaptiveState).forEach(k => delete adaptiveState[k]);
 
@@ -1834,6 +2155,10 @@ function renderQuestion() {
   document.getElementById('explanation').className = 'explanation';
   document.getElementById('explanation').innerHTML = '';
   document.getElementById('nextBtn').className = 'next-btn';
+
+  // Hide flag button until user answers
+  const flagBtn = document.getElementById('flagBtn');
+  if (flagBtn) flagBtn.style.display = 'none';
 }
 
 function selectAnswer(idx) {
@@ -1845,6 +2170,7 @@ function selectAnswer(idx) {
 
   userAnswers[current] = idx;
   opts.forEach(o => o.classList.add('locked'));
+  savePracticeProgress(); // persist after every answer (no-op if not practice mode)
 
   let forcedNote = '';
 
@@ -1890,6 +2216,14 @@ function selectAnswer(idx) {
   exp.classList.add('show');
 
   document.getElementById('nextBtn').classList.add('show');
+
+  // Show and sync flag button now that an answer has been selected
+  const flagBtn = document.getElementById('flagBtn');
+  if (flagBtn) {
+    flagBtn.style.display = '';
+    updateFlagBtn(loadFlags().has(flagId(q)));
+  }
+
   adaptAfterAnswer(idx === q.ans);
 }
 
@@ -1897,8 +2231,10 @@ function nextQuestion() {
   current++;
   if (current >= QUESTIONS.length) {
     clearInterval(timerInterval);
+    if (isPracticeMode) clearPracticeProgress();
     showResults();
   } else {
+    savePracticeProgress();
     renderQuestion();
   }
 }
@@ -2088,14 +2424,22 @@ function showResults() {
     const div = document.createElement('div');
     div.className = `review-item ${correct ? 'ok' : 'bad'}`;
     const preview = q.q.length > 70 ? q.q.substring(0, 70) + '…' : q.q;
+    const isFlagged = loadFlags().has(flagId(q));
     div.innerHTML = `
-      <div class="ri-icon">${correct ? '✓' : '✗'}</div>
+      <div class="ri-icon">${correct ? '&#10003;' : '&#10007;'}</div>
       <div class="ri-q">${preview}</div>
+      ${isFlagged ? '<span class="ri-flag" title="Flagged for review">&#x2691;</span>' : ''}
       <div class="ri-tag ${q.section}">${q.section}</div>
     `;
     list.appendChild(div);
   });
 }
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', () => {
+  checkResumeBanner();
+  updateFlaggedSplashBtn();
+});
 </script>
 </body>
 </html>
