@@ -1658,7 +1658,7 @@ function startRealTestMode() {
   mode = 'realtest';
   isPracticeMode = false;
 
-  clearPracticeProgress();
+  archiveInterruptedSession();
   const banner = document.getElementById('resumeBanner');
   if (banner) banner.remove();
   Object.keys(adaptiveState).forEach(k => delete adaptiveState[k]);
@@ -1867,42 +1867,60 @@ function clearAllFlags() {
   showFlaggedReview();
 }
 
-// ── RESUME BANNER (injected at top of splash if save exists) ──
+// ── RESUME BANNER — single banner for the one most-recent in-progress session ──
 function checkResumeBanner() {
-  const payload = loadPracticeProgress();
-  if (!payload) return;
-
-  // Don't show if already on the quiz screen
   if (!document.getElementById('splash') || document.getElementById('splash').style.display === 'none') return;
+  const p = loadActiveSession();
+  if (!p) return;
 
-  const answered  = payload.userAnswers.filter(a => a !== null).length;
-  const total     = payload.questions.length;
-  const savedAt   = new Date(payload.savedAt);
-  const expiresAt = new Date(payload.savedAt + PRACTICE_TTL_MS);
-  const msLeft    = Math.max(0, expiresAt - Date.now());
-  const tlHours   = Math.floor(msLeft / 3600000);
-  const tlMins    = Math.floor((msLeft % 3600000) / 60000);
-  const timeLeft  = tlHours > 0 ? `${tlHours}h ${tlMins}m` : `${tlMins}m`;
+  const answered = p.userAnswers.filter(a => a !== null).length;
+  const total    = p.questions.length;
+  const savedAt  = new Date(p.savedAt);
+
+  // Mode label + color
+  let modeLabel, modeColor, borderColor;
+  if (p.isPractice) {
+    modeLabel = 'PRACTICE SESSION'; modeColor = '#34d399'; borderColor = 'rgba(52,211,153,0.3)';
+  } else if (p.mode === 'full') {
+    modeLabel = 'FULL ASVAB SIMULATION'; modeColor = 'var(--accent3)'; borderColor = 'rgba(255,214,0,0.3)';
+  } else if (p.mode === 'realtest') {
+    modeLabel = 'REAL TEST REPLAY'; modeColor = 'var(--accent3)'; borderColor = 'rgba(255,214,0,0.3)';
+  } else {
+    modeLabel = 'TIMED DRILL'; modeColor = 'var(--accent)'; borderColor = 'rgba(0,229,255,0.3)';
+  }
+
+  // Remaining clock time (timed modes only)
+  let clockStr = '';
+  if (!p.isPractice && p.mode !== 'realtest' && p.secondsLeft > 0) {
+    const h = Math.floor(p.secondsLeft / 3600);
+    const m = Math.floor((p.secondsLeft % 3600) / 60);
+    const s = p.secondsLeft % 60;
+    clockStr = h > 0
+      ? ` · ${h}h ${String(m).padStart(2,'0')}m left on clock`
+      : m > 0
+      ? ` · ${m}m ${String(s).padStart(2,'0')}s left`
+      : ` · ${s}s left`;
+  }
 
   const banner = document.createElement('div');
   banner.id = 'resumeBanner';
   banner.style.cssText = [
     'position:fixed','top:0','left:0','right:0','z-index:999',
-    'background:#111318','border-bottom:1px solid rgba(52,211,153,0.3)',
+    'background:#111318',`border-bottom:1px solid ${borderColor}`,
     'padding:12px 20px','display:flex','align-items:center',
     'justify-content:space-between','gap:12px','flex-wrap:wrap'
   ].join(';');
   banner.innerHTML = `
-    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#34d399;">
-      ↩ PRACTICE RESUMED — ${answered}/${total} answered
-      <span style="color:#5a6070;margin-left:12px;">saved ${savedAt.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})} · expires in ${timeLeft}</span>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:${modeColor};">
+      ↩ ${modeLabel} IN PROGRESS — ${answered}/${total} answered
+      <span style="color:#5a6070;margin-left:12px;">saved ${savedAt.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}${clockStr}</span>
     </div>
     <div style="display:flex;gap:8px;">
-      <button onclick="resumePractice(loadPracticeProgress());document.getElementById('resumeBanner').remove();"
+      <button onclick="resumeSession(loadActiveSession());document.getElementById('resumeBanner').remove();"
         style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;padding:6px 16px;
-               background:rgba(52,211,153,0.1);color:#34d399;border:1px solid #34d399;
+               background:rgba(255,255,255,0.04);color:${modeColor};border:1px solid ${modeColor};
                border-radius:4px;cursor:pointer;">CONTINUE →</button>
-      <button onclick="clearPracticeProgress();document.getElementById('resumeBanner').remove();"
+      <button onclick="clearActiveSession();document.getElementById('resumeBanner').remove();"
         style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;padding:6px 14px;
                background:transparent;color:#5a6070;border:1px solid #1e2330;
                border-radius:4px;cursor:pointer;">DISCARD</button>
@@ -1931,69 +1949,176 @@ function setDrillMode(m) {
   if (beginBtn) beginBtn.textContent = m === 'practice' ? 'BEGIN PRACTICE →' : m === 'realtest' ? 'REPLAY MY TEST →' : 'BEGIN DRILL →';
 }
 
-// ── PRACTICE PROGRESS SAVE / RESTORE ──
-const PRACTICE_SAVE_KEY  = 'asvab_practice_save';
-const PRACTICE_TTL_MS    = 24 * 60 * 60 * 1000; // 24 hours
+// ── SESSION PROGRESS SAVE / RESTORE (unified single slot) ──
+// Only the most recent in-progress session is kept here.
+// When a NEW session starts, the old slot is archived to stats
+// as an interrupted entry so it still appears in the history.
+const ACTIVE_SESSION_KEY     = 'asvab_active_session';
+const ACTIVE_SESSION_TTL     = 7  * 24 * 60 * 60 * 1000; // 7 days  — interrupted sessions
+const COMPLETED_SESSION_TTL  = 30 * 24 * 60 * 60 * 1000; // 30 days — completed sessions
 
-function savePracticeProgress() {
-  if (!isPracticeMode) return;
+function saveActiveSession() {
   try {
     const payload = {
       savedAt:     Date.now(),
       mode,
+      isPractice:  isPracticeMode,
       questions:   QUESTIONS,
       userAnswers,
       current,
+      secondsLeft: (isPracticeMode || mode === 'realtest') ? 0 : secondsLeft,
       selectedSections,
     };
-    localStorage.setItem(PRACTICE_SAVE_KEY, JSON.stringify(payload));
+    localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify(payload));
   } catch(e) {}
 }
 
-function clearPracticeProgress() {
-  localStorage.removeItem(PRACTICE_SAVE_KEY);
+function clearActiveSession() {
+  localStorage.removeItem(ACTIVE_SESSION_KEY);
 }
 
-function loadPracticeProgress() {
+function loadActiveSession() {
   try {
-    const raw = localStorage.getItem(PRACTICE_SAVE_KEY);
+    const raw = localStorage.getItem(ACTIVE_SESSION_KEY);
     if (!raw) return null;
-    const payload = JSON.parse(raw);
-    if (!payload || !payload.savedAt) return null;
-    if (Date.now() - payload.savedAt > PRACTICE_TTL_MS) {
-      localStorage.removeItem(PRACTICE_SAVE_KEY);
+    const p = JSON.parse(raw);
+    if (!p || !p.savedAt) return null;
+    if (Date.now() - p.savedAt > ACTIVE_SESSION_TTL) {
+      localStorage.removeItem(ACTIVE_SESSION_KEY);
       return null;
     }
-    return payload;
+    return p;
   } catch(e) { return null; }
 }
 
-function resumePractice(payload) {
-  isPracticeMode  = true;
-  mode            = payload.mode || 'picat';
-  QUESTIONS       = payload.questions;
-  userAnswers     = payload.userAnswers;
-  current         = payload.current;
-  selectedSections = payload.selectedSections || ['MK','AR','WK','PC'];
+// Move the current active save into the interrupted-sessions log, then clear it.
+// Called whenever a brand-new session is launched, so nothing is silently overwritten.
+function archiveInterruptedSession() {
+  const p = loadActiveSession();
+  if (!p) return;
+  const answered = p.userAnswers.filter(a => a !== null).length;
+  if (answered === 0) { clearActiveSession(); return; } // nothing answered — discard silently
+  try {
+    const stored = JSON.parse(localStorage.getItem('asvab_stats') || '{"sessions":[],"interrupted":[]}');
+    if (!stored.interrupted) stored.interrupted = [];
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2);
+    stored.interrupted.push({
+      id,
+      date:            new Date(p.savedAt).toISOString(),
+      mode:            p.mode,
+      isPractice:      p.isPractice,
+      answered,
+      total:           p.questions.length,
+      // Full resume payload:
+      questions:       p.questions,
+      userAnswers:     p.userAnswers,
+      current:         p.current,
+      secondsLeft:     p.secondsLeft || 0,
+      selectedSections: p.selectedSections || ['MK','AR','WK','PC'],
+    });
+    // Keep only the 5 most-recent interrupted entries to stay under storage limits
+    if (stored.interrupted.length > 5) stored.interrupted = stored.interrupted.slice(-5);
+    localStorage.setItem('asvab_stats', JSON.stringify(stored));
+  } catch(e) {}
+  clearActiveSession();
+}
 
-  // Restore mode-pill UI
-  const drillBtn = document.getElementById('modeDrillBtn');
-  const practBtn = document.getElementById('modePracticeBtn');
-  if (drillBtn) drillBtn.classList.remove('drill-active');
-  if (practBtn) practBtn.classList.add('practice-active');
+// Resume a specific interrupted session from the history by its id.
+// Puts it back as the active session and starts the quiz.
+function resumeInterruptedSession(id) {
+  try {
+    const stored = JSON.parse(localStorage.getItem('asvab_stats') || '{"sessions":[],"interrupted":[]}');
+    const idx = (stored.interrupted || []).findIndex(e => (e.id || e.date) === id);
+    if (idx === -1) return;
+    const entry = stored.interrupted[idx];
+    if (!entry.questions) return; // old entry without full payload — can't resume
+    // Remove from interrupted list
+    stored.interrupted.splice(idx, 1);
+    localStorage.setItem('asvab_stats', JSON.stringify(stored));
+    // Archive whatever is currently active (if anything) before overwriting
+    archiveInterruptedSession();
+    // Restore as the active session and launch
+    const payload = {
+      savedAt:          Date.now(),
+      mode:             entry.mode,
+      isPractice:       entry.isPractice,
+      questions:        entry.questions,
+      userAnswers:      entry.userAnswers,
+      current:          entry.current,
+      secondsLeft:      entry.secondsLeft || 0,
+      selectedSections: entry.selectedSections || ['MK','AR','WK','PC'],
+    };
+    localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify(payload));
+    resumeSession(payload);
+  } catch(e) {}
+}
+
+// Permanently remove a single interrupted entry from the history by its id.
+function removeInterruptedSession(id) {
+  try {
+    const stored = JSON.parse(localStorage.getItem('asvab_stats') || '{"sessions":[],"interrupted":[]}');
+    stored.interrupted = (stored.interrupted || []).filter(e => (e.id || e.date) !== id);
+    localStorage.setItem('asvab_stats', JSON.stringify(stored));
+  } catch(e) {}
+  showStats();
+}
+
+// Unified resume — handles all modes from the single saved slot.
+function resumeSession(payload) {
+  if (!payload) return;
+  mode             = payload.mode || 'picat';
+  isPracticeMode   = payload.isPractice || false;
+  QUESTIONS        = payload.questions;
+  userAnswers      = payload.userAnswers;
+  current          = payload.current;
+  selectedSections = payload.selectedSections || ['MK','AR','WK','PC'];
+  Object.keys(adaptiveState).forEach(k => delete adaptiveState[k]);
+
+  const banner = document.getElementById('resumeBanner');
+  if (banner) banner.remove();
 
   showScreen('quiz');
   renderQuestion();
-
-  // Hide timer, show PRACTICE MODE badge
   clearInterval(timerInterval);
-  secondsLeft = 0;
+
   const timerEl = document.getElementById('timer');
-  if (timerEl) { timerEl.style.visibility = 'hidden'; timerEl.style.minWidth = '0'; timerEl.style.width = '0'; }
-  const badge = document.getElementById('sessionModeBadge');
-  if (badge) {
-    badge.textContent = 'PRACTICE MODE';
-    badge.style.cssText = 'color:#34d399;background:rgba(52,211,153,0.08);border:1px solid #34d399;font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:3px;display:block;';
+  const badge   = document.getElementById('sessionModeBadge');
+
+  if (isPracticeMode) {
+    secondsLeft = 0;
+    if (timerEl) { timerEl.style.visibility = 'hidden'; timerEl.style.minWidth = '0'; timerEl.style.width = '0'; }
+    if (badge) {
+      badge.textContent = 'PRACTICE MODE';
+      badge.style.cssText = 'color:#34d399;background:rgba(52,211,153,0.08);border:1px solid #34d399;font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:3px;display:block;';
+    }
+    const drillBtn = document.getElementById('modeDrillBtn');
+    const practBtn = document.getElementById('modePracticeBtn');
+    if (drillBtn) drillBtn.classList.remove('drill-active');
+    if (practBtn) practBtn.classList.add('practice-active');
+  } else if (mode === 'realtest') {
+    secondsLeft = 0;
+    if (timerEl) { timerEl.style.visibility = 'hidden'; timerEl.style.minWidth = '0'; timerEl.style.width = '0'; }
+    if (badge) {
+      badge.textContent = 'REAL TEST MODE';
+      badge.style.cssText = 'color:var(--accent3);background:rgba(255,214,0,0.08);border:1px solid var(--accent3);font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:3px;display:block;';
+    }
+  } else {
+    // Timed mode (picat drill or full ASVAB) — resume clock
+    secondsLeft = payload.secondsLeft || 0;
+    if (timerEl) { timerEl.style.visibility = ''; timerEl.style.minWidth = ''; timerEl.style.width = ''; }
+    if (badge) {
+      const isFullMode = mode === 'full';
+      badge.textContent = isFullMode ? 'FULL ASVAB' : 'DRILL RESUMED';
+      const col = isFullMode ? 'var(--mk)' : 'var(--accent)';
+      const bg  = isFullMode ? 'rgba(255,214,0,0.08)' : 'rgba(0,229,255,0.08)';
+      badge.style.cssText = `color:${col};background:${bg};border:1px solid ${col};font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:3px;display:block;`;
+    }
+    timerInterval = setInterval(() => {
+      secondsLeft--;
+      updateTimerDisplay();
+      if (secondsLeft <= 0) { clearInterval(timerInterval); clearActiveSession(); showResults(); }
+    }, 1000);
+    updateTimerDisplay();
   }
 }
 
@@ -2014,12 +2139,33 @@ function saveSessionStats(afqtPct, secC, secT) {
 
 function showStats() {
   showScreen('stats');
-  const stored = JSON.parse(localStorage.getItem('asvab_stats') || '{"sessions":[]}');
-  const sessions = stored.sessions || [];
+  const stored = JSON.parse(localStorage.getItem('asvab_stats') || '{"sessions":[],"interrupted":[]}');
+  if (!stored.sessions)    stored.sessions    = [];
+  if (!stored.interrupted) stored.interrupted = [];
+
+  // Auto-prune interrupted entries older than 7 days — they can't be resumed anyway.
+  // Completed sessions are kept for 30 days before being removed.
+  let pruned = false;
+  const intBefore = stored.interrupted.length;
+  stored.interrupted = stored.interrupted.filter(e => {
+    return (Date.now() - new Date(e.date).getTime()) <= ACTIVE_SESSION_TTL;
+  });
+  if (stored.interrupted.length !== intBefore) pruned = true;
+
+  const sesBefore = stored.sessions.length;
+  stored.sessions = stored.sessions.filter(e => {
+    return (Date.now() - new Date(e.date).getTime()) <= COMPLETED_SESSION_TTL;
+  });
+  if (stored.sessions.length !== sesBefore) pruned = true;
+
+  if (pruned) localStorage.setItem('asvab_stats', JSON.stringify(stored));
+
+  const sessions     = stored.sessions;
+  const interrupted  = stored.interrupted;
   const container = document.getElementById('statsContent');
   if (!container) return;
 
-  if (!sessions.length) {
+  if (!sessions.length && !interrupted.length) {
     container.innerHTML = `<div style="text-align:center;padding:80px 0;font-family:'IBM Plex Mono',monospace;color:var(--muted);line-height:2.5">No sessions recorded yet.<br>Complete a quiz to start tracking your progress.</div>`;
     return;
   }
@@ -2066,8 +2212,10 @@ function showStats() {
     </div>`;
   }
 
-  html += `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:14px;text-transform:uppercase">Section Accuracy — All Time (Timed + Practice)</div>`;
-  allSecs.forEach(s => {
+  const hasAccuracyData = allSecs.some(s => agg[s].attempted > 0);
+  if (hasAccuracyData) {
+    html += `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:14px;text-transform:uppercase">Section Accuracy — All Time (Timed + Practice)</div>`;
+    allSecs.forEach(s => {
     const d = agg[s];
     if (!d.attempted) return;
     const pct = Math.round((d.correct / d.attempted) * 100);
@@ -2089,24 +2237,63 @@ function showStats() {
       <div class="stat-sec-foot">${d.correct} correct of ${d.attempted} attempted${practiceNote}</div>
     </div>`;
   });
+  } // end hasAccuracyData
 
-  html += `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin:28px 0 14px;text-transform:uppercase">Recent Sessions</div>`;
+  // Merge completed + interrupted into one history list, newest first
+  const allHistory = [
+    ...sessions.map(s    => ({ ...s, _type: 'completed' })),
+    ...interrupted.map(s => ({ ...s, _type: 'interrupted' })),
+  ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 12);
+
+  html += `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin:28px 0 14px;text-transform:uppercase">Session History</div>`;
   html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0 20px">`;
-  [...sessions].reverse().slice(0,8).forEach(sess => {
-    const d = new Date(sess.date);
+  allHistory.forEach(sess => {
+    const d       = new Date(sess.date);
     const dateStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-    const t = sess.total || {attempted:0,correct:0};
-    const acc = t.attempted ? Math.round((t.correct/t.attempted)*100) : 0;
-    const afqtStr = sess.afqt != null ? `${sess.afqt}th` : '—';
-    const modeLabel = sess.mode === 'practice' ? 'PRACTICE' : sess.mode === 'full' ? 'FULL' : sess.mode === 'realtest' ? 'REAL TEST' : 'PICAT';
-    const modeColor = sess.mode === 'practice' ? '#34d399' : sess.mode === 'realtest' ? 'var(--accent3)' : 'var(--muted)';
-    html += `
-    <div class="session-row">
-      <span style="color:var(--muted)">${dateStr}</span>
-      <span style="color:${modeColor}">${modeLabel}</span>
-      <span>${t.correct}/${t.attempted} <span style="color:var(--muted)">(${acc}%)</span></span>
-      <span style="color:${sess.afqt != null ? 'var(--accent)' : 'var(--muted)'}">${afqtStr} <span style="font-size:9px;color:var(--muted)">${sess.afqt != null ? 'AFQT' : 'PRACTICE'}</span></span>
-    </div>`;
+    const isInterrupted = sess._type === 'interrupted';
+
+    if (isInterrupted) {
+      // Interrupted/abandoned session row
+      const rawMode   = sess.isPractice ? 'practice' : sess.mode;
+      const modeLabel = rawMode === 'practice' ? 'PRACTICE' : rawMode === 'full' ? 'FULL' : rawMode === 'realtest' ? 'REAL TEST' : 'PICAT';
+      const modeColor = rawMode === 'practice' ? '#34d399' : rawMode === 'realtest' ? 'var(--accent3)' : 'var(--muted)';
+      const rawId     = String(sess.id || sess.date); // alphanumeric id or ISO date — safe inside single quotes
+      const canResume = !!sess.questions;
+      html += `
+      <div class="session-row" style="opacity:0.8;flex-wrap:wrap;gap:6px;">
+        <span style="color:var(--muted);flex-shrink:0">${dateStr}</span>
+        <span style="color:${modeColor};flex-shrink:0">${modeLabel}</span>
+        <span style="color:var(--muted);flex-shrink:0">${sess.answered}/${sess.total} answered</span>
+        <span style="margin-left:auto;display:flex;align-items:center;gap:6px;flex-shrink:0">
+          ${canResume ? `<button onclick="resumeInterruptedSession('${rawId}')"
+            style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 10px;
+                   background:rgba(255,255,255,0.04);color:var(--accent);border:1px solid var(--accent);
+                   border-radius:3px;cursor:pointer;transition:all 0.15s;"
+            onmouseover="this.style.background='rgba(0,229,255,0.1)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.04)'">CONTINUE →</button>` : ''}
+          <button onclick="removeInterruptedSession('${rawId}')"
+            style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 8px;
+                   background:transparent;color:rgba(255,61,90,0.45);border:1px solid rgba(255,61,90,0.2);
+                   border-radius:3px;cursor:pointer;transition:all 0.15s;"
+            onmouseover="this.style.color='rgba(255,61,90,0.8)';this.style.borderColor='rgba(255,61,90,0.5)'"
+            onmouseout="this.style.color='rgba(255,61,90,0.45)';this.style.borderColor='rgba(255,61,90,0.2)'">&#x2715; REMOVE</button>
+        </span>
+      </div>`;
+    } else {
+      // Completed session row
+      const t = sess.total || {attempted:0,correct:0};
+      const acc = t.attempted ? Math.round((t.correct/t.attempted)*100) : 0;
+      const afqtStr = sess.afqt != null ? `${sess.afqt}th` : '—';
+      const modeLabel = sess.mode === 'practice' ? 'PRACTICE' : sess.mode === 'full' ? 'FULL' : sess.mode === 'realtest' ? 'REAL TEST' : 'PICAT';
+      const modeColor = sess.mode === 'practice' ? '#34d399' : sess.mode === 'realtest' ? 'var(--accent3)' : 'var(--muted)';
+      html += `
+      <div class="session-row">
+        <span style="color:var(--muted)">${dateStr}</span>
+        <span style="color:${modeColor}">${modeLabel}</span>
+        <span>${t.correct}/${t.attempted} <span style="color:var(--muted)">(${acc}%)</span></span>
+        <span style="color:${sess.afqt != null ? 'var(--accent)' : 'var(--muted)'}">${afqtStr} <span style="font-size:9px;color:var(--muted)">${sess.afqt != null ? 'AFQT' : '—'}</span></span>
+      </div>`;
+    }
   });
   html += `</div>`;
   container.innerHTML = html;
@@ -2115,6 +2302,7 @@ function showStats() {
 function clearStats() {
   if (confirm('Clear all session history? This cannot be undone.')) {
     localStorage.removeItem('asvab_stats');
+    clearActiveSession();
     showStats();
   }
 }
@@ -2137,8 +2325,8 @@ function weightedSample(items, weights, n) {
 function startQuiz(selectedMode) {
   mode = selectedMode;
 
-  // Clear any saved practice progress and dismiss the resume banner
-  clearPracticeProgress();
+  // Archive any interrupted session, then dismiss the resume banner
+  archiveInterruptedSession();
   const banner = document.getElementById('resumeBanner');
   if (banner) banner.remove();
 
@@ -2317,7 +2505,7 @@ function selectAnswer(idx) {
 
   userAnswers[current] = idx;
   opts.forEach(o => o.classList.add('locked'));
-  savePracticeProgress(); // persist after every answer (no-op if not practice mode)
+  saveActiveSession(); // persist session after every answer
 
   let forcedNote = '';
 
@@ -2378,10 +2566,10 @@ function nextQuestion() {
   current++;
   if (current >= QUESTIONS.length) {
     clearInterval(timerInterval);
-    if (isPracticeMode) clearPracticeProgress();
+    clearActiveSession();
     showResults();
   } else {
-    savePracticeProgress();
+    saveActiveSession();
     renderQuestion();
   }
 }
@@ -2432,6 +2620,7 @@ function compositeToPercentile(comp) {
 
 function showResults() {
   showScreen('results');
+  clearActiveSession(); // safety: clear on results regardless of how we got here
 
   const secC = {}, secT = {}, secQs = {}, secMask = {};
   QUESTIONS.forEach(q => {
@@ -2758,8 +2947,45 @@ function showResults() {
   });
 }
 
+// ── Migrate old dual-key saves to the unified slot (one-time) ──
+// Users who had an asvab_full_save or asvab_practice_save from the previous
+// version will see their most recent interrupted session automatically preserved.
+function migrateOldSaves() {
+  if (loadActiveSession()) return; // already have a unified save — nothing to do
+
+  const FULL_KEY     = 'asvab_full_save';
+  const PRACTICE_KEY = 'asvab_practice_save';
+  let bestCandidate  = null;
+
+  [FULL_KEY, PRACTICE_KEY].forEach(key => {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return;
+      const p = JSON.parse(raw);
+      if (!p || !p.savedAt) return;
+      if (Date.now() - p.savedAt > ACTIVE_SESSION_TTL) { localStorage.removeItem(key); return; }
+      if (!bestCandidate || p.savedAt > bestCandidate.savedAt) {
+        bestCandidate = {
+          ...p,
+          isPractice: key === PRACTICE_KEY,
+          secondsLeft: p.secondsLeft || 0,
+          selectedSections: p.selectedSections || ['MK','AR','WK','PC'],
+        };
+      }
+    } catch(e) {}
+  });
+
+  if (bestCandidate) {
+    try { localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify(bestCandidate)); } catch(e) {}
+  }
+  // Clean up old keys regardless
+  localStorage.removeItem(FULL_KEY);
+  localStorage.removeItem(PRACTICE_KEY);
+}
+
 // Run on page load
 document.addEventListener('DOMContentLoaded', () => {
+  migrateOldSaves();
   checkResumeBanner();
   updateFlaggedSplashBtn();
 });
