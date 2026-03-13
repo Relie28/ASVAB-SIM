@@ -203,6 +203,34 @@
     animation: fadeUp 0.6s 1.3s forwards;
   }
 
+  /* ── Real Test Replay button ── */
+  .realtest-btn {
+    background: transparent;
+    color: var(--accent3);
+    border: 1px solid rgba(255,214,0,0.45);
+    padding: 14px 56px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+    margin-top: 12px;
+    opacity: 0;
+    animation: fadeUp 0.6s 1.35s forwards;
+  }
+  .realtest-btn:hover { background: rgba(255,214,0,0.08); border-color: var(--accent3); transform: translateY(-2px); }
+  .realtest-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 10px;
+    opacity: 0;
+    animation: fadeUp 0.6s 1.45s forwards;
+  }
+
   /* ── QUIZ ── */
   #quiz { display: none; min-height: 100vh; padding: 0; }
 
@@ -785,9 +813,10 @@
   .cat-summary { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); margin-top:14px; letter-spacing:1px; }
   .mode-toggle { display:flex; gap:8px; width:100%; margin-top:4px; }
   .mode-pill { flex:1; padding:11px 8px; border-radius:4px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; cursor:pointer; transition:all 0.15s; border:1px solid var(--border); background:transparent; color:var(--muted); text-align:center; }
-  .mode-pill:not(.drill-active):not(.practice-active):hover { border-color:var(--accent); color:var(--accent); }
+  .mode-pill:not(.drill-active):not(.practice-active):not(.realtest-active):hover { border-color:var(--accent); color:var(--accent); }
   .mode-pill.drill-active { border-color:var(--accent); background:var(--accent); color:var(--bg); }
   .mode-pill.practice-active { border-color:#34d399; background:#34d399; color:var(--bg); }
+  .mode-pill.realtest-active { border-color:var(--accent3); background:var(--accent3); color:var(--bg); }
   .mode-desc { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.5px; min-height:30px; padding:6px 0 0; text-align:left; line-height:1.6; }
 
   /* ── STATS SCREEN ── */
@@ -822,7 +851,7 @@
     .score-analysis { gap: 10px; margin: 36px 0 32px; }
     .score-card { padding: 14px 10px; }
     .score-card .val { font-size: 24px; }
-    .start-btn, .full-btn, .stats-btn { padding: 16px 36px; font-size: 16px; }
+    .start-btn, .full-btn, .realtest-btn, .stats-btn { padding: 16px 36px; font-size: 16px; }
 
     /* Stats screen outer wrapper */
     #stats > div { padding: 40px 20px 60px; }
@@ -850,9 +879,10 @@
     .score-card .sub { font-size: 10px; }
     .weakness-tag { font-size: 8px; padding: 2px 5px; }
 
-    .start-btn  { width: 100%; padding: 16px 20px; font-size: 16px; }
-    .full-btn   { width: 100%; padding: 14px 20px; font-size: 15px; }
-    .stats-btn  { width: 100%; padding: 14px 20px; }
+    .start-btn   { width: 100%; padding: 16px 20px; font-size: 16px; }
+    .full-btn    { width: 100%; padding: 14px 20px; font-size: 15px; }
+    .realtest-btn{ width: 100%; padding: 14px 20px; font-size: 15px; }
+    .stats-btn   { width: 100%; padding: 14px 20px; }
     .quiz-meta, .full-meta { font-size: 10px; letter-spacing: 0.5px; }
 
     /* ── Stats screen ── */
@@ -916,7 +946,7 @@
     .stat-sec-pct   { font-size: 20px; }
 
     /* Buttons full-width and compact */
-    .start-btn, .full-btn, .stats-btn { font-size: 14px; padding: 13px 16px; letter-spacing: 2px; }
+    .start-btn, .full-btn, .realtest-btn, .stats-btn { font-size: 14px; padding: 13px 16px; letter-spacing: 2px; }
 
     /* Quiz header ultra-compact */
     .quiz-header { padding: 8px 12px; }
@@ -1043,6 +1073,7 @@
     <div class="mode-toggle">
       <button id="modeDrillBtn" class="mode-pill drill-active" onclick="setDrillMode('drill')">⏱&nbsp; TIMED DRILL</button>
       <button id="modePracticeBtn" class="mode-pill" onclick="setDrillMode('practice')">📖&nbsp; PRACTICE MODE</button>
+      <button id="modeRealtestBtn" class="mode-pill" onclick="setDrillMode('realtest')">⚑&nbsp; REPLAY TEST</button>
     </div>
     <div id="modeDesc" class="mode-desc">Countdown timer · adaptive difficulty · AFQT percentile estimated at session end</div>
     <button class="start-btn" id="launchBtn" style="opacity:1;animation:none;margin-top:20px;width:100%" onclick="launchCustomQuiz()">BEGIN DRILL →</button>
@@ -1466,6 +1497,7 @@ let secondsLeft = 25 * 60;
 let selectedSections = ['MK','AR','WK','PC']; // controlled by category select
 let lastAfqt = null;
 let isPracticeMode = false;
+let activeDrillMode = 'drill'; // 'drill' | 'practice' | 'realtest'
 
 // Per-section adaptive state: tracks consecutive correct streak per section
 // Used to escalate difficulty after sustained correct answers
@@ -1614,7 +1646,47 @@ function updateCatSummary() {
 
 function launchCustomQuiz() {
   if (!selectedSections.length) return;
+  if (activeDrillMode === 'realtest') { startRealTestMode(); return; }
   startQuiz('picat');
+}
+
+// ── REAL TEST REPLAY MODE ──
+// Loads ONLY the questions that appeared on the actual PICAT (forced !== null).
+// Scoring is based on whether the user recalls their original real-test answer,
+// NOT on whether they pick the correct answer. This lets you track memory fidelity.
+function startRealTestMode() {
+  mode = 'realtest';
+  isPracticeMode = false;
+
+  clearPracticeProgress();
+  const banner = document.getElementById('resumeBanner');
+  if (banner) banner.remove();
+  Object.keys(adaptiveState).forEach(k => delete adaptiveState[k]);
+
+  // Filter to only real PICAT questions (forced field is non-null)
+  const realQs = PICAT_QUESTIONS.filter(q => q.forced !== null);
+  QUESTIONS    = shuffle(realQs).map(shuffleOpts);
+  userAnswers  = new Array(QUESTIONS.length).fill(null);
+  current      = 0;
+
+  showScreen('quiz');
+  renderQuestion();
+  clearInterval(timerInterval);
+
+  // No timer — this mode is about recall, not speed
+  secondsLeft = 0;
+  const timerEl = document.getElementById('timer');
+  if (timerEl) {
+    timerEl.style.visibility = 'hidden';
+    timerEl.style.minWidth = '0';
+    timerEl.style.width = '0';
+  }
+
+  const badge = document.getElementById('sessionModeBadge');
+  if (badge) {
+    badge.textContent = 'REAL TEST MODE';
+    badge.style.cssText = 'color:var(--accent3);background:rgba(255,214,0,0.08);border:1px solid var(--accent3);font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:3px;display:block;';
+  }
 }
 
 // ── FLAG / BOOKMARK SYSTEM ──
@@ -1840,17 +1912,23 @@ function checkResumeBanner() {
 }
 
 function setDrillMode(m) {
-  isPracticeMode = (m === 'practice');
-  const drillBtn = document.getElementById('modeDrillBtn');
-  const practBtn = document.getElementById('modePracticeBtn');
-  const desc     = document.getElementById('modeDesc');
-  const beginBtn = document.getElementById('launchBtn');
-  if (drillBtn) { drillBtn.classList.toggle('drill-active', !isPracticeMode); }
-  if (practBtn) { practBtn.classList.toggle('practice-active', isPracticeMode); }
-  if (desc) desc.textContent = isPracticeMode
-    ? 'No time limit · study at your own pace · full explanations · results not counted toward AFQT'
-    : 'Countdown timer · adaptive difficulty · AFQT percentile estimated at session end';
-  if (beginBtn) beginBtn.textContent = isPracticeMode ? 'BEGIN PRACTICE →' : 'BEGIN DRILL →';
+  activeDrillMode = m;
+  isPracticeMode  = (m === 'practice');
+  const drillBtn  = document.getElementById('modeDrillBtn');
+  const practBtn  = document.getElementById('modePracticeBtn');
+  const realtBtn  = document.getElementById('modeRealtestBtn');
+  const desc      = document.getElementById('modeDesc');
+  const beginBtn  = document.getElementById('launchBtn');
+  if (drillBtn)  drillBtn.classList.toggle('drill-active',    m === 'drill');
+  if (practBtn)  practBtn.classList.toggle('practice-active', m === 'practice');
+  if (realtBtn)  realtBtn.classList.toggle('realtest-active', m === 'realtest');
+  const descs = {
+    drill:    'Countdown timer · adaptive difficulty · AFQT percentile estimated at session end',
+    practice: 'No time limit · study at your own pace · full explanations · results not counted toward AFQT',
+    realtest: '46 real PICAT questions · recall your original answers · see how much you remember',
+  };
+  if (desc)     desc.textContent = descs[m] || descs.drill;
+  if (beginBtn) beginBtn.textContent = m === 'practice' ? 'BEGIN PRACTICE →' : m === 'realtest' ? 'REPLAY MY TEST →' : 'BEGIN DRILL →';
 }
 
 // ── PRACTICE PROGRESS SAVE / RESTORE ──
@@ -2020,8 +2098,8 @@ function showStats() {
     const t = sess.total || {attempted:0,correct:0};
     const acc = t.attempted ? Math.round((t.correct/t.attempted)*100) : 0;
     const afqtStr = sess.afqt != null ? `${sess.afqt}th` : '—';
-    const modeLabel = sess.mode === 'practice' ? 'PRACTICE' : sess.mode === 'full' ? 'FULL' : 'PICAT';
-    const modeColor = sess.mode === 'practice' ? '#34d399' : 'var(--muted)';
+    const modeLabel = sess.mode === 'practice' ? 'PRACTICE' : sess.mode === 'full' ? 'FULL' : sess.mode === 'realtest' ? 'REAL TEST' : 'PICAT';
+    const modeColor = sess.mode === 'practice' ? '#34d399' : sess.mode === 'realtest' ? 'var(--accent3)' : 'var(--muted)';
     html += `
     <div class="session-row">
       <span style="color:var(--muted)">${dateStr}</span>
@@ -2443,6 +2521,99 @@ function showResults() {
       const preview = q.q.length > 70 ? q.q.substring(0, 70) + '…' : q.q;
       div.innerHTML = `<div class="ri-icon">${correct ? '✓' : '✗'}</div><div class="ri-q">${preview}</div><div class="ri-tag ${q.section}">${q.section}</div>`;
       list.appendChild(div);
+    });
+    return;
+  }
+
+  // ── Real Test Mode: recall-based scoring ──
+  // A question is "correct" here if the user picks the same answer they gave on
+  // the real PICAT (the forced field), regardless of whether it was right or wrong.
+  if (mode === 'realtest') {
+    const secRecall = {};
+    let recalledCount = 0, totalInitMiss = 0, nowCorrectFromMiss = 0;
+
+    QUESTIONS.forEach(q => {
+      if (!secRecall[q.section]) secRecall[q.section] = { recalled: 0, total: 0 };
+    });
+
+    QUESTIONS.forEach((q, i) => {
+      const forcedIdx = q.opts.indexOf(q.forced);
+      const recalled  = userAnswers[i] === forcedIdx;
+      const gotRight  = userAnswers[i] === q.ans;
+      secRecall[q.section].total++;
+      if (recalled) { recalledCount++; secRecall[q.section].recalled++; }
+      if (q.initiallyWrong) {
+        totalInitMiss++;
+        if (gotRight) nowCorrectFromMiss++;
+      }
+    });
+
+    const totalQs    = QUESTIONS.length;
+    const recallPct  = Math.round((recalledCount / totalQs) * 100);
+    const recallCol  = recallPct >= 80 ? 'var(--correct)' : recallPct >= 60 ? 'var(--accent3)' : 'var(--wrong)';
+
+    document.getElementById('resultsTitle').textContent = recallPct + '%';
+    document.getElementById('resultsTitle').style.color = recallCol;
+    document.getElementById('resultsTitle').style.fontSize = 'clamp(72px,16vw,120px)';
+    document.getElementById('overallScore').textContent = recalledCount + ' / ' + totalQs + ' RECALLED · REAL TEST MODE';
+
+    const secCardHTML = Object.keys(secRecall).map(s => `
+      <div class="result-card ${s}">
+        <div class="r-label">${s} RECALL</div>
+        <div class="r-score">${secRecall[s].recalled}<span style="font-family:'Barlow',sans-serif;font-size:18px;font-weight:400;color:var(--muted)">/${secRecall[s].total}</span></div>
+        <div class="r-fraction">${Math.round((secRecall[s].recalled / secRecall[s].total) * 100)}% recall rate</div>
+      </div>`).join('');
+
+    const improveNote = totalInitMiss > 0
+      ? `<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent3);margin-top:12px;padding:10px 14px;border:1px solid rgba(255,214,0,0.2);border-radius:4px;background:rgba(255,214,0,0.04)">⛑ PICAT MISSES &mdash; ${nowCorrectFromMiss} / ${totalInitMiss} of your original mistakes answered correctly this time (${Math.round((nowCorrectFromMiss / totalInitMiss) * 100)}%)</div>`
+      : '';
+
+    document.getElementById('scoringDetails').innerHTML = `
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;color:var(--accent3);margin-bottom:16px;padding:12px 16px;border:1px solid rgba(255,214,0,0.3);border-radius:4px;background:rgba(255,214,0,0.05)">
+        &#9873; &nbsp;REAL TEST MODE &nbsp;&middot;&nbsp; ${totalQs} questions from your actual PICAT &nbsp;&middot;&nbsp; matching your original answers
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:8px">${secCardHTML}</div>
+      ${improveNote}
+    `;
+
+    const recalledWrongCount = QUESTIONS.filter((q, i) => {
+      const forcedIdx = q.opts.indexOf(q.forced);
+      return userAnswers[i] === forcedIdx && forcedIdx !== q.ans;
+    }).length;
+
+    let verdictTitle, verdictMsg;
+    if (recallPct >= 85) {
+      verdictTitle = `✓ SHARP MEMORY — ${recallPct}% RECALLED`;
+      verdictMsg = recalledWrongCount > 0
+        ? `You recall your real test answers clearly. Watch out — ${recalledWrongCount} of those recalled answers were incorrect on the real test. These are habits to actively correct.`
+        : 'Excellent recall, and all recalled answers were correct. Your instincts are well-calibrated.';
+    } else if (recallPct >= 65) {
+      verdictTitle = `SOLID RECALL — ${recallPct}%`;
+      verdictMsg = 'You remember most of your real test answers. Keep running this mode until you can predict your answers consistently.';
+    } else {
+      verdictTitle = `${recallPct}% RECALL — BUILD YOUR MEMORY`;
+      verdictMsg = 'Your recall of real test answers needs more repetition. Run this mode multiple times to build a clear mental map of your test.';
+    }
+    if (totalInitMiss > 0) {
+      verdictMsg += ` On your original PICAT misses: ${nowCorrectFromMiss}/${totalInitMiss} now corrected — ${nowCorrectFromMiss >= totalInitMiss ? 'perfect!' : nowCorrectFromMiss >= Math.ceil(totalInitMiss * 0.75) ? 'strong improvement.' : 'keep drilling those weak spots.'}`;
+    }
+
+    document.getElementById('verdictBox').innerHTML = `<h3 style="color:${recallCol}">${verdictTitle}</h3><p>${verdictMsg}</p>`;
+
+    saveSessionStats(null, secC, secT);
+
+    const rtList = document.getElementById('reviewList');
+    rtList.innerHTML = '';
+    QUESTIONS.forEach((q, i) => {
+      const forcedIdx  = q.opts.indexOf(q.forced);
+      const recalled   = userAnswers[i] === forcedIdx;
+      const div        = document.createElement('div');
+      div.className    = `review-item ${recalled ? 'ok' : 'bad'}`;
+      const preview    = q.q.length > 70 ? q.q.substring(0, 70) + '…' : q.q;
+      const missTag    = q.initiallyWrong ? '<span style="font-size:9px;font-family:\'IBM Plex Mono\',monospace;padding:1px 5px;border-radius:2px;background:rgba(255,61,90,0.1);color:var(--wrong);margin-right:4px;border:1px solid rgba(255,61,90,0.3)">✗ MISS</span>' : '';
+      const isFlagged  = loadFlags().has(flagId(q));
+      div.innerHTML    = `<div class="ri-icon">${recalled ? '&#10003;' : '&#10007;'}</div><div class="ri-q">${missTag}${preview}</div>${isFlagged ? '<span class="ri-flag" title="Flagged for review">&#x2691;</span>' : ''}<div class="ri-tag ${q.section}">${q.section}</div>`;
+      rtList.appendChild(div);
     });
     return;
   }
