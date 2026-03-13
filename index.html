@@ -2274,7 +2274,9 @@ function renderQuestion() {
     diffEl.style.color = q.initiallyWrong ? 'var(--wrong)' : (diffColors[d] || 'var(--muted)');
   }
 
-  document.getElementById('qNumber').textContent = `${q.section} — QUESTION ${current + 1} OF ${QUESTIONS.length}`;
+  const sectionTotal = QUESTIONS.filter(q2 => q2.section === q.section).length;
+  const sectionIndex = QUESTIONS.slice(0, current).filter(q2 => q2.section === q.section).length + 1;
+  document.getElementById('qNumber').textContent = `${q.section} — QUESTION ${sectionIndex} OF ${sectionTotal}`;
   document.getElementById('qText').innerHTML = q.q;
   document.getElementById('qCounter').textContent = `${current + 1} / ${QUESTIONS.length}`;
 
