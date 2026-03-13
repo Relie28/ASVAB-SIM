@@ -2262,19 +2262,23 @@ function showStats() {
       html += `
       <div class="session-row" style="opacity:0.8;flex-wrap:wrap;gap:6px;">
         <span style="color:var(--muted);flex-shrink:0">${dateStr}</span>
-        <span style="color:${modeColor};flex-shrink:0">${modeLabel}</span>
-        <span style="color:var(--muted);flex-shrink:0">${sess.answered}/${sess.total} answered</span>
+        <span style="min-width:80px;color:${modeColor};flex-shrink:0;margin-left:25px;">
+          <p style="text-align:start">${modeLabel}</p>
+        </span>
+        <span style="color:var(--muted);flex-shrink:0">
+          <p style="text-align:end">${sess.answered}/${sess.total} answered</p>
+        </span>
         <span style="margin-left:auto;display:flex;align-items:center;gap:6px;flex-shrink:0">
           ${canResume ? `<button onclick="resumeInterruptedSession('${rawId}')"
             style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 10px;
-                   background:rgba(255,255,255,0.04);color:var(--accent);border:1px solid var(--accent);
-                   border-radius:3px;cursor:pointer;transition:all 0.15s;"
+            background:rgba(255,255,255,0.04);color:var(--accent);border:1px solid var(--accent);
+            border-radius:3px;cursor:pointer;transition:all 0.15s;"
             onmouseover="this.style.background='rgba(0,229,255,0.1)'"
             onmouseout="this.style.background='rgba(255,255,255,0.04)'">CONTINUE →</button>` : ''}
           <button onclick="removeInterruptedSession('${rawId}')"
             style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 8px;
-                   background:transparent;color:rgba(255,61,90,0.45);border:1px solid rgba(255,61,90,0.2);
-                   border-radius:3px;cursor:pointer;transition:all 0.15s;"
+            background:transparent;color:rgba(255,61,90,0.45);border:1px solid rgba(255,61,90,0.2);
+            border-radius:3px;cursor:pointer;transition:all 0.15s;"
             onmouseover="this.style.color='rgba(255,61,90,0.8)';this.style.borderColor='rgba(255,61,90,0.5)'"
             onmouseout="this.style.color='rgba(255,61,90,0.45)';this.style.borderColor='rgba(255,61,90,0.2)'">&#x2715; REMOVE</button>
         </span>
@@ -2287,11 +2291,17 @@ function showStats() {
       const modeLabel = sess.mode === 'practice' ? 'PRACTICE' : sess.mode === 'full' ? 'FULL' : sess.mode === 'realtest' ? 'REAL TEST' : 'PICAT';
       const modeColor = sess.mode === 'practice' ? '#34d399' : sess.mode === 'realtest' ? 'var(--accent3)' : 'var(--muted)';
       html += `
-      <div class="session-row">
-        <span style="color:var(--muted)">${dateStr}</span>
-        <span style="color:${modeColor}">${modeLabel}</span>
-        <span>${t.correct}/${t.attempted} <span style="color:var(--muted)">(${acc}%)</span></span>
-        <span style="color:${sess.afqt != null ? 'var(--accent)' : 'var(--muted)'}">${afqtStr} <span style="font-size:9px;color:var(--muted)">${sess.afqt != null ? 'AFQT' : '—'}</span></span>
+      <div class="session-row" style="opacity:0.8;flex-wrap:wrap;gap:6px;">
+        <span style="color:var(--muted);flex-shrink:0">${dateStr}</span>
+        <span style="min-width:80px;color:${modeColor};flex-shrink:0;margin-left:25px;">
+          <p style="text-align:start">${modeLabel}</p>
+        </span>
+        <span style="color:var(--muted);flex-shrink:0">
+          <p style="text-align:end">${t.correct}/${t.attempted} <span style="color:var(--muted)">(${acc}%)</span></p>
+        </span>
+        <span style="margin-left:auto;color:${sess.afqt != null ? 'var(--accent)' : 'var(--muted)'};flex-shrink:0;text-align:right">
+          ${afqtStr} <span style="font-size:9px;color:var(--muted)">${sess.afqt != null ? 'AFQT' : '—'}</span>
+        </span>
       </div>`;
     }
   });
