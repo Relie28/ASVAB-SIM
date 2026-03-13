@@ -467,6 +467,8 @@
     background:var(--surface2); color:var(--muted);
   }
   #flagged-review .fr-opt.correct-opt { border-color:var(--correct); color:var(--correct); background:rgba(0,201,122,0.07); }
+  #flagged-review .fr-opt.forced-wrong-opt { border-color:var(--accent3); color:var(--accent3); background:rgba(255,214,0,0.07); }
+  #flagged-review .fr-opt.user-picked-opt { border-color:var(--ar); color:var(--ar); background:rgba(0,229,255,0.07); }
   #flagged-review .fr-opt-letter {
     font-family:'IBM Plex Mono',monospace; font-size:10px;
     width:20px; height:20px; border-radius:50%; border:1px solid currentColor;
@@ -1009,6 +1011,7 @@
   <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted);margin-bottom:16px;">QUESTION REVIEW</div>
   <div class="review-list" id="reviewList"></div>
   <button class="retry-btn" onclick="location.reload()">RETAKE QUIZ</button>
+  <button class="full-btn" style="opacity:1;animation:none;margin-top:12px;width:100%;display:block" onclick="showScreen('splash')">← HOME</button>
 </div>
 
 <!-- FLAGGED REVIEW -->
@@ -1615,7 +1618,8 @@ function launchCustomQuiz() {
 }
 
 // ── FLAG / BOOKMARK SYSTEM ──
-const FLAGGED_KEY = 'asvab_flagged';
+const FLAGGED_KEY    = 'asvab_flagged';
+const FLAG_META_KEY  = 'asvab_flag_meta';
 
 function loadFlags() {
   try { return new Set(JSON.parse(localStorage.getItem(FLAGGED_KEY) || '[]')); }
@@ -1626,16 +1630,33 @@ function saveFlags(set) {
   try { localStorage.setItem(FLAGGED_KEY, JSON.stringify([...set])); } catch(e) {}
 }
 
+function loadFlagMeta() {
+  try { return JSON.parse(localStorage.getItem(FLAG_META_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+
+function saveFlagMeta(meta) {
+  try { localStorage.setItem(FLAG_META_KEY, JSON.stringify(meta)); } catch(e) {}
+}
+
 function flagId(q) {
   return (q.section || '') + '::' + (q.q || '').substring(0, 80);
 }
 
 function toggleFlag() {
-  const q   = QUESTIONS[current];
-  const id  = flagId(q);
-  const set = loadFlags();
-  if (set.has(id)) { set.delete(id); } else { set.add(id); }
+  const q    = QUESTIONS[current];
+  const id   = flagId(q);
+  const set  = loadFlags();
+  const meta = loadFlagMeta();
+  if (set.has(id)) {
+    set.delete(id);
+    delete meta[id];
+  } else {
+    set.add(id);
+    meta[id] = { userAnswer: userAnswers[current] };
+  }
   saveFlags(set);
+  saveFlagMeta(meta);
   updateFlagBtn(set.has(id));
   updateFlaggedSplashBtn();
 }
@@ -1682,16 +1703,48 @@ function showFlaggedReview() {
   }
 
   const letters = ['A','B','C','D','E'];
+  const flagMeta = loadFlagMeta();
   flaggedQ.forEach(q => {
-    const secColor = SECTION_COLORS[q.section] || 'var(--accent)';
+    const secColor    = SECTION_COLORS[q.section] || 'var(--accent)';
+    const forcedIdx   = (q.forced != null) ? (q.opts || []).indexOf(q.forced) : -1;
+    const metaEntry   = flagMeta[q._flagId] || {};
+    const sessionAns  = (metaEntry.userAnswer !== undefined && metaEntry.userAnswer !== null) ? metaEntry.userAnswer : -1;
+    const hasSession  = sessionAns !== -1;
     const optsHTML = (q.opts || []).map((opt, i) => {
       const isCorrect = i === q.ans;
-      return `<div class="fr-opt${isCorrect ? ' correct-opt' : ''}">
+      const isForced  = q.forced != null && i === forcedIdx;
+      const isPicked  = hasSession && i === sessionAns;
+      // Determine border class — priority: correct > forced > user pick
+      let cls = '';
+      if (isCorrect) cls = ' correct-opt';
+      else if (isForced) cls = ' forced-wrong-opt';
+      else if (isPicked) cls = ' user-picked-opt';
+      // Build indicator tags
+      const tags = [];
+      if (isForced && q.forced != null) {
+        const label = isCorrect ? '⚑ YOUR ANSWER ON REAL TEST (✓)' : '⚑ YOUR ANSWER ON REAL TEST';
+        tags.push(`<span style="font-size:9px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;color:var(--accent3);white-space:nowrap">${label}</span>`);
+      }
+      if (isPicked) {
+        const label = isCorrect ? '◎ YOU CHOSE (✓)' : '◎ YOU CHOSE';
+        const col   = isCorrect ? 'var(--correct)' : 'var(--ar)';
+        tags.push(`<span style="font-size:9px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;color:${col};white-space:nowrap">${label}</span>`);
+      }
+      const indicatorHTML = tags.length
+        ? `<div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px;padding-left:8px;flex-shrink:0">${tags.join('')}</div>`
+        : '';
+      return `<div class="fr-opt${cls}">
         <div class="fr-opt-letter">${letters[i]}</div>
         <div>${opt}</div>
-        ${isCorrect ? '<div style="margin-left:auto;font-size:11px;">&#10003;</div>' : ''}
+        ${indicatorHTML}
       </div>`;
     }).join('');
+    const realBadge = q.forced != null
+      ? `<span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;padding:2px 7px;border-radius:3px;flex-shrink:0;margin-left:6px;${q.initiallyWrong ? 'background:rgba(255,61,90,0.1);color:var(--wrong);border:1px solid rgba(255,61,90,0.3)' : 'background:rgba(0,201,122,0.1);color:var(--correct);border:1px solid rgba(0,201,122,0.3)'}">${q.initiallyWrong ? '✗ REAL MISS' : '✓ REAL HIT'}</span>`
+      : '';
+    const realBanner = q.forced != null
+      ? `<div class="forced-banner ${q.initiallyWrong ? 'b-wrong' : 'b-correct'}" style="margin-bottom:10px;">${q.initiallyWrong ? '✗ Real PICAT question — you missed this on the real test' : '✓ Real PICAT question — you answered this correctly'}</div>`
+      : '';
     const passageHTML = q.passage
       ? `<div style="font-size:12px;color:var(--muted);line-height:1.6;background:var(--surface2);border-radius:4px;padding:10px 12px;margin-bottom:10px;">${q.passage}</div>` : '';
     const safeId = q._flagId.replace(/"/g, '&quot;');
@@ -1700,11 +1753,13 @@ function showFlaggedReview() {
     div.innerHTML = `
       <div class="fr-header" onclick="this.closest('.fr-item').classList.toggle('expanded')">
         <div class="fr-section" style="background:transparent;color:${secColor};border:1px solid ${secColor};">${q.section}</div>
+        ${realBadge}
         <div class="fr-q">${q.q}</div>
         <div class="fr-chevron">&#9654;</div>
       </div>
       <div class="fr-body">
         ${passageHTML}
+        ${realBanner}
         <div class="fr-opts">${optsHTML}</div>
         <div class="fr-exp">${q.exp || ''}</div>
         <button class="fr-unflag" data-flagid="${safeId}" onclick="unflagFromReview(this)">REMOVE FLAG</button>
@@ -1715,10 +1770,13 @@ function showFlaggedReview() {
 }
 
 function unflagFromReview(btn) {
-  const id  = btn.dataset.flagid;
-  const set = loadFlags();
+  const id   = btn.dataset.flagid;
+  const set  = loadFlags();
   set.delete(id);
   saveFlags(set);
+  const meta = loadFlagMeta();
+  delete meta[id];
+  saveFlagMeta(meta);
   updateFlaggedSplashBtn();
   const item = btn.closest('.fr-item');
   item.style.transition = 'opacity 0.2s';
@@ -1732,6 +1790,7 @@ function unflagFromReview(btn) {
 function clearAllFlags() {
   if (!confirm('Remove all flagged questions?')) return;
   localStorage.removeItem(FLAGGED_KEY);
+  localStorage.removeItem(FLAG_META_KEY);
   updateFlaggedSplashBtn();
   showFlaggedReview();
 }
@@ -1868,7 +1927,8 @@ function saveSessionStats(afqtPct, secC, secT) {
     Object.keys(secT).forEach(s => { sections[s] = { attempted: secT[s], correct: secC[s] || 0 }; });
     const totalAttempted = Object.values(secT).reduce((a,b) => a+b, 0);
     const totalCorrect   = Object.keys(secC).reduce((a,k) => a + (secC[k]||0), 0);
-    stored.sessions.push({ date: new Date().toISOString(), mode, sections, afqt: afqtPct, total: { attempted: totalAttempted, correct: totalCorrect } });
+    const sessionMode    = isPracticeMode ? 'practice' : mode;
+    stored.sessions.push({ date: new Date().toISOString(), mode: sessionMode, sections, afqt: afqtPct, total: { attempted: totalAttempted, correct: totalCorrect } });
     if (stored.sessions.length > 50) stored.sessions = stored.sessions.slice(-50);
     localStorage.setItem('asvab_stats', JSON.stringify(stored));
   } catch(e) {}
@@ -1887,11 +1947,13 @@ function showStats() {
   }
 
   const allSecs = ['AR','WK','PC','MK'];
-  const agg = {};
-  allSecs.forEach(s => { agg[s] = { attempted:0, correct:0 }; });
+  const agg = {}, practiceAgg = {};
+  allSecs.forEach(s => { agg[s] = { attempted:0, correct:0 }; practiceAgg[s] = { attempted:0, correct:0 }; });
   sessions.forEach(sess => {
+    const isPractSess = sess.mode === 'practice';
     Object.entries(sess.sections || {}).forEach(([s,d]) => {
       if (agg[s]) { agg[s].attempted += d.attempted; agg[s].correct += d.correct; }
+      if (isPractSess && practiceAgg[s]) { practiceAgg[s].attempted += d.attempted; practiceAgg[s].correct += d.correct; }
     });
   });
 
@@ -1908,7 +1970,7 @@ function showStats() {
     const afqtColor = latestAfqt >= 95 ? 'var(--correct)' : latestAfqt >= 80 ? 'var(--ar)' : latestAfqt >= 60 ? 'var(--accent3)' : 'var(--wrong)';
     html += `
     <div class="afqt-panel">
-      <div class="afqt-panel-title">Estimated AFQT — based on session performance</div>
+      <div class="afqt-panel-title">Estimated AFQT — timed drills &amp; practice sessions</div>
       <div style="display:flex;align-items:flex-end;gap:36px;flex-wrap:wrap">
         <div>
           <div class="afqt-score-big" style="color:${afqtColor}">${latestAfqt}<span style="font-size:32px;color:var(--muted);font-weight:400">th</span></div>
@@ -1926,13 +1988,16 @@ function showStats() {
     </div>`;
   }
 
-  html += `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:14px;text-transform:uppercase">Section Accuracy — All Time</div>`;
+  html += `<div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);margin-bottom:14px;text-transform:uppercase">Section Accuracy — All Time (Timed + Practice)</div>`;
   allSecs.forEach(s => {
     const d = agg[s];
     if (!d.attempted) return;
     const pct = Math.round((d.correct / d.attempted) * 100);
     const trend = pct >= 80 ? 'strong' : pct >= 60 ? 'ok' : 'weak';
     const trendLabel = pct >= 80 ? 'STRONG' : pct >= 60 ? 'IMPROVING' : 'NEEDS WORK';
+    const pd = practiceAgg[s];
+    const practiceNote = pd && pd.attempted
+      ? `<span style="color:rgba(52,211,153,0.7);margin-left:10px;">📖 ${pd.correct}/${pd.attempted} practice</span>` : '';
     html += `
     <div class="stat-sec-card">
       <div class="stat-sec-header">
@@ -1943,7 +2008,7 @@ function showStats() {
         </div>
       </div>
       <div class="stat-bar-track"><div class="stat-bar-fill" style="width:${pct}%;background:${secColors[s]}"></div></div>
-      <div class="stat-sec-foot">${d.correct} correct of ${d.attempted} attempted</div>
+      <div class="stat-sec-foot">${d.correct} correct of ${d.attempted} attempted${practiceNote}</div>
     </div>`;
   });
 
@@ -1955,12 +2020,14 @@ function showStats() {
     const t = sess.total || {attempted:0,correct:0};
     const acc = t.attempted ? Math.round((t.correct/t.attempted)*100) : 0;
     const afqtStr = sess.afqt != null ? `${sess.afqt}th` : '—';
+    const modeLabel = sess.mode === 'practice' ? 'PRACTICE' : sess.mode === 'full' ? 'FULL' : 'PICAT';
+    const modeColor = sess.mode === 'practice' ? '#34d399' : 'var(--muted)';
     html += `
     <div class="session-row">
       <span style="color:var(--muted)">${dateStr}</span>
-      <span style="color:var(--muted)">${sess.mode==='picat'?'PICAT':'FULL'}</span>
+      <span style="color:${modeColor}">${modeLabel}</span>
       <span>${t.correct}/${t.attempted} <span style="color:var(--muted)">(${acc}%)</span></span>
-      <span style="color:var(--accent)">${afqtStr} <span style="font-size:9px;color:var(--muted)">AFQT</span></span>
+      <span style="color:${sess.afqt != null ? 'var(--accent)' : 'var(--muted)'}">${afqtStr} <span style="font-size:9px;color:var(--muted)">${sess.afqt != null ? 'AFQT' : 'PRACTICE'}</span></span>
     </div>`;
   });
   html += `</div>`;
@@ -2301,32 +2368,72 @@ function showResults() {
   const std = {};
   Object.keys(secT).forEach(s => { std[s] = calcStandard(secQs[s], secMask[s]); });
 
-  // ── Practice mode: section accuracy only, no AFQT calculation or stat save ──
+  // ── Practice mode: compute AFQT estimate ONLY when all 4 AFQT sections are present ──
   if (isPracticeMode) {
     const totalC = Object.values(secC).reduce((a,b) => a+b, 0);
     const totalT = Object.values(secT).reduce((a,b) => a+b, 0);
     const pct    = totalT ? Math.round(totalC / totalT * 100) : 0;
     const col    = pct >= 80 ? 'var(--correct)' : pct >= 60 ? 'var(--accent3)' : 'var(--wrong)';
-    document.getElementById('resultsTitle').textContent = pct + '%';
-    document.getElementById('resultsTitle').style.color = col;
-    document.getElementById('resultsTitle').style.fontSize = 'clamp(72px,16vw,120px)';
-    document.getElementById('overallScore').textContent = 'PRACTICE SESSION — ACCURACY';
+    const AFQT_SECS     = ['AR','WK','PC','MK'];
+    const allAfqt       = AFQT_SECS.every(s => secT[s] > 0);
+    const missingSecs   = AFQT_SECS.filter(s => !secT[s]);
     const cardHTML = Object.keys(secT).map(s => `
       <div class="result-card ${s}">
         <div class="r-label">${SECTION_LABELS[s] || s}</div>
         <div class="r-score">${std[s] || '—'}</div>
         <div class="r-fraction">${secC[s]||0} / ${secT[s]} correct</div>
       </div>`).join('');
-    document.getElementById('scoringDetails').innerHTML = `
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;color:#34d399;margin-bottom:16px;padding:12px 16px;border:1px solid rgba(52,211,153,0.25);border-radius:4px;background:rgba(52,211,153,0.05)">
-        📖 &nbsp;PRACTICE SESSION &nbsp;·&nbsp; No time pressure &nbsp;·&nbsp; Not counted toward AFQT average
-      </div>
-      <div class="results-grid-afqt">${cardHTML}</div>`;
-    const msg = pct >= 80
-      ? "You're clearly absorbing the material. Keep drilling and your timed performance will follow."
-      : 'Review the missed questions and explanations below, then try a Timed Drill when you feel ready.';
-    const heading = pct >= 80 ? '✓ GREAT PRACTICE SESSION' : pct >= 60 ? 'SOLID EFFORT — KEEP REVIEWING' : 'KEEP AT IT — STUDY THE EXPLANATIONS BELOW';
-    document.getElementById('verdictBox').innerHTML = `<h3 style="color:${col}">${heading}</h3><p>${msg}</p>`;
+
+    if (allAfqt) {
+      // All 4 sections present — full AFQT estimate
+      const AR_p = std['AR'], MK_p = std['MK'];
+      const WK_p = std['WK'], PC_p = std['PC'];
+      const VE_p = (WK_p + PC_p) / 2;
+      const comp_p    = Math.round(2 * VE_p + AR_p + MK_p);
+      const afqtPct_p = compositeToPercentile(comp_p);
+      const afqtCol_p = afqtPct_p >= 95 ? 'var(--correct)' : afqtPct_p >= 80 ? 'var(--ar)' : afqtPct_p >= 60 ? 'var(--accent3)' : 'var(--wrong)';
+      document.getElementById('resultsTitle').textContent = afqtPct_p;
+      document.getElementById('resultsTitle').style.color = afqtCol_p;
+      document.getElementById('resultsTitle').style.fontSize = 'clamp(72px,16vw,120px)';
+      document.getElementById('overallScore').textContent = 'PRACTICE AFQT ESTIMATE · ' + pct + '% ACCURACY';
+      const compositeRow = `
+        <div class="composite-row" style="margin-bottom:16px">
+          <div class="cr-block"><div class="cr-label">VE × 2</div><span class="cr-val">${Math.round(2*VE_p)}</span></div>
+          <span class="cr-op">+</span>
+          <div class="cr-block"><div class="cr-label">AR</div><span class="cr-val" style="color:var(--ar)">${AR_p}</span></div>
+          <span class="cr-op">+</span>
+          <div class="cr-block"><div class="cr-label">MK</div><span class="cr-val" style="color:var(--mk)">${MK_p}</span></div>
+          <span class="cr-op">=</span>
+          <div class="cr-block cr-result"><div class="cr-label">COMPOSITE</div><span class="cr-val" style="color:${afqtCol_p}">${comp_p}</span></div>
+        </div>`;
+      document.getElementById('scoringDetails').innerHTML = `
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;color:#34d399;margin-bottom:16px;padding:12px 16px;border:1px solid rgba(52,211,153,0.25);border-radius:4px;background:rgba(52,211,153,0.05)">
+          📖 &nbsp;PRACTICE SESSION &nbsp;·&nbsp; AFQT estimated from all 4 sections
+        </div>
+        ${compositeRow}
+        <div class="results-grid-afqt">${cardHTML}</div>`;
+      const heading = pct >= 80 ? '✓ GREAT PRACTICE SESSION' : pct >= 60 ? 'SOLID EFFORT — KEEP REVIEWING' : 'KEEP AT IT — STUDY THE EXPLANATIONS BELOW';
+      const msg = pct >= 80
+        ? "You're clearly absorbing the material. Keep drilling and your timed performance will follow."
+        : 'Review the missed questions and explanations below, then try a Timed Drill when you feel ready.';
+      document.getElementById('verdictBox').innerHTML = `<h3 style="color:${col}">${heading}</h3><p>${msg}</p>`;
+      saveSessionStats(afqtPct_p, secC, secT);
+    } else {
+      // Partial — not all 4 AFQT sections practiced
+      document.getElementById('resultsTitle').textContent = pct + '%';
+      document.getElementById('resultsTitle').style.color = col;
+      document.getElementById('resultsTitle').style.fontSize = 'clamp(72px,16vw,120px)';
+      document.getElementById('overallScore').textContent = totalC + ' / ' + totalT + ' CORRECT · PRACTICE';
+      document.getElementById('scoringDetails').innerHTML = `
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;color:var(--accent3);margin-bottom:16px;padding:12px 16px;border:1px solid rgba(255,214,0,0.25);border-radius:4px;background:rgba(255,214,0,0.04)">
+          ⚠ &nbsp;No AFQT estimate — you need all 4 sections. Still missing: <strong>${missingSecs.join(', ')}</strong>
+        </div>
+        <div class="results-grid-afqt">${cardHTML}</div>`;
+      const heading = pct >= 80 ? '✓ STRONG SECTION DRILL' : pct >= 60 ? 'GOOD EFFORT — KEEP DRILLING' : 'NEEDS WORK — REVIEW EXPLANATIONS';
+      document.getElementById('verdictBox').innerHTML = `<h3 style="color:${col}">${heading}</h3><p>Practice all 4 AFQT sections (AR, WK, PC, MK) together to see your estimated score.</p>`;
+      saveSessionStats(null, secC, secT);
+    }
+
     const list = document.getElementById('reviewList');
     list.innerHTML = '';
     QUESTIONS.forEach((q, i) => {
@@ -2336,6 +2443,49 @@ function showResults() {
       const preview = q.q.length > 70 ? q.q.substring(0, 70) + '…' : q.q;
       div.innerHTML = `<div class="ri-icon">${correct ? '✓' : '✗'}</div><div class="ri-q">${preview}</div><div class="ri-tag ${q.section}">${q.section}</div>`;
       list.appendChild(div);
+    });
+    return;
+  }
+
+  // ── Timed/Full mode: guard against partial section drill ──
+  const AFQT_SECS_T   = ['AR','WK','PC','MK'];
+  const allAfqtT      = AFQT_SECS_T.every(s => secT[s] > 0);
+  const missingSecsT  = AFQT_SECS_T.filter(s => !secT[s]);
+
+  if (!allAfqtT) {
+    // Partial drill — show section scores only, no composite
+    const totalC2 = Object.values(secC).reduce((a,b)=>a+b,0);
+    const totalT2 = Object.values(secT).reduce((a,b)=>a+b,0);
+    const pct2  = totalT2 ? Math.round(totalC2/totalT2*100) : 0;
+    const col2  = pct2 >= 80 ? 'var(--correct)' : pct2 >= 60 ? 'var(--accent3)' : 'var(--wrong)';
+    const cardHTML2 = Object.keys(secT).map(s => `
+      <div class="result-card ${s}">
+        <div class="r-label">${SECTION_LABELS[s]||s}</div>
+        <div class="r-score">${std[s]||'—'}</div>
+        <div class="r-fraction">${secC[s]||0} / ${secT[s]} correct</div>
+      </div>`).join('');
+    document.getElementById('resultsTitle').textContent = pct2 + '%';
+    document.getElementById('resultsTitle').style.color = col2;
+    document.getElementById('resultsTitle').style.fontSize = 'clamp(72px,16vw,120px)';
+    document.getElementById('overallScore').textContent = totalC2 + ' / ' + totalT2 + ' CORRECT';
+    document.getElementById('scoringDetails').innerHTML = `
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;color:var(--accent3);margin-bottom:16px;padding:12px 16px;border:1px solid rgba(255,214,0,0.25);border-radius:4px;background:rgba(255,214,0,0.04)">
+        ⚠ &nbsp;No AFQT estimate — you need all 4 sections. Still missing: <strong>${missingSecsT.join(', ')}</strong>
+      </div>
+      <div class="results-grid-afqt">${cardHTML2}</div>`;
+    const heading2 = pct2 >= 80 ? '✓ STRONG SECTION DRILL' : pct2 >= 60 ? 'GOOD EFFORT — KEEP DRILLING' : 'NEEDS WORK — REVIEW EXPLANATIONS';
+    document.getElementById('verdictBox').innerHTML = `<h3 style="color:${col2}">${heading2}</h3><p>Include all 4 AFQT sections (AR, WK, PC, MK) in your drill to see an estimated percentile score.</p>`;
+    saveSessionStats(null, secC, secT);
+    const list2 = document.getElementById('reviewList');
+    list2.innerHTML = '';
+    QUESTIONS.forEach((q, i) => {
+      const correct = userAnswers[i] === q.ans;
+      const div = document.createElement('div');
+      div.className = `review-item ${correct ? 'ok' : 'bad'}`;
+      const preview = q.q.length > 70 ? q.q.substring(0, 70) + '…' : q.q;
+      const isFlagged = loadFlags().has(flagId(q));
+      div.innerHTML = `<div class="ri-icon">${correct?'&#10003;':'&#10007;'}</div><div class="ri-q">${preview}</div>${isFlagged?'<span class="ri-flag" title="Flagged for review">&#x2691;</span>':''}<div class="ri-tag ${q.section}">${q.section}</div>`;
+      list2.appendChild(div);
     });
     return;
   }
