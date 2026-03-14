@@ -2175,8 +2175,9 @@ function showStats() {
   allSecs.forEach(s => { agg[s] = { attempted:0, correct:0 }; practiceAgg[s] = { attempted:0, correct:0 }; });
   sessions.forEach(sess => {
     const isPractSess = sess.mode === 'practice';
+    const isRealTest  = sess.mode === 'realtest'; // recall data — exclude from accuracy bars
     Object.entries(sess.sections || {}).forEach(([s,d]) => {
-      if (agg[s]) { agg[s].attempted += d.attempted; agg[s].correct += d.correct; }
+      if (!isRealTest && agg[s]) { agg[s].attempted += d.attempted; agg[s].correct += d.correct; }
       if (isPractSess && practiceAgg[s]) { practiceAgg[s].attempted += d.attempted; practiceAgg[s].correct += d.correct; }
     });
   });
@@ -2197,15 +2198,15 @@ function showStats() {
       <div class="afqt-panel-title">Estimated AFQT — timed drills &amp; practice sessions</div>
       <div style="display:flex;align-items:flex-end;gap:36px;flex-wrap:wrap">
         <div>
-          <div class="afqt-score-big" style="color:${afqtColor}">${latestAfqt}<span style="font-size:32px;color:var(--muted);font-weight:400">th</span></div>
+          <div class="afqt-score-big" style="color:${afqtColor}">${latestAfqt}<span style="font-size:32px;color:var(--muted);font-weight:400">${ordSuffix(latestAfqt)}</span></div>
           <div class="afqt-sub">LAST SESSION</div>
         </div>
         <div style="padding-bottom:6px">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:700;color:var(--muted)">${avgAfqt}th</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:700;color:var(--muted)">${avgAfqt}${ordSuffix(avgAfqt)}</div>
           <div class="afqt-sub">${afqtSessions.length}-SESSION AVG</div>
         </div>
         <div style="padding-bottom:6px">
-          <div style="font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:700;color:var(--correct)">${bestAfqt}th</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:700;color:var(--correct)">${bestAfqt}${ordSuffix(bestAfqt)}</div>
           <div class="afqt-sub">PERSONAL BEST</div>
         </div>
       </div>
@@ -2287,7 +2288,7 @@ function showStats() {
       // Completed session row
       const t = sess.total || {attempted:0,correct:0};
       const acc = t.attempted ? Math.round((t.correct/t.attempted)*100) : 0;
-      const afqtStr = sess.afqt != null ? `${sess.afqt}th` : '—';
+      const afqtStr = sess.afqt != null ? `${sess.afqt}${ordSuffix(sess.afqt)}` : '—';
       const modeLabel = sess.mode === 'practice' ? 'PRACTICE' : sess.mode === 'full' ? 'FULL' : sess.mode === 'realtest' ? 'REAL TEST' : 'PICAT';
       const modeColor = sess.mode === 'practice' ? '#34d399' : sess.mode === 'realtest' ? 'var(--accent3)' : 'var(--muted)';
       html += `
@@ -2584,6 +2585,18 @@ function nextQuestion() {
   }
 }
 
+// ── ORDINAL SUFFIX ──
+function ordSuffix(n) {
+  const v = n % 100;
+  if (v >= 11 && v <= 13) return 'th';
+  switch (n % 10) {
+    case 1: return 'st';
+    case 2: return 'nd';
+    case 3: return 'rd';
+    default: return 'th';
+  }
+}
+
 // ── SCORING ENGINE ──
 //
 // Standard score pipeline (calibrated to DoD 1997 norms):
@@ -2656,7 +2669,8 @@ function showResults() {
     const AFQT_SECS     = ['AR','WK','PC','MK'];
     const allAfqt       = AFQT_SECS.every(s => secT[s] > 0);
     const missingSecs   = AFQT_SECS.filter(s => !secT[s]);
-    const cardHTML = Object.keys(secT).map(s => `
+    const SEC_DISPLAY_ORDER = ['AR','WK','PC','MK','GS'];
+    const cardHTML = SEC_DISPLAY_ORDER.filter(s => secT[s]).map(s => `
       <div class="result-card ${s}">
         <div class="r-label">${SECTION_LABELS[s] || s}</div>
         <div class="r-score">${std[s] || '—'}</div>
@@ -2801,7 +2815,14 @@ function showResults() {
 
     document.getElementById('verdictBox').innerHTML = `<h3 style="color:${recallCol}">${verdictTitle}</h3><p>${verdictMsg}</p>`;
 
-    saveSessionStats(null, secC, secT);
+    // Save recall-based counts (not standard correct/wrong) so session history
+    // matches the score displayed on the results screen.
+    const recallSecC = {}, recallSecT = {};
+    Object.keys(secRecall).forEach(s => {
+      recallSecC[s] = secRecall[s].recalled;
+      recallSecT[s] = secRecall[s].total;
+    });
+    saveSessionStats(null, recallSecC, recallSecT);
 
     const rtList = document.getElementById('reviewList');
     rtList.innerHTML = '';
@@ -2830,7 +2851,8 @@ function showResults() {
     const totalT2 = Object.values(secT).reduce((a,b)=>a+b,0);
     const pct2  = totalT2 ? Math.round(totalC2/totalT2*100) : 0;
     const col2  = pct2 >= 80 ? 'var(--correct)' : pct2 >= 60 ? 'var(--accent3)' : 'var(--wrong)';
-    const cardHTML2 = Object.keys(secT).map(s => `
+    const SEC_DISPLAY_ORDER2 = ['AR','WK','PC','MK','GS'];
+    const cardHTML2 = SEC_DISPLAY_ORDER2.filter(s => secT[s]).map(s => `
       <div class="result-card ${s}">
         <div class="r-label">${SECTION_LABELS[s]||s}</div>
         <div class="r-score">${std[s]||'—'}</div>
@@ -2877,13 +2899,13 @@ function showResults() {
     color='var(--correct)'; title='✓ VERIFIED — 95TH PERCENTILE';
     msg="Your performance holds up. You're thinking at the 95th percentile level. The verification is a formality—stay calm, trust your process, and you'll confirm your score.";
   } else if (afqtPct >= 90) {
-    color='var(--ar)'; title=`STRONG — ${afqtPct}TH PERCENTILE`;
+    color='var(--ar)'; title=`STRONG — ${afqtPct}${ordSuffix(afqtPct).toUpperCase()} PERCENTILE`;
     msg="Very close to your target. A few more correct answers gets you there. Review the missed questions below.";
   } else if (afqtPct >= 60) {
-    color='var(--accent3)'; title=`${afqtPct}TH PERCENTILE — REVIEW NEEDED`;
+    color='var(--accent3)'; title=`${afqtPct}${ordSuffix(afqtPct).toUpperCase()} PERCENTILE — REVIEW NEEDED`;
     msg="Solid foundation, but a few concept gaps could cost you under test pressure. Focus on the questions you missed below and drill those specific skills before your verification.";
   } else {
-    color='var(--wrong)'; title=`${afqtPct}TH PERCENTILE — MORE PREP NEEDED`;
+    color='var(--wrong)'; title=`${afqtPct}${ordSuffix(afqtPct).toUpperCase()} PERCENTILE — MORE PREP NEEDED`;
     msg="Some core concepts need reinforcement. The good news: your original test wasn't a fluke—these new questions hit your weak spots intentionally. Drill the explanations below.";
   }
 
