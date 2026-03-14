@@ -341,6 +341,42 @@
   }
   .rm-close-btn:hover { border-color: var(--muted); color: var(--text); }
 
+  /* ── CUSTOM CONTEXT MENU ── */
+  #customContextMenu {
+    display: none;
+    position: fixed;
+    z-index: 99998;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 0;
+    min-width: 160px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    font-family: 'Barlow', sans-serif;
+    font-size: 13px;
+  }
+  #customContextMenu .ctx-item {
+    padding: 8px 16px;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.1s;
+  }
+  #customContextMenu .ctx-item:hover {
+    background: var(--border);
+    color: var(--accent);
+  }
+  #customContextMenu .ctx-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+  #customContextMenu .ctx-item.disabled {
+    color: var(--muted);
+    cursor: default;
+    pointer-events: none;
+  }
+
   /* ── DEVTOOLS LOCKOUT OVERLAY ── */
   #dtOverlay {
     display: none;
@@ -1110,8 +1146,38 @@ window.IS_DEV = location.protocol === 'file:' ||
 (function(){
   'use strict';
   if (window.IS_DEV) return; // dev mode: all protections disabled
-  // Block right-click
-  document.addEventListener('contextmenu', function(e){ e.preventDefault(); e.stopPropagation(); }, true);
+
+  // Custom context menu — block native menu immediately, wire up UI after DOM ready
+  document.addEventListener('contextmenu', function(e) { e.preventDefault(); }, true);
+  document.addEventListener('DOMContentLoaded', function() {
+    var ctxMenu = document.getElementById('customContextMenu');
+    if (!ctxMenu) return;
+    function hideCtx() { ctxMenu.style.display = 'none'; }
+    document.addEventListener('contextmenu', function(e) {
+      var x = e.clientX, y = e.clientY;
+      ctxMenu.style.display = 'block';
+      var mw = ctxMenu.offsetWidth || 160, mh = ctxMenu.offsetHeight || 120;
+      ctxMenu.style.left = (x + mw > window.innerWidth  ? window.innerWidth  - mw - 4 : x) + 'px';
+      ctxMenu.style.top  = (y + mh > window.innerHeight ? window.innerHeight - mh - 4 : y) + 'px';
+    });
+    document.addEventListener('click', hideCtx);
+    document.addEventListener('scroll', hideCtx);
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') hideCtx(); });
+    document.getElementById('ctx-copy').addEventListener('click', function() {
+      var sel = window.getSelection();
+      if (sel && sel.toString()) document.execCommand('copy');
+      hideCtx();
+    });
+    document.getElementById('ctx-selectall').addEventListener('click', function() {
+      document.execCommand('selectAll');
+      hideCtx();
+    });
+    document.getElementById('ctx-print').addEventListener('click', function() {
+      hideCtx();
+      setTimeout(function(){ window.print(); }, 100);
+    });
+  });
+
   // Block devtools keyboard shortcuts
   document.addEventListener('keydown', function(e){
     const k = e.key ? e.key.toLowerCase() : '';
@@ -3337,6 +3403,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+<!-- CUSTOM CONTEXT MENU -->
+<div id="customContextMenu">
+  <div class="ctx-item" id="ctx-copy">Copy</div>
+  <div class="ctx-item" id="ctx-selectall">Select All</div>
+  <div class="ctx-divider"></div>
+  <div class="ctx-item" id="ctx-print">Print</div>
+</div>
+
 <!-- DEVTOOLS LOCKOUT OVERLAY -->
 <div id="dtOverlay">
   <div class="dt-icon">🔒</div>
