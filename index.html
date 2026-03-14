@@ -2462,7 +2462,7 @@ function renderQuestion() {
   if (diffEl) {
     const d = q.diff || 1;
     let badge = diffLabels[d];
-    if (q.forced !== null) {
+    if (mode === 'realtest' && q.forced !== null) {
       if (q.initiallyWrong) {
         badge += (badge ? ' ' : '') + '✗ REAL MISS';
       } else {
@@ -2470,7 +2470,7 @@ function renderQuestion() {
       }
     }
     diffEl.textContent = badge;
-    diffEl.style.color = q.initiallyWrong ? 'var(--wrong)' : (diffColors[d] || 'var(--muted)');
+    diffEl.style.color = (mode === 'realtest' && q.initiallyWrong) ? 'var(--wrong)' : (diffColors[d] || 'var(--muted)');
   }
 
   const sectionTotal = QUESTIONS.filter(q2 => q2.section === q.section).length;
@@ -2508,11 +2508,26 @@ function renderQuestion() {
 }
 
 function selectAnswer(idx) {
-  if (answered) return;
-  answered = true;
-
   const q = QUESTIONS[current];
   const opts = document.querySelectorAll('.option');
+
+  // ── Full ASVAB Simulation: re-selectable until Next is clicked ──
+  if (mode === 'full') {
+    opts.forEach(o => o.classList.remove('selected'));
+    opts[idx].classList.add('selected');
+    userAnswers[current] = idx;
+    document.getElementById('nextBtn').classList.add('show');
+    const flagBtn = document.getElementById('flagBtn');
+    if (flagBtn) {
+      flagBtn.style.display = '';
+      updateFlagBtn(loadFlags().has(flagId(q)));
+    }
+    saveActiveSession();
+    return;
+  }
+
+  if (answered) return;
+  answered = true;
 
   userAnswers[current] = idx;
   opts.forEach(o => o.classList.add('locked'));
@@ -2520,17 +2535,14 @@ function selectAnswer(idx) {
 
   let forcedNote = '';
 
-  if (q.forced !== null) {
-    // ── Forced question: target is initialUserAnswer ──
-    // The user should try to match what they answered on the real PICAT.
-    // If they pick something else, highlight the initialUserAnswer option.
+  if (q.forced !== null && mode === 'realtest') {
+    // ── Real Test Replay only: target is initialUserAnswer (recall-based) ──
     const forcedIdx = q.opts.indexOf(q.forced);
 
     if (forcedIdx !== -1) {
       if (idx === forcedIdx) {
         // User matched initialUserAnswer — always show green banner regardless of correctness
         if (idx === q.ans) {
-          // initialUserAnswer was also the correct answer
           opts[idx].classList.add('correct');
         } else {
           // initialUserAnswer was wrong on the real test; show pick in gold only, don't reveal correct
@@ -2547,12 +2559,12 @@ function selectAnswer(idx) {
         forcedNote = `<div class="forced-banner b-info">⚑ Your real PICAT answer was <strong>${q.forced}</strong> — highlighted above${realWasCorrect ? ' (which was correct ✓)' : ' (also incorrect ✗)'}.</div>`;
       }
     } else {
-      // Fallback: forced text not found in opts (shouldn't happen)
+      // Fallback: forced text not found in opts
       opts[idx].classList.add(idx === q.ans ? 'correct' : 'wrong');
       if (idx !== q.ans) opts[q.ans].classList.add('correct');
     }
   } else {
-    // ── Standard question ──
+    // ── Standard scoring: PICAT drill, practice, and all other modes ──
     opts[idx].classList.add(idx === q.ans ? 'correct' : 'wrong');
     if (idx !== q.ans) opts[q.ans].classList.add('correct');
   }
@@ -2574,6 +2586,10 @@ function selectAnswer(idx) {
 }
 
 function nextQuestion() {
+  // Full mode: finalize the pending selection and run adaptive logic before advancing
+  if (mode === 'full' && userAnswers[current] !== null) {
+    adaptAfterAnswer(userAnswers[current] === QUESTIONS[current].ans);
+  }
   current++;
   if (current >= QUESTIONS.length) {
     clearInterval(timerInterval);
