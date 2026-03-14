@@ -231,6 +231,147 @@
     animation: fadeUp 0.6s 1.45s forwards;
   }
 
+  /* ── ACCESS CODE MODAL ── */
+  #replayModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(4px);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .replay-modal-box {
+    background: var(--surface);
+    border: 1px solid rgba(255,214,0,0.3);
+    border-radius: 8px;
+    padding: 36px 32px 28px;
+    max-width: 400px;
+    width: 100%;
+  }
+  .rm-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--accent3);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .replay-modal-box h3 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+    line-height: 1;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  .rm-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 24px;
+  }
+  .replay-modal-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.15s;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+  }
+  .replay-modal-input:focus { border-color: var(--accent3); }
+  @keyframes rm-shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-7px); }
+    40%      { transform: translateX(7px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+  .replay-modal-input.shake { animation: rm-shake 0.4s ease; }
+  .rm-error {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    min-height: 16px;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .rm-actions { display: flex; gap: 10px; }
+  .rm-unlock-btn {
+    flex: 1;
+    background: var(--accent3);
+    color: var(--bg);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .rm-unlock-btn:hover { opacity: 0.85; }
+  .rm-close-btn {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .rm-close-btn:hover { border-color: var(--muted); color: var(--text); }
+
+  /* ── DEVTOOLS LOCKOUT OVERLAY ── */
+  #dtOverlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: var(--bg);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+  }
+  #dtOverlay .dt-icon { font-size: 48px; margin-bottom: 20px; }
+  #dtOverlay h2 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 42px;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--wrong);
+    margin-bottom: 12px;
+  }
+  #dtOverlay p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    line-height: 1.8;
+    max-width: 340px;
+  }
+
   /* ── QUIZ ── */
   #quiz { display: none; min-height: 100vh; padding: 0; }
 
@@ -957,6 +1098,36 @@
 </style>
 </head>
 <body>
+<!-- EARLY PROTECTION: runs before page renders -->
+<script>
+// IS_DEV is set here first so every subsequent script block shares the same value.
+// Dev mode is automatic: any local file:// open or localhost server counts as dev.
+// When deployed on a real domain (https://...) protections are active.
+window.IS_DEV = location.protocol === 'file:' ||
+                location.hostname === 'localhost' ||
+                location.hostname === '127.0.0.1' ||
+                new URLSearchParams(location.search).has('dev');
+(function(){
+  'use strict';
+  if (window.IS_DEV) return; // dev mode: all protections disabled
+  // Block right-click
+  document.addEventListener('contextmenu', function(e){ e.preventDefault(); e.stopPropagation(); }, true);
+  // Block devtools keyboard shortcuts
+  document.addEventListener('keydown', function(e){
+    const k = e.key ? e.key.toLowerCase() : '';
+    // F12
+    if (k === 'f12') { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+    // Ctrl/Cmd + Shift + I / J / C / K / M (inspector, console, etc.)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && 'ijckm'.includes(k)) { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+    // Ctrl/Cmd + U (view source)
+    if ((e.ctrlKey || e.metaKey) && k === 'u') { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+    // Ctrl/Cmd + S (save as)
+    if ((e.ctrlKey || e.metaKey) && k === 's') { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+    // Ctrl/Cmd + P (print)
+    if ((e.ctrlKey || e.metaKey) && k === 'p') { e.preventDefault(); e.stopImmediatePropagation(); return false; }
+  }, true);
+})();
+</script>
 
 <!-- SPLASH -->
 <div id="splash" class="screen">
@@ -1073,7 +1244,7 @@
     <div class="mode-toggle">
       <button id="modeDrillBtn" class="mode-pill drill-active" onclick="setDrillMode('drill')">⏱&nbsp; TIMED DRILL</button>
       <button id="modePracticeBtn" class="mode-pill" onclick="setDrillMode('practice')">📖&nbsp; PRACTICE MODE</button>
-      <button id="modeRealtestBtn" class="mode-pill" onclick="setDrillMode('realtest')">⚑&nbsp; REPLAY TEST</button>
+      <button id="modeRealtestBtn" class="mode-pill" style="display:none" onclick="setDrillMode('realtest')">⚑&nbsp; REPLAY TEST</button>
     </div>
     <div id="modeDesc" class="mode-desc">Countdown timer · adaptive difficulty · AFQT percentile estimated at session end</div>
     <button class="start-btn" id="launchBtn" style="opacity:1;animation:none;margin-top:20px;width:100%" onclick="launchCustomQuiz()">BEGIN DRILL →</button>
@@ -1584,6 +1755,7 @@ function showCategorySelect() {
   showScreen('category-select');
   renderCatTiles();
   updateCatSummary();
+  applyReplayAccess();
 }
 
 function renderCatTiles() {
@@ -3031,12 +3203,164 @@ function migrateOldSaves() {
   localStorage.removeItem(PRACTICE_KEY);
 }
 
+// ── DEV MODE ──
+// Activate by adding ?dev to the URL, e.g. index.html?dev
+// IS_DEV is set by the early script block at the top of <body> — do not redefine it here.
+// const IS_DEV is intentionally omitted; use the global window.IS_DEV set at page start.
+
+// ── DEVTOOLS DETECTION ──
+(function setupDTDetection(){
+  if (IS_DEV) return;
+  const overlay = document.getElementById('dtOverlay');
+  if (!overlay) return;
+
+  let _triggered = false;
+
+  // Method 1: window size delta (docked devtools)
+  function sizeCheck() {
+    return (window.outerWidth  - window.innerWidth)  > 160 ||
+           (window.outerHeight - window.innerHeight) > 160;
+  }
+
+  // Method 2: debugger timing (catches undocked/separate-window devtools)
+  function timingCheck() {
+    const t = performance.now();
+    // eslint-disable-next-line no-debugger
+    debugger; // pauses only when devtools is open
+    return (performance.now() - t) > 80;
+  }
+
+  function check() {
+    const open = sizeCheck() || timingCheck();
+    if (open) {
+      _triggered = true;
+      overlay.style.display = 'flex';
+    } else if (_triggered) {
+      _triggered = false;
+      overlay.style.display = 'none';
+    }
+  }
+
+  // Run once after DOM ready, then on a tight interval
+  document.addEventListener('DOMContentLoaded', check);
+  setInterval(check, 800);
+  window.addEventListener('resize', check);
+})();
+
+// ── REPLAY ACCESS ──
+// Access code: RELIE  (stored as double-base64 to avoid plaintext in source)
+const REPLAY_ACCESS_KEY  = 'asvab_replay_access';
+const REPLAY_SNOOZE_KEY  = 'asvab_replay_snooze'; // set when user clicks Close
+const _rk = 'VWtWTVNVVT0='; // btoa(btoa('RELIE'))
+
+function hasReplayAccess() {
+  try {
+    const v = localStorage.getItem(REPLAY_ACCESS_KEY);
+    return !!(v && parseInt(v, 10) > Date.now());
+  } catch(e) { return false; }
+}
+
+function isReplayModalSnoozed() {
+  if (IS_DEV) return false; // dev mode: never snoozed — modal always shows
+  try {
+    const v = localStorage.getItem(REPLAY_SNOOZE_KEY);
+    return !!(v && parseInt(v, 10) > Date.now());
+  } catch(e) { return false; }
+}
+
+function grantReplayAccess() {
+  try {
+    localStorage.setItem(REPLAY_ACCESS_KEY, String(Date.now() + 30 * 24 * 60 * 60 * 1000));
+    localStorage.removeItem(REPLAY_SNOOZE_KEY); // clear any snooze when access is granted
+  } catch(e) {}
+}
+
+function _checkReplayCode(input) {
+  try { return btoa(btoa(input.trim().toUpperCase())) === _rk; } catch(e) { return false; }
+}
+
+function applyReplayAccess() {
+  const btn = document.getElementById('modeRealtestBtn');
+  if (btn) btn.style.display = hasReplayAccess() ? '' : 'none';
+}
+
+function showReplayModal() {
+  const modal = document.getElementById('replayModal');
+  if (!modal) return;
+  document.getElementById('replayCodeInput').value = '';
+  const errEl = document.getElementById('replayCodeError');
+  errEl.textContent = '';
+  errEl.style.color = 'var(--wrong)';
+  modal.style.display = 'flex';
+  setTimeout(() => document.getElementById('replayCodeInput').focus(), 80);
+}
+
+function dismissReplayModal() {
+  // In production: snooze for 2 weeks when the user explicitly closes.
+  // In dev mode: never snooze so the modal re-shows on every load.
+  if (!IS_DEV) {
+    try { localStorage.setItem(REPLAY_SNOOZE_KEY, String(Date.now() + 14 * 24 * 60 * 60 * 1000)); } catch(e) {}
+  }
+  document.getElementById('replayModal').style.display = 'none';
+}
+
+function submitReplayCode() {
+  const val = document.getElementById('replayCodeInput').value;
+  if (_checkReplayCode(val)) {
+    grantReplayAccess();
+    applyReplayAccess();
+    const errEl = document.getElementById('replayCodeError');
+    errEl.style.color = 'var(--correct)';
+    errEl.textContent = '\u2713 ACCESS GRANTED \u2014 REPLAY TEST UNLOCKED';
+    setTimeout(() => dismissReplayModal(), 1400);
+  } else {
+    const errEl = document.getElementById('replayCodeError');
+    errEl.style.color = 'var(--wrong)';
+    errEl.textContent = '\u2717 INVALID ACCESS CODE';
+    const input = document.getElementById('replayCodeInput');
+    input.classList.remove('shake');
+    void input.offsetWidth;
+    input.classList.add('shake');
+  }
+}
+
 // Run on page load
 document.addEventListener('DOMContentLoaded', () => {
   migrateOldSaves();
   checkResumeBanner();
   updateFlaggedSplashBtn();
+  applyReplayAccess();
+  // Dev mode: always show modal so the access flow can be tested.
+  // Production: show only when access hasn't been granted and isn't snoozed.
+  if (IS_DEV || (!hasReplayAccess() && !isReplayModalSnoozed())) {
+    showReplayModal();
+  }
 });
 </script>
+<!-- DEVTOOLS LOCKOUT OVERLAY -->
+<div id="dtOverlay">
+  <div class="dt-icon">🔒</div>
+  <h2>Access Restricted</h2>
+  <p>Developer tools are not permitted.<br>Close DevTools to continue.</p>
+</div>
+
+<!-- REPLAY ACCESS MODAL -->
+<div id="replayModal" role="dialog" aria-modal="true" aria-labelledby="rmTitle">
+  <div class="replay-modal-box">
+    <div class="rm-eyebrow">▶ RESTRICTED MODE</div>
+    <h3 id="rmTitle">Access<br><span style="color:var(--accent3)">Code</span></h3>
+    <p class="rm-sub">This mode is restricted.<br>Enter your access code to unlock it, or close to continue.</p>
+    <input id="replayCodeInput" class="replay-modal-input" type="password" maxlength="12"
+      placeholder="· · · · ·"
+      onkeydown="if(event.key==='Enter')submitReplayCode()"
+      autocomplete="off" spellcheck="false" />
+    <div id="replayCodeError" class="rm-error"></div>
+    <div class="rm-actions">
+      <button class="rm-unlock-btn" onclick="submitReplayCode()">UNLOCK →</button>
+      <button class="rm-close-btn" onclick="dismissReplayModal()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
