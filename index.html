@@ -1261,9 +1261,227 @@
     .section-tag { font-size: 9px; padding: 3px 7px; }
     #sessionModeBadge { display: none !important; }
   }
+
+  /* ── DISCLAIMER MODAL ── */
+  #disclaimerOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  #disclaimerOverlay.hidden { display: none; }
+  #disclaimerBox {
+    background: #111318;
+    border: 1px solid #1e2330;
+    border-top: 3px solid #ff3d5a;
+    border-radius: 10px;
+    max-width: 640px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 36px 36px 32px;
+    position: relative;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+  }
+  #disclaimerBox::-webkit-scrollbar { width: 4px; }
+  #disclaimerBox::-webkit-scrollbar-track { background: transparent; }
+  #disclaimerBox::-webkit-scrollbar-thumb { background: #1e2330; border-radius: 2px; }
+  .disc-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: #ff3d5a;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .disc-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+    color: #e8eaf0;
+    margin-bottom: 20px;
+    line-height: 1.1;
+  }
+  .disc-section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    color: #5a6070;
+    text-transform: uppercase;
+    margin: 18px 0 6px;
+  }
+  .disc-body {
+    font-size: 13px;
+    color: #a0a8b8;
+    line-height: 1.75;
+    margin-bottom: 4px;
+  }
+  .disc-body strong { color: #e8eaf0; font-weight: 600; }
+  .disc-divider {
+    border: none;
+    border-top: 1px solid #1e2330;
+    margin: 20px 0;
+  }
+  .disc-acknowledge {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: rgba(255,61,90,0.06);
+    border: 1px solid rgba(255,61,90,0.2);
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin: 22px 0 20px;
+    cursor: pointer;
+  }
+  .disc-acknowledge:hover { background: rgba(255,61,90,0.1); }
+  #discCheck {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    accent-color: #ff3d5a;
+    cursor: pointer;
+  }
+  .disc-ack-label {
+    font-size: 12px;
+    color: #c0c8d8;
+    line-height: 1.6;
+    cursor: pointer;
+    user-select: none;
+  }
+  .disc-ack-label strong { color: #e8eaf0; }
+  .disc-btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  #discAcceptBtn {
+    flex: 2;
+    padding: 13px 20px;
+    background: #ff3d5a;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    opacity: 0.45;
+    pointer-events: none;
+  }
+  #discAcceptBtn.ready {
+    opacity: 1;
+    pointer-events: all;
+  }
+  #discAcceptBtn.ready:hover { background: #ff1a3a; transform: translateY(-1px); }
+  #discDeclineBtn {
+    flex: 1;
+    padding: 13px 20px;
+    background: transparent;
+    color: #5a6070;
+    border: 1px solid #1e2330;
+    border-radius: 5px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  #discDeclineBtn:hover { border-color: #5a6070; color: #a0a8b8; }
+  .disc-footer {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: #3a4050;
+    letter-spacing: 1px;
+    text-align: center;
+    margin-top: 18px;
+    line-height: 1.7;
+  }
+  @media (max-width: 480px) {
+    #disclaimerBox { padding: 24px 20px 22px; }
+    .disc-title { font-size: 22px; }
+    .disc-btn-row { flex-direction: column; }
+  }
 </style>
 </head>
 <body>
+<!-- DISCLAIMER / TERMS MODAL -->
+<div id="disclaimerOverlay">
+  <div id="disclaimerBox">
+    <div class="disc-badge">⚠ Important Notice — Read Before Continuing</div>
+    <div class="disc-title">Terms of Use Disclaimer</div>
+
+    <div class="disc-section-label">No Score Guarantee</div>
+    <p class="disc-body">
+      <strong>ASVAB SIM makes absolutely no guarantee, promise, or representation</strong> that use of this
+      application will result in any specific ASVAB score, AFQT percentile, or military enlistment outcome —
+      including but not limited to a 95th-percentile or higher AFQT score. Individual results vary based on
+      prior knowledge, test preparation, test-day conditions, and many other factors entirely outside the
+      control of this application.
+    </p>
+
+    <div class="disc-section-label">Educational Tool Only — Not Official</div>
+    <p class="disc-body">
+      This application is an <strong>independent, unofficial study and practice tool</strong>. It is not
+      affiliated with, endorsed by, sponsored by, or connected to the U.S. Department of Defense (DoD),
+      the Military Entrance Processing Command (MEPCOM), any branch of the U.S. Armed Forces, or any
+      official ASVAB testing program. The actual ASVAB is a registered trademark of the United States
+      Government. Practice questions and explanations provided here are for educational purposes only
+      and may not reflect the exact content, format, or difficulty of the official exam.
+    </p>
+
+    <div class="disc-section-label">Limitation of Liability</div>
+    <p class="disc-body">
+      To the fullest extent permitted by applicable law, the creators and operators of ASVAB SIM shall
+      <strong>not be liable</strong> for any direct, indirect, incidental, special, consequential, or punitive
+      damages arising from your use of — or inability to use — this application, including any reliance
+      on scores, projections, or study recommendations presented herein. This includes, without limitation,
+      any failure to achieve a desired military enlistment score or occupational qualification.
+    </p>
+
+    <div class="disc-section-label">Accuracy of Content</div>
+    <p class="disc-body">
+      While reasonable efforts are made to ensure the accuracy of practice questions and explanations,
+      <strong>no warranty of accuracy, completeness, or fitness for a particular purpose is made</strong>.
+      Content may contain errors or may become outdated as the official ASVAB evolves. Always verify
+      information against official study materials.
+    </p>
+
+    <hr class="disc-divider">
+
+    <label class="disc-acknowledge" for="discCheck">
+      <input type="checkbox" id="discCheck" onchange="discToggle(this)">
+      <span class="disc-ack-label">
+        I have read and understood this disclaimer. I acknowledge that <strong>ASVAB SIM does not
+        guarantee any specific score or outcome</strong>, that this is an unofficial educational tool,
+        and that I am using this application <strong>entirely at my own discretion and risk</strong>.
+      </span>
+    </label>
+
+    <div class="disc-btn-row">
+      <button id="discAcceptBtn" onclick="discAccept()">I Agree — Enter App</button>
+      <button id="discDeclineBtn" onclick="discDecline()">Decline</button>
+    </div>
+
+    <div class="disc-footer">
+      ASVAB SIM &nbsp;·&nbsp; UNOFFICIAL PRACTICE TOOL &nbsp;·&nbsp; NOT AFFILIATED WITH DOD OR MEPCOM<br>
+      BY CLICKING "I AGREE" YOU CONFIRM YOU HAVE READ AND ACCEPT THESE TERMS
+    </div>
+  </div>
+</div>
+
 <!-- EARLY PROTECTION: runs before page renders -->
 <script>
 // IS_DEV is set here first so every subsequent script block shares the same value.
@@ -1273,12 +1491,43 @@ window.IS_DEV = location.protocol === 'file:' ||
                 location.hostname === 'localhost' ||
                 location.hostname === '127.0.0.1' ||
                 new URLSearchParams(location.search).has('dev');
+  // ── DISCLAIMER LOGIC (always runs, outside dev-mode guard) ──
+  function discToggle(cb) {
+    var btn = document.getElementById('discAcceptBtn');
+    if (cb.checked) { btn.classList.add('ready'); }
+    else            { btn.classList.remove('ready'); }
+  }
+  function discAccept() {
+    try { localStorage.setItem('asvabSimDisclaimer_v1', '1'); } catch(e){}
+    document.getElementById('disclaimerOverlay').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+  function discDecline() {
+    document.getElementById('disclaimerOverlay').innerHTML =
+      '<div style="color:#5a6070;font-family:IBM Plex Mono,monospace;font-size:12px;text-align:center;padding:40px 20px;">' +
+      '⚠ You must accept the terms to use this application.<br><br>' +
+      '<button onclick="location.reload()" style="background:transparent;border:1px solid #1e2330;color:#5a6070;padding:10px 24px;font-family:IBM Plex Mono,monospace;font-size:11px;letter-spacing:2px;border-radius:4px;cursor:pointer;">← GO BACK</button>' +
+      '</div>';
+  }
+  // Check if already accepted
+  (function() {
+    var accepted = false;
+    try { accepted = localStorage.getItem('asvabSimDisclaimer_v1') === '1'; } catch(e){}
+    if (accepted) {
+      var ov = document.getElementById('disclaimerOverlay');
+      if (ov) ov.classList.add('hidden');
+    } else {
+      document.body.style.overflow = 'hidden';
+    }
+  })();
+
 (function(){
   'use strict';
   if (window.IS_DEV) return; // dev mode: all protections disabled
 
   // Custom context menu — block native menu immediately, wire up UI after DOM ready
   document.addEventListener('contextmenu', function(e) { e.preventDefault(); }, true);
+
   document.addEventListener('DOMContentLoaded', function() {
     var ctxMenu = document.getElementById('customContextMenu');
     if (!ctxMenu) return;
@@ -2436,7 +2685,7 @@ function setDrillMode(m) {
   if (realtBtn)  realtBtn.classList.toggle('realtest-active', m === 'realtest');
   const descs = {
     drill:    'Countdown timer · adaptive difficulty · AFQT percentile estimated at session end',
-    practice: 'No time limit · study at your own pace · full explanations · results not counted toward AFQT',
+    practice: 'No time limit · study at your own pace · full explanations · AFQT estimated when all 4 sections are practiced together',
     realtest: '46 real PICAT questions · recall your original answers · see how much you remember',
   };
   if (desc)     desc.textContent = descs[m] || descs.drill;
