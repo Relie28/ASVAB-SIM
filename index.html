@@ -1609,7 +1609,7 @@ window.IS_DEV = location.protocol === 'file:' ||
 
   <button class="start-btn" onclick="showCategorySelect()">BEGIN TIMED QUIZ</button>
   <div class="quiz-meta">up to 50 questions · adaptive timer · MK/AR priority · adaptive difficulty</div>
-  <button class="full-btn" onclick="startQuiz('full')">FULL ASVAB SIMULATION →</button>
+  <button class="full-btn" onclick="startQuiz('full')">ASVAB SIMULATION →</button>
   <div class="full-meta">71 questions · 90 minutes · GS · AR · WK · PC · MK · AFQT score</div>
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:18px;opacity:0;animation:fadeUp 0.6s 1.5s forwards">
     <button class="stats-btn" style="margin-top:0" onclick="showStats()">VIEW MY STATS →</button>
@@ -1993,7 +1993,7 @@ const PICAT_QUESTIONS = [
   {section:"MK",diff:2,forced:null,q:"Simplify: (2x³y²)(5x²y⁴)",opts:["7x⁵y⁶","10x⁵y⁶","10x⁶y⁸","7x⁶y⁸"],ans:1,exp:"Coefficients: 2×5=10. Exponents: x^(3+2)=x⁵, y^(2+4)=y⁶. Result: <code>10x⁵y⁶</code>."}
 ];
 
-// ── FULL ASVAB EXTRA BANKS — diff-tagged, calibrated to 95th pct ──
+// ── ASVAB SIM EXTRA BANKS — diff-tagged, calibrated to 95th pct ──
 const QB = {
   PC:[
     // Fresh PC questions (real-test ones now live in PICAT_QUESTIONS)
@@ -2625,7 +2625,7 @@ function checkResumeBanner() {
   if (p.isPractice) {
     modeLabel = 'PRACTICE SESSION'; modeColor = '#34d399'; borderColor = 'rgba(52,211,153,0.3)';
   } else if (p.mode === 'full') {
-    modeLabel = 'FULL ASVAB SIMULATION'; modeColor = 'var(--accent3)'; borderColor = 'rgba(255,214,0,0.3)';
+    modeLabel = 'ASVAB SIMULATION'; modeColor = 'var(--accent3)'; borderColor = 'rgba(255,214,0,0.3)';
   } else if (p.mode === 'realtest') {
     modeLabel = 'REAL TEST REPLAY'; modeColor = 'var(--accent3)'; borderColor = 'rgba(255,214,0,0.3)';
   } else {
@@ -2685,7 +2685,7 @@ function setDrillMode(m) {
   if (realtBtn)  realtBtn.classList.toggle('realtest-active', m === 'realtest');
   const descs = {
     drill:    'Countdown timer · adaptive difficulty · AFQT percentile estimated at session end',
-    practice: 'No time limit · study at your own pace · full explanations · AFQT estimated when all 4 sections are practiced together',
+    practice: 'No time limit · study at your own pace · full explanations · AFQT estimate saved to session history',     
     realtest: '46 real PICAT questions · recall your original answers · see how much you remember',
   };
   if (desc)     desc.textContent = descs[m] || descs.drill;
@@ -2925,7 +2925,7 @@ function showStats() {
     });
   });
 
-  const afqtSessions = sessions.filter(s => s.afqt != null).slice(-10);
+  const afqtSessions = sessions.filter(s => s.afqt != null && s.mode === 'full').slice(-10);
   const latestAfqt = afqtSessions.length ? afqtSessions[afqtSessions.length-1].afqt : null;
   const avgAfqt    = afqtSessions.length ? Math.round(afqtSessions.reduce((s,x)=>s+x.afqt,0)/afqtSessions.length) : null;
   const bestAfqt   = afqtSessions.length ? Math.max(...afqtSessions.map(x=>x.afqt)) : null;
@@ -2938,7 +2938,7 @@ function showStats() {
     const afqtColor = latestAfqt >= 95 ? 'var(--correct)' : latestAfqt >= 80 ? 'var(--ar)' : latestAfqt >= 60 ? 'var(--accent3)' : 'var(--wrong)';
     html += `
     <div class="afqt-panel">
-      <div class="afqt-panel-title">Estimated AFQT — timed drills &amp; practice sessions</div>
+      <div class="afqt-panel-title">Estimated AFQT — Full ASVAB (First 5 sections only)</div>
       <div style="display:flex;align-items:flex-end;gap:36px;flex-wrap:wrap">
         <div>
           <div class="afqt-score-big" style="color:${afqtColor}">${latestAfqt}<span style="font-size:32px;color:var(--muted);font-weight:400">${ordSuffix(latestAfqt)}</span></div>
@@ -2999,7 +2999,7 @@ function showStats() {
     if (isInterrupted) {
       // Interrupted/abandoned session row
       const rawMode   = sess.isPractice ? 'practice' : sess.mode;
-      const modeLabel = rawMode === 'practice' ? 'PRACTICE' : rawMode === 'full' ? 'FULL' : rawMode === 'realtest' ? 'REAL TEST' : 'PICAT';
+      const modeLabel = rawMode === 'practice' ? 'PRACTICE' : rawMode === 'full' ? 'ASVAB SIM' : rawMode === 'realtest' ? 'REAL TEST' : 'PICAT';
       const modeColor = rawMode === 'practice' ? '#34d399' : rawMode === 'realtest' ? 'var(--accent3)' : 'var(--muted)';
       const rawId     = String(sess.id || sess.date); // alphanumeric id or ISO date — safe inside single quotes
       const canResume = !!sess.questions;
@@ -3032,7 +3032,7 @@ function showStats() {
       const t = sess.total || {attempted:0,correct:0};
       const acc = t.attempted ? Math.round((t.correct/t.attempted)*100) : 0;
       const afqtStr = sess.afqt != null ? `${sess.afqt}${ordSuffix(sess.afqt)}` : '—';
-      const modeLabel = sess.mode === 'practice' ? 'PRACTICE' : sess.mode === 'full' ? 'FULL' : sess.mode === 'realtest' ? 'REAL TEST' : 'PICAT';
+      const modeLabel = sess.mode === 'practice' ? 'PRACTICE' : sess.mode === 'full' ? 'ASVAB SIM' : sess.mode === 'realtest' ? 'REAL TEST' : 'PICAT';
       const modeColor = sess.mode === 'practice' ? '#34d399' : sess.mode === 'realtest' ? 'var(--accent3)' : 'var(--muted)';
       html += `
       <div class="session-row" style="opacity:0.8;flex-wrap:wrap;gap:6px;">
@@ -3453,7 +3453,7 @@ function showResults() {
         </div>`;
       document.getElementById('scoringDetails').innerHTML = `
         <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;color:#34d399;margin-bottom:16px;padding:12px 16px;border:1px solid rgba(52,211,153,0.25);border-radius:4px;background:rgba(52,211,153,0.05)">
-          📖 &nbsp;PRACTICE SESSION &nbsp;·&nbsp; AFQT estimated from all 4 sections
+          📖 &nbsp;PRACTICE SESSION &nbsp;·&nbsp; AFQT estimate saved to session history — Full ASVAB mode updates the AFQT panel
         </div>
         ${compositeRow}
         <div class="results-grid-afqt">${cardHTML}</div>`;

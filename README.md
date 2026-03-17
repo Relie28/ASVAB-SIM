@@ -237,7 +237,7 @@ A composite of **256** → **AFQT 95th percentile** — verified. This is not an
 1. Open `index.html` in any modern browser (Chrome, Safari, Firefox, Edge)
 2. No server required — runs entirely offline
 3. Tap **BEGIN TIMED QUIZ** for the adaptive PICAT drill
-4. Tap **FULL ASVAB SIMULATION** for a full-length practice test
+4. Tap **ASVAB SIMULATION** for a full-length practice test
 5. Tap **VIEW MY STATS** to see your history across sessions
 
 ---
