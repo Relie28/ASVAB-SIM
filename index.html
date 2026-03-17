@@ -1988,14 +1988,14 @@ function toggleCatSection(sec) {
 }
 
 function calcQuestionAlloc(activeSecs) {
-  // Base proportions (ratio only — actual target scales to available pool)
-  const BASE_ALLOC = { MK:20, AR:16, WK:8, PC:6 }; // sums to 50
-  const TARGET = 50;
+  // Base proportions (ratio only — actual target scales to available fresh pool)
+  const BASE_ALLOC = { MK:12, AR:10, WK:5, PC:3 }; // sums to 30
+  const TARGET = 30;
   const totalBase = activeSecs.reduce((s,k) => s + (BASE_ALLOC[k] || 0), 0);
   let running = 0;
   const alloc = {};
   activeSecs.forEach((sec, i) => {
-    const avail = PICAT_QUESTIONS.filter(q => q.section === sec).length;
+    const avail = PICAT_QUESTIONS.filter(q => q.section === sec && q.forced === null).length;
     const raw   = (i === activeSecs.length - 1)
       ? TARGET - running
       : Math.round((BASE_ALLOC[sec] / totalBase) * TARGET);
@@ -2042,14 +2042,16 @@ function startRealTestMode() {
   renderQuestion();
   clearInterval(timerInterval);
 
-  // No timer — this mode is about recall, not speed
-  secondsLeft = 0;
+  // 15-minute hard cap
+  secondsLeft = 15 * 60;
   const timerEl = document.getElementById('timer');
-  if (timerEl) {
-    timerEl.style.visibility = 'hidden';
-    timerEl.style.minWidth = '0';
-    timerEl.style.width = '0';
-  }
+  if (timerEl) { timerEl.style.visibility = ''; timerEl.style.minWidth = ''; timerEl.style.width = ''; }
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    updateTimerDisplay();
+    if (secondsLeft <= 0) { clearInterval(timerInterval); showResults(); }
+  }, 1000);
+  updateTimerDisplay();
 
   const badge = document.getElementById('sessionModeBadge');
   if (badge) {
@@ -2727,34 +2729,27 @@ function startQuiz(selectedMode) {
   if (mode === 'picat') {
     // ── Smart 30-question selector with weighted sampling ──
     // Allocations: MK=12, AR=10, WK=5, PC=3
-    // Weights:
-    //   initiallyWrong (real miss)  → GUARANTEED every session (always included)
-    //   correctForced  (real hit)   → weight 3  — high volume for memorization
-    //   fresh diff:2/3              → weight 2  — medium volume, improve weak spots
-    //   fresh diff:1                → weight 1  — lower volume, easy filler
+    // Timed drills use ONLY fresh questions (forced === null) —
+    // no real PICAT questions, no previously-worked questions.
+    // Weights: diff:3 → highest, diff:2 → medium, diff:1 → lower
     const activeSecs = selectedSections.length ? selectedSections : ['MK','AR','WK','PC'];
     const ALLOC = calcQuestionAlloc(activeSecs);
     const selected = [];
 
-    Object.entries(ALLOC).forEach(([sec, quota]) => {
-      const pool       = PICAT_QUESTIONS.filter(q => q.section === sec);
-      const guaranteed = shuffle(pool.filter(q => q.initiallyWrong));
-      const remaining  = Math.max(0, quota - guaranteed.length);
-      const candidates = pool.filter(q => !q.initiallyWrong);
-      const weights    = candidates.map(q => {
-        const base = q.forced !== null ? 3 : 1;
-        return base * (flavor.diffMod[q.diff || 1] || 1);
-      });
-      const fillers    = weightedSample(candidates, weights, remaining);
-      selected.push(...guaranteed, ...fillers);
+    // Section order: AR → WK → PC → MK (mirrors real PICAT structure)
+    const SEC_ORDER = ['AR','WK','PC','MK'];
+    SEC_ORDER.filter(s => ALLOC[s]).forEach(sec => {
+      const pool    = PICAT_QUESTIONS.filter(q => q.section === sec && q.forced === null);
+      const weights = pool.map(q => flavor.diffMod[q.diff || 1] || 1);
+      const picked  = weightedSample(pool, weights, ALLOC[sec]);
+      // Shuffle within section so question order varies each session
+      selected.push(...shuffle(picked));
     });
 
-    // Shuffle the full selected pool so sections are interleaved
-    QUESTIONS = shuffle(selected).map(shuffleOpts);
+    QUESTIONS = selected.map(shuffleOpts);
 
-    // Scale timer: ~50 seconds per question
-    const actualTotal = Object.values(ALLOC).reduce((s,v) => s+v, 0);
-    secondsLeft = Math.round(actualTotal * 50);
+    // 30-minute hard cap
+    secondsLeft = 30 * 60;
   } else {
     // Full ASVAB: GS → AR → WK → PC → MK in fixed section order, adaptive within each section
     const FULL_SECTIONS = [
