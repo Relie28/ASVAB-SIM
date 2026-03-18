@@ -1654,6 +1654,7 @@ window.IS_DEV = location.protocol === 'file:' ||
   </div>
   <div id="scoringDetails"></div>
   <div class="verdict" id="verdictBox"></div>
+  <div id="answerRecoveryBanner" style="display:none"></div>
   <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--muted);margin-bottom:16px;">QUESTION REVIEW</div>
   <div class="review-list" id="reviewList"></div>
   <button class="retry-btn" onclick="location.reload()">RETAKE QUIZ</button>
@@ -1774,7 +1775,7 @@ const PICAT_QUESTIONS = [
   {section:"AR",diff:2,forced:null,q:"A store marks all items down 40%. At checkout, an additional 10% is taken off the sale price. What is the total percent discount from the original price?",opts:["46%","50%","54%","60%"],ans:0,exp:"After 40% off: pay 60% of original. After 10% off that: 60% × 0.90 = 54%. Total discount = 100% − 54% = <code>46%</code>."},
   {section:"AR",diff:2,forced:null,q:"A tank is 1/3 full. After adding 120 gallons it is 3/4 full. What is the total capacity of the tank?",opts:["240 gallons","288 gallons","336 gallons","480 gallons"],ans:1,exp:"3/4 − 1/3 = 9/12 − 4/12 = 5/12 of the tank = 120 gal. Capacity = 120 × 12/5 = <code>288 gallons</code>."},
   {section:"AR",diff:2,forced:null,q:"Two pipes fill a pool. Pipe A fills it in 4 hours, Pipe B in 6 hours. How long does it take both pipes together to fill the pool?",opts:["1 hour 12 minutes","2 hours 24 minutes","2 hours 40 minutes","5 hours"],ans:1,exp:"Combined rate = 1/4 + 1/6 = 5/12 tank/hr. Time = 12/5 hr = <code>2 hrs 24 min</code>."},
-  {section:"AR",diff:3,forced:null,q:"A car’s value depreciates 15% in the first year and 10% each subsequent year. What is the car’s value after 3 years if it originally cost $24,000?",opts:["$15,912","$16,524","$17,442","$18,360"],ans:2,exp:"Year 1 (−15%): $24,000 × 0.85 = $20,400. Year 2 (−10%): $20,400 × 0.90 = $18,360. Year 3 (−5%): $18,360 × 0.95 = <code>$17,442</code>."},
+  {section:"AR",diff:3,forced:null,q:"A car’s value depreciates 15% in the first year and 10% each subsequent year. What is the car’s value after 3 years if it originally cost $24,000?",opts:["$15,912","$16,524","$17,442","$18,360"],ans:1,exp:"Year 1 (−15%): $24,000 × 0.85 = $20,400. Year 2 (−10%): $20,400 × 0.90 = $18,360. Year 3 (−10%): $18,360 × 0.90 = <code>$16,524</code>."},
   {section:"AR",diff:1,forced:null,q:"A hallway is 4.5 feet wide and 32 feet long. An adjacent storage room measures 9 feet by 6 feet. What is the total floor area in square feet?",opts:["144 sq. ft.","180 sq. ft.","198 sq. ft.","216 sq. ft."],ans:2,exp:"Hallway: 4.5 × 32 = 144 sq ft. Storage: 9 × 6 = 54 sq ft. Total = 144 + 54 = <code>198 sq. ft.</code>"},
   {section:"AR",diff:1,forced:null,q:"A work shift starts at 6:45 AM and ends at 3:20 PM. The worker takes a 45-minute unpaid lunch break. How many hours and minutes of paid work time does the worker complete?",opts:["7 hours 30 minutes","7 hours 50 minutes","8 hours 10 minutes","8 hours 35 minutes"],ans:1,exp:"6:45 AM to 3:20 PM = 8 hrs 35 min. Subtract 45-min lunch: 8h 35min − 45min = <code>7 hrs 50 min</code>."},
   {section:"AR",diff:2,forced:null,q:"A factory completes 2/3 of its daily quota in 4 hours. At the same rate, how many hours will it take to produce 2 full daily quotas?",opts:["10 hours","12 hours","14 hours","16 hours"],ans:1,exp:"Rate = (2/3) ÷ 4 = 1/6 quota/hr. Time for 2 quotas = 2 ÷ (1/6) = <code>12 hours</code>."},
@@ -3393,9 +3394,186 @@ function compositeToPercentile(comp) {
   return 1;
 }
 
+// ══════════════════════════════════════════════════════════════
+// QUESTION BANK INTEGRITY AUDIT
+// Runs on page load — detects & auto-corrects data errors so
+// users never lose points due to bad answer keys.
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * auditQuestionBank()
+ * Scans PICAT_QUESTIONS for:
+ *  1. ans out of range  (ans >= opts.length)
+ *  2. Duplicate question text with CONFLICTING answer keys
+ *  3. Missing required fields (q, opts, ans, section)
+ *
+ * When a conflict is found between two copies of the same question,
+ * the copy whose opts[ans] text appears as the correct opt in the
+ * OTHER copy wins (cross-validation). The losing copy's ans is
+ * silently patched in-place before any session starts.
+ *
+ * All findings are logged to console.warn so they're visible in
+ * dev mode but silent to end users.
+ */
+function auditQuestionBank() {
+  const issues = [];
+
+  // ── Pass 1: structural checks ──
+  PICAT_QUESTIONS.forEach((q, idx) => {
+    const loc = `PICAT_QUESTIONS[${idx}] (section:${q.section})`;
+    if (!q.q)      { issues.push(`${loc} — missing question text`); return; }
+    if (!q.opts || !Array.isArray(q.opts) || q.opts.length < 2) {
+      issues.push(`${loc} — missing or malformed opts`); return;
+    }
+    if (typeof q.ans !== 'number') {
+      issues.push(`${loc} — ans is not a number (got ${JSON.stringify(q.ans)})`); return;
+    }
+    if (q.ans < 0 || q.ans >= q.opts.length) {
+      issues.push(`${loc} — ans ${q.ans} is out of range (opts has ${q.opts.length} items)`);
+      // Clamp to last valid index to prevent crashes
+      q.ans = Math.max(0, Math.min(q.ans, q.opts.length - 1));
+    }
+    if (!q.section) {
+      issues.push(`${loc} — missing section`);
+    }
+  });
+
+  // ── Pass 2: duplicate question text with conflicting ans ──
+  // Build a map: normalised question text → first seen entry
+  const canonical = {}; // normText → { idx, q, correctOptText }
+  PICAT_QUESTIONS.forEach((q, idx) => {
+    if (!q.q || !q.opts || typeof q.ans !== 'number') return;
+    const norm = q.q.trim().toLowerCase().replace(/\s+/g, ' ');
+    const correctOptText = (q.opts[q.ans] || '').trim().toLowerCase();
+
+    if (!canonical[norm]) {
+      canonical[norm] = { idx, q, correctOptText };
+    } else {
+      const canon = canonical[norm];
+      if (canon.correctOptText !== correctOptText) {
+        // Conflict: the two copies point to different answer texts.
+        // Cross-validate: see if each copy's answer text appears as
+        // an option in the other copy so we can determine which is right.
+        const canonAnsInThis  = q.opts.findIndex(o => o.trim().toLowerCase() === canon.correctOptText);
+        const thisAnsInCanon  = canon.q.opts.findIndex(o => o.trim().toLowerCase() === correctOptText);
+
+        // Prefer the answer that cross-validates (both copies have it as an option).
+        // If only one validates, that one wins. If neither, keep canonical and warn.
+        if (canonAnsInThis !== -1 && thisAnsInCanon === -1) {
+          // Canon answer exists in this copy but this answer doesn't exist in canon.
+          // This copy has the wrong ans — patch it to match canonical.
+          issues.push(
+            `CONFLICT idx ${idx} vs ${canon.idx} — patching idx ${idx} ans from ${q.ans} ("${q.opts[q.ans]}") ` +
+            `to ${canonAnsInThis} ("${q.opts[canonAnsInThis]}") to match canonical`
+          );
+          q.ans = canonAnsInThis;
+        } else if (thisAnsInCanon !== -1 && canonAnsInThis === -1) {
+          // This copy's answer exists in canon but canon's answer doesn't exist in this copy.
+          // The canonical entry was the wrong one — patch it.
+          issues.push(
+            `CONFLICT idx ${canon.idx} vs ${idx} — patching canonical idx ${canon.idx} ans from ${canon.q.ans} ` +
+            `("${canon.q.opts[canon.q.ans]}") to ${thisAnsInCanon} ("${canon.q.opts[thisAnsInCanon]}") ` +
+            `using cross-validated answer from idx ${idx}`
+          );
+          canon.q.ans = thisAnsInCanon;
+          canonical[norm] = { idx, q, correctOptText: q.opts[q.ans].trim().toLowerCase() };
+        } else {
+          // Both or neither cross-validate — log but don't auto-patch (needs human review).
+          issues.push(
+            `CONFLICT idx ${idx} vs ${canon.idx} — ` +
+            `"${q.opts[q.ans]}" vs "${canon.q.opts[canon.q.ans]}" — could not auto-resolve, manual review needed`
+          );
+        }
+      }
+    }
+  });
+
+  if (issues.length) {
+    console.group('%c⚠ ASVAB SIM — Question Bank Audit', 'color:#ffd600;font-weight:bold');
+    issues.forEach(msg => console.warn(msg));
+    console.groupEnd();
+  } else {
+    console.log('%c✓ ASVAB SIM — Question Bank Audit passed (' + PICAT_QUESTIONS.length + ' questions, no issues)', 'color:#00c97a');
+  }
+
+  return issues;
+}
+
+/**
+ * auditUserAnswers(answers, questions)
+ * Called at the TOP of showResults() before any scoring.
+ *
+ * For every question the user answered incorrectly, this function
+ * checks whether the user's chosen option TEXT matches the correct
+ * option text on any other copy of the same question in the pool.
+ * If yes — the answer key on THIS question was wrong at answer time,
+ * so we flip the stored answer to the correct index and record a
+ * recovery so the results screen can display a notice.
+ *
+ * Returns: { correctedAnswers, recovered }
+ *   correctedAnswers — new array (same length as answers)
+ *   recovered        — array of { qIdx, section, questionPreview, recoveredOptText }
+ */
+function auditUserAnswers(answers, questions) {
+  // Build a lookup: norm question text → correct option text (from canonical)
+  const correctOptByText = {};
+  PICAT_QUESTIONS.forEach(q => {
+    if (!q.q || !q.opts || typeof q.ans !== 'number') return;
+    const norm = q.q.trim().toLowerCase().replace(/\s+/g,' ');
+    const correctText = (q.opts[q.ans] || '').trim().toLowerCase();
+    // First occurrence sets the canonical correct answer text
+    if (!correctOptByText[norm]) correctOptByText[norm] = correctText;
+  });
+
+  const correctedAnswers = answers.slice(); // copy
+  const recovered = [];
+
+  questions.forEach((q, i) => {
+    if (answers[i] === null || answers[i] === undefined) return; // unanswered
+    if (answers[i] === q.ans) return; // already correct — nothing to do
+
+    // User was marked wrong. Check their chosen option text against the
+    // canonical correct answer for this question.
+    const norm = q.q.trim().toLowerCase().replace(/\s+/g,' ');
+    const canonicalCorrect = correctOptByText[norm];
+    if (!canonicalCorrect) return;
+
+    const userChoseText = (q.opts[answers[i]] || '').trim().toLowerCase();
+    if (userChoseText === canonicalCorrect) {
+      // User actually chose the right answer — the ans key was wrong.
+      // Patch the live question object and correct the stored answer.
+      const rightIdx = q.opts.findIndex(o => o.trim().toLowerCase() === canonicalCorrect);
+      if (rightIdx !== -1) {
+        correctedAnswers[i] = rightIdx;
+        q.ans = rightIdx; // patch live object so review list also shows correctly
+        recovered.push({
+          qIdx: i,
+          section: q.section,
+          questionPreview: q.q.length > 60 ? q.q.substring(0,60) + '…' : q.q,
+          recoveredOptText: q.opts[rightIdx]
+        });
+      }
+    }
+  });
+
+  return { correctedAnswers, recovered };
+}
+
 function showResults() {
   showScreen('results');
   clearActiveSession(); // safety: clear on results regardless of how we got here
+
+  // ── Answer integrity check: recover any points lost to bad answer keys ──
+  const audit = auditUserAnswers(userAnswers, QUESTIONS);
+  if (audit.recovered.length) {
+    // Apply the corrected answers for all downstream scoring
+    audit.recovered.forEach(r => { userAnswers[r.qIdx] = QUESTIONS[r.qIdx].ans; });
+    console.group('%c⚠ ASVAB SIM — Answer Recovery', 'color:#ffd600;font-weight:bold');
+    audit.recovered.forEach(r =>
+      console.warn(`Recovered point for Q${r.qIdx} (${r.section}): "${r.questionPreview}" — correct answer: "${r.recoveredOptText}"`)
+    );
+    console.groupEnd();
+  }
 
   const secC = {}, secT = {}, secQs = {}, secMask = {};
   QUESTIONS.forEach(q => {
@@ -3489,6 +3667,25 @@ function showResults() {
       div.innerHTML = `<div class="ri-icon">${correct ? '✓' : '✗'}</div><div class="ri-q">${preview}</div><div class="ri-tag ${q.section}">${q.section}</div>`;
       list.appendChild(div);
     });
+    // Recovery banner for practice mode
+    const pracRecoveryBanner = document.getElementById('answerRecoveryBanner');
+    if (pracRecoveryBanner) {
+      if (audit.recovered.length) {
+        pracRecoveryBanner.innerHTML =
+          `<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;color:#00c97a;` +
+          `padding:12px 16px;border:1px solid rgba(0,201,122,0.3);border-radius:6px;` +
+          `background:rgba(0,201,122,0.06);margin-bottom:16px;line-height:1.8">` +
+          `\u2713 &nbsp;<strong>${audit.recovered.length} point${audit.recovered.length > 1 ? 's' : ''} recovered</strong> ` +
+          `\u2014 our integrity check found and corrected ${audit.recovered.length > 1 ? 'answer key errors' : 'an answer key error'} ` +
+          `in the question pool. Your score and AFQT have been adjusted to reflect your true performance.<br>` +
+          `<span style="color:rgba(0,201,122,0.6);font-size:10px;margin-top:4px;display:block">` +
+          audit.recovered.map(r => `[${r.section}] ${r.questionPreview}`).join(' &nbsp;\u00b7&nbsp; ') +
+          `</span></div>`;
+        pracRecoveryBanner.style.display = 'block';
+      } else {
+        pracRecoveryBanner.style.display = 'none';
+      }
+    }
     return;
   }
 
@@ -3589,6 +3786,25 @@ function showResults() {
       div.innerHTML    = `<div class="ri-icon">${recalled ? '&#10003;' : '&#10007;'}</div><div class="ri-q">${missTag}${preview}</div>${isFlagged ? '<span class="ri-flag" title="Flagged for review">&#x2691;</span>' : ''}<div class="ri-tag ${q.section}">${q.section}</div>`;
       rtList.appendChild(div);
     });
+    // Recovery banner for real-test mode
+    const rtRecoveryBanner = document.getElementById('answerRecoveryBanner');
+    if (rtRecoveryBanner) {
+      if (audit.recovered.length) {
+        rtRecoveryBanner.innerHTML =
+          `<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;color:#00c97a;` +
+          `padding:12px 16px;border:1px solid rgba(0,201,122,0.3);border-radius:6px;` +
+          `background:rgba(0,201,122,0.06);margin-bottom:16px;line-height:1.8">` +
+          `\u2713 &nbsp;<strong>${audit.recovered.length} point${audit.recovered.length > 1 ? 's' : ''} recovered</strong> ` +
+          `\u2014 our integrity check found and corrected ${audit.recovered.length > 1 ? 'answer key errors' : 'an answer key error'} ` +
+          `in the question pool. Your score has been adjusted to reflect your true performance.<br>` +
+          `<span style="color:rgba(0,201,122,0.6);font-size:10px;margin-top:4px;display:block">` +
+          audit.recovered.map(r => `[${r.section}] ${r.questionPreview}`).join(' &nbsp;\u00b7&nbsp; ') +
+          `</span></div>`;
+        rtRecoveryBanner.style.display = 'block';
+      } else {
+        rtRecoveryBanner.style.display = 'none';
+      }
+    }
     return;
   }
 
@@ -3712,6 +3928,26 @@ function showResults() {
   `;
 
   document.getElementById('verdictBox').innerHTML = `<h3 style="color:${color}">${title}</h3><p>${msg}</p>`;
+
+  // ── Show recovery notice if any points were restored ──
+  const recoveryBanner = document.getElementById('answerRecoveryBanner');
+  if (recoveryBanner) {
+    if (audit.recovered.length) {
+      recoveryBanner.innerHTML =
+        `<div style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;color:#00c97a;` +
+        `padding:12px 16px;border:1px solid rgba(0,201,122,0.3);border-radius:6px;` +
+        `background:rgba(0,201,122,0.06);margin-bottom:16px;line-height:1.8">` +
+        `✓ &nbsp;<strong>${audit.recovered.length} point${audit.recovered.length > 1 ? 's' : ''} recovered</strong> ` +
+        `— our integrity check found and corrected ${audit.recovered.length > 1 ? 'answer key errors' : 'an answer key error'} ` +
+        `in the question pool. Your score and AFQT have been adjusted to reflect your true performance.<br>` +
+        `<span style="color:rgba(0,201,122,0.6);font-size:10px;margin-top:4px;display:block">` +
+        audit.recovered.map(r => `[${r.section}] ${r.questionPreview}`).join(' &nbsp;·&nbsp; ') +
+        `</span></div>`;
+      recoveryBanner.style.display = 'block';
+    } else {
+      recoveryBanner.style.display = 'none';
+    }
+  }
 
   const list = document.getElementById('reviewList');
   list.innerHTML = '';
@@ -4100,6 +4336,7 @@ function hideSyncModal() {
 
 // Run on page load
 document.addEventListener('DOMContentLoaded', () => {
+  auditQuestionBank(); // integrity check — patches bad answer keys before any session starts
   migrateOldSaves();
   checkResumeBanner();
   updateFlaggedSplashBtn();
