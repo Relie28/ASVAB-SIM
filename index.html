@@ -2818,16 +2818,44 @@ function resumeSession(payload) {
   selectedSections = payload.selectedSections || ['MK','AR','WK','PC'];
   Object.keys(adaptiveState).forEach(k => delete adaptiveState[k]);
 
-  // Re-audit already-answered questions: if a bad answer key was saved in a
-  // previous session, correct it now so the rest of the session and final
-  // results use the verified correct answers.
+  // ── Step 1: sync QUESTIONS[i].ans from the patched PICAT_QUESTIONS pool ──
+  // auditQuestionBank() and auditExplanations() both patch PICAT_QUESTIONS in-place
+  // during DOMContentLoaded, but QUESTIONS was deserialized from localStorage and
+  // still carries the old ans values from when the session was saved.
+  // Walk every question in the session and apply any patches the audits found.
+  if (QUESTIONS) {
+    const pqMap = {};
+    PICAT_QUESTIONS.forEach(pq => {
+      if (pq.q) pqMap[pq.q.trim().toLowerCase().replace(/\s+/g, ' ')] = pq;
+    });
+    let syncPatched = 0;
+    QUESTIONS.forEach(q => {
+      if (!q.q) return;
+      const norm = q.q.trim().toLowerCase().replace(/\s+/g, ' ');
+      const canonical = pqMap[norm];
+      if (canonical && canonical.ans !== q.ans) {
+        q.ans = canonical.ans;
+        syncPatched++;
+      }
+    });
+    if (syncPatched) {
+      console.log(
+        `%c✓ ASVAB SIM — Resume: synced ${syncPatched} answer key(s) from audit patches`,
+        'color:#00c97a'
+      );
+    }
+  }
+
+  // ── Step 2: re-audit already-answered questions ──
+  // Now that QUESTIONS[i].ans is canonical, re-check every answered question:
+  // any previously mis-scored answer gets recovered before the session continues.
   if (userAnswers && QUESTIONS) {
     const reaudit = auditUserAnswers(userAnswers, QUESTIONS);
     if (reaudit.recovered.length) {
       reaudit.recovered.forEach(r => { userAnswers[r.qIdx] = QUESTIONS[r.qIdx].ans; });
       console.group('%c⚠ ASVAB SIM — Resume: Answer Recovery', 'color:#ffd600;font-weight:bold');
       reaudit.recovered.forEach(r =>
-        console.warn(`Corrected Q${r.qIdx} (${r.section}) on resume: "${r.questionPreview}"`)  
+        console.warn(`Corrected Q${r.qIdx} (${r.section}) on resume: "${r.questionPreview}"`)
       );
       console.groupEnd();
     }
