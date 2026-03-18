@@ -3542,6 +3542,149 @@ function auditQuestionBank() {
 }
 
 /**
+ * auditExplanations()
+ * Validates that every explanation (exp) field is internally consistent.
+ *
+ * Three checks per question:
+ *
+ *   1. CODE-TAG CHECK — the final <code>…</code> value must match opts[ans].
+ *      This catches the class of bug where the explanation was written for a
+ *      different answer than the one stored in `ans`.  When a single matching
+ *      option is found it is auto-patched (same policy as auditQuestionBank).
+ *
+ *   2. ARITHMETIC CHECK — every "A × B = C", "A ÷ B = C", and "A + B = C"
+ *      expression extracted from the plain text is verified numerically
+ *      (tolerance: max($1, 0.1 % of stated value) to allow rounding).
+ *
+ *   3. PERCENTAGE-MULTIPLIER CHECK — patterns like "(−10%): $N × 0.YY" are
+ *      checked to ensure the multiplier matches the stated percentage
+ *      (e.g. −10 % → ×0.90).  This catches the exact class of error where
+ *      someone wrote "(−5%)" but applied the wrong rate.
+ *
+ * All findings are logged to the console.  Auto-patches are applied only for
+ * Check 1 (code-tag vs ans) when the match is unambiguous.
+ */
+function auditExplanations() {
+  const issues = [];
+
+  /* Strip all HTML tags and decode common entities → plain text */
+  function stripHtml(html) {
+    return html
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ').trim();
+  }
+
+  /* Normalise a value string: remove $, commas, spaces, lowercase */
+  function normVal(s) {
+    return String(s).replace(/[$,\s]/g, '').toLowerCase();
+  }
+
+  /* Parse a dollar/comma-formatted number */
+  function parseNum(s) {
+    return parseFloat(String(s).replace(/[$,]/g, ''));
+  }
+
+  PICAT_QUESTIONS.forEach((q, idx) => {
+    if (!q.exp || !q.opts || typeof q.ans !== 'number') return;
+    const loc = `PICAT_QUESTIONS[${idx}] (${q.section})`;
+    const plain = stripHtml(q.exp);
+
+    // ── Check 1: final <code> value must match opts[ans] ──────────────────
+    const codeTags = q.exp.match(/<code>([\s\S]*?)<\/code>/gi);
+    if (codeTags && codeTags.length > 0) {
+      const lastCode = codeTags[codeTags.length - 1].replace(/<\/?code>/gi, '').trim();
+      const correctOpt = (q.opts[q.ans] || '').trim();
+      const nc = normVal(lastCode);
+      const no = normVal(correctOpt);
+      if (nc.length >= 2 && no.length >= 2 && !no.includes(nc) && !nc.includes(no)) {
+        issues.push(
+          `${loc} — explanation ends with <code>${lastCode}</code> ` +
+          `but opts[ans=${q.ans}] = "${correctOpt}"`
+        );
+        const matchIdx = q.opts.findIndex(o => {
+          const n = normVal(o);
+          return n.length >= 2 && (n.includes(nc) || nc.includes(n));
+        });
+        if (matchIdx !== -1 && matchIdx !== q.ans) {
+          issues.push(
+            `  → auto-patching ans from ${q.ans} ("${q.opts[q.ans]}") ` +
+            `to ${matchIdx} ("${q.opts[matchIdx]}") to align with explanation`
+          );
+          q.ans = matchIdx;
+        }
+      }
+    }
+
+    // ── Check 2a: multiplication — A × B = C ──────────────────────────────
+    const multRe = /\$?([\d,]+\.?\d*)\s*[×x\*]\s*([\d,]+\.?\d*)\s*=\s*\$?([\d,]+\.?\d*)/g;
+    let m;
+    while ((m = multRe.exec(plain)) !== null) {
+      const a = parseNum(m[1]), b = parseNum(m[2]), stated = parseNum(m[3]);
+      if (isNaN(a) || isNaN(b) || isNaN(stated) || stated === 0) continue;
+      const computed = Math.round(a * b * 100) / 100;
+      const tol = Math.max(1, Math.abs(stated) * 0.001);
+      if (Math.abs(computed - stated) > tol) {
+        issues.push(`${loc} — arithmetic error: ${a} × ${b} = ${stated} (computed ${computed})`);
+      }
+    }
+
+    // ── Check 2b: division — A ÷ B = C ────────────────────────────────────
+    const divRe = /\$?([\d,]+\.?\d*)\s*÷\s*([\d,]+\.?\d*)\s*=\s*\$?([\d,]+\.?\d*)/g;
+    while ((m = divRe.exec(plain)) !== null) {
+      const a = parseNum(m[1]), b = parseNum(m[2]), stated = parseNum(m[3]);
+      if (isNaN(a) || isNaN(b) || isNaN(stated) || b === 0) continue;
+      const computed = Math.round((a / b) * 100) / 100;
+      const tol = Math.max(0.5, Math.abs(stated) * 0.001);
+      if (Math.abs(computed - stated) > tol) {
+        issues.push(`${loc} — arithmetic error: ${a} ÷ ${b} = ${stated} (computed ${computed})`);
+      }
+    }
+
+    // ── Check 2c: addition — A + B = C (dollar-anchored to reduce false positives)
+    const addRe = /\$?([\d,]+\.?\d*)\s*\+\s*\$?([\d,]+\.?\d*)\s*=\s*\$?([\d,]+\.?\d*)/g;
+    while ((m = addRe.exec(plain)) !== null) {
+      const a = parseNum(m[1]), b = parseNum(m[2]), stated = parseNum(m[3]);
+      if (isNaN(a) || isNaN(b) || isNaN(stated)) continue;
+      const computed = Math.round((a + b) * 100) / 100;
+      const tol = Math.max(1, Math.abs(stated) * 0.001);
+      if (Math.abs(computed - stated) > tol) {
+        issues.push(`${loc} — arithmetic error: ${a} + ${b} = ${stated} (computed ${computed})`);
+      }
+    }
+
+    // ── Check 3: percentage label vs multiplier consistency ───────────────
+    // Pattern: "(−X%)" followed shortly by "× 0.YY"
+    // The multiplier must equal (1 − X/100) within ±0.005
+    const pctRe = /\([\u2212\-](\d+(?:\.\d+)?)%\)[^×]*×\s*(0\.\d+)/g;
+    while ((m = pctRe.exec(plain)) !== null) {
+      const pct  = parseFloat(m[1]);
+      const mult = parseFloat(m[2]);
+      const expected = Math.round((1 - pct / 100) * 1000) / 1000;
+      if (Math.abs(mult - expected) > 0.005) {
+        issues.push(
+          `${loc} — percentage mismatch: "(−${pct}%)" implies ×${expected} but found ×${mult}`
+        );
+      }
+    }
+  });
+
+  if (issues.length) {
+    console.group('%c⚠ ASVAB SIM — Explanation Audit', 'color:#ff6b35;font-weight:bold');
+    issues.forEach(msg => console.warn(msg));
+    console.groupEnd();
+  } else {
+    console.log(
+      `%c✓ ASVAB SIM — Explanation Audit passed (${PICAT_QUESTIONS.length} questions, no issues)`,
+      'color:#00c97a'
+    );
+  }
+
+  return issues;
+}
+
+/**
  * auditUserAnswers(answers, questions)
  * Called at the TOP of showResults() before any scoring.
  *
@@ -4378,7 +4521,8 @@ function hideSyncModal() {
 
 // Run on page load
 document.addEventListener('DOMContentLoaded', () => {
-  auditQuestionBank(); // integrity check — patches bad answer keys before any session starts
+  auditQuestionBank();   // patches bad answer keys before any session starts
+  auditExplanations();   // validates explanation math & <code> answer consistency
   migrateOldSaves();
   checkResumeBanner();
   updateFlaggedSplashBtn();
