@@ -1725,25 +1725,25 @@ const PICAT_QUESTIONS = [
   // ══ ARITHMETIC REASONING (38 questions) ══
   // Q1-Q6: from real test (non-null initialUserAnswer)
   {section:"AR",diff:1,forced:"264 gallons",q:"Two tanks are each partially filled with 96 gallons of water. Tank A is 4/5 full, and Tank B is 2/3 full. What is the maximum amount of water that can be held in both tanks together?",opts:["128 gallons","192 gallons","256 gallons","264 gallons"],ans:3,exp:"Tank A capacity: 96 ÷ (4/5) = <code>120 gal</code>. Tank B capacity: 96 ÷ (2/3) = <code>144 gal</code>. Total max = 120 + 144 = <code>264 gallons</code>."},
-  {section:"AR",diff:1,forced:"31",q:"A wooden box is 1 foot high, 3 feet wide, and 5 feet long. Bob plans to paint the 4 sides and the top. How many square feet will be painted?",opts:["15","30","31","46"],ans:2,exp:"4 sides: front/back = 2×(5×1)=10, left/right = 2×(3×1)=6 → 16 sq ft. Top = 5×3=15. Total = <code>31 sq ft</code>. Bottom is NOT painted."},
+  {section:"AR",diff:1,forced:"31",q:"A wooden box is 1 foot high, 3 feet wide, and 5 feet long. Bob plans to paint the 4 sides and the top. How many square feet will be painted?",opts:["15","30","31","46"],ans:2,exp:"4 sides: front/back = 2×(5×1)=10, left/right = 2×(3×1)=6 → 16 sq ft. Top = 5×3=15. Total = <code>31</code>. Bottom is NOT painted."},
   {section:"AR",diff:2,forced:"276 sq. in.",initiallyWrong:true,q:"What is the approximate surface area of a box that is 8 inches wide, 12 inches long, and 9 inches tall?",opts:["276 sq. in.","444 sq. in.","456 sq. in.","552 sq. in."],ans:3,exp:"SA = 2(lw + lh + wh) = 2(96 + 108 + 72) = 2(276) = <code>552 sq. in.</code>. The trap 276 is half the answer—forgot to multiply by 2."},
   {section:"AR",diff:2,forced:"3.6 m",initiallyWrong:true,q:"A structure in a 1:20 scale drawing has a height of 36 cm. If the ratio of the height to the width is 4:1, what is the width of the actual structure, to the nearest tenth of a meter?",opts:["1.4 m","1.8 m","3.6 m","7.2 m"],ans:1,exp:"Actual height = 36 × 20 = 720 cm = 7.2 m. Width = 7.2 ÷ 4 = <code>1.8 m</code>. Trap: stop at 7.2 and pick D, or forget to divide by 4 and pick C."},
   {section:"AR",diff:2,forced:"8 hours 6 minutes",q:"A photocopy machine can copy 24 pages per minute. How long will it take to make 36 copies of a 324-page document?",opts:["13 hours 30 minutes","10 hours 24 minutes","8 hours 6 minutes","3 hours 36 minutes"],ans:2,exp:"Total pages = 36 × 324 = 11,664. Time = 11,664 ÷ 24 = 486 min = <code>8 hours 6 minutes</code>."},
-  {section:"AR",diff:1,forced:"150",q:"A local paving company contracted to pave a parking lot that is 180 feet long and 100 feet wide. One drum of paving asphalt covers 120 square feet. How many drums should be delivered?",opts:["2.3","15","150","216"],ans:2,exp:"Area = 180 × 100 = 18,000 sq ft. Drums = 18,000 ÷ 120 = <code>150 drums</code>."},
+  {section:"AR",diff:1,forced:"150",q:"A local paving company contracted to pave a parking lot that is 180 feet long and 100 feet wide. One drum of paving asphalt covers 120 square feet. How many drums should be delivered?",opts:["2.3","15","150","216"],ans:2,exp:"Area = 180 × 100 = 18,000 sq ft. Drums = 18,000 ÷ 120 = <code>150</code>."},
   // Q7-Q38: fresh practice pool (null initialUserAnswer)
   {section:"AR",diff:1,forced:null,q:"A store marks up products 40% above cost. During a sale, all items are discounted 20%. What percentage of the original cost is the final sale price?",opts:["108%","112%","116%","120%"],ans:1,exp:"Cost = 100. Mark-up to 140. Sale: 140 × 0.80 = <code>112</code>. Final = <code>112%</code> of cost."},
   {section:"AR",diff:2,forced:null,q:"A blueprint uses a scale of 3/8 inch = 1 foot. A room measures 2¼ in × 3 in on the blueprint. What is the actual area in square feet?",opts:["36 sq ft","48 sq ft","64 sq ft","72 sq ft"],ans:1,exp:"Scale: 3/8 in = 1 ft → 1 in = 8/3 ft. Length: 2.25 × 8/3 = 6 ft. Width: 3 × 8/3 = 8 ft. Area = 6 × 8 = <code>48 sq ft</code>."},
   {section:"AR",diff:2,forced:null,q:"Train A leaves at 8:00 AM at 60 mph. Train B leaves the same station at 9:30 AM at 90 mph in the same direction. When does Train B catch Train A?",opts:["11:30 AM","12:00 PM","12:30 PM","1:00 PM"],ans:2,exp:"By 9:30 AM, Train A has 90-mile lead. Closing speed = 30 mph. Time = 90÷30 = 3 hrs after 9:30 AM = <code>12:30 PM</code>."},
   {section:"AR",diff:2,forced:null,q:"Two pipes fill a tank together in 4 hours. Pipe A alone takes 6 hours. How long does Pipe B alone take?",opts:["8 hours","10 hours","12 hours","18 hours"],ans:2,exp:"Rate B = 1/4 − 1/6 = 1/12 per hour → <code>12 hours</code>."},
-  {section:"AR",diff:1,forced:null,q:"A car travels 240 miles on 8 gallons of gas. At this rate, how many gallons are needed for a 450-mile trip?",opts:["12","15","18","20"],ans:1,exp:"Rate = 240/8 = 30 mpg. Gallons = 450 ÷ 30 = <code>15 gallons</code>."},
+  {section:"AR",diff:1,forced:null,q:"A car travels 240 miles on 8 gallons of gas. At this rate, how many gallons are needed for a 450-mile trip?",opts:["12","15","18","20"],ans:1,exp:"Rate = 240/8 = 30 mpg. Gallons = 450 ÷ 30 = <code>15</code>."},
   {section:"AR",diff:1,forced:null,q:"Maria earns $12.50 per hour and works 40 hours per week. After 15% taxes, what is her weekly take-home pay?",opts:["$412.50","$425.00","$437.50","$500.00"],ans:1,exp:"Gross = 12.50 × 40 = $500. Take-home = 500 × 0.85 = <code>$425.00</code>."},
   {section:"AR",diff:2,forced:null,q:"A rectangular pool is 50 meters long and 25 meters wide. It needs to be filled to a depth of 2 meters. If water costs $0.03 per cubic meter, what is the total cost?",opts:["$65","$75","$85","$95"],ans:1,exp:"Volume = 50×25×2 = 2,500 m³. Cost = 2,500 × 0.03 = <code>$75</code>."},
   {section:"AR",diff:2,forced:null,q:"A machine depreciates 15% in value each year. If it was bought for $80,000, what is its value after 2 years?",opts:["$56,200","$57,800","$60,200","$62,000"],ans:1,exp:"After yr 1: 80,000 × 0.85 = 68,000. After yr 2: 68,000 × 0.85 = <code>$57,800</code>."},
-  {section:"AR",diff:1,forced:null,q:"A recipe calls for 2½ cups of flour for 24 cookies. How many cups are needed for 60 cookies?",opts:["5","5.5","6","6.25"],ans:3,exp:"Rate = 2.5/24 per cookie. For 60: 2.5 × (60/24) = 2.5 × 2.5 = <code>6.25 cups</code>."},
+  {section:"AR",diff:1,forced:null,q:"A recipe calls for 2½ cups of flour for 24 cookies. How many cups are needed for 60 cookies?",opts:["5","5.5","6","6.25"],ans:3,exp:"Rate = 2.5/24 per cookie. For 60: 2.5 × (60/24) = 2.5 × 2.5 = <code>6.25</code>."},
   {section:"AR",diff:1,forced:null,q:"There are 48 students in a class. 25% are in the science club. How many are NOT in the science club?",opts:["12","24","36","38"],ans:2,exp:"In club: 48 × 0.25 = 12. NOT in club: 48 − 12 = <code>36</code>."},
   {section:"AR",diff:2,forced:null,q:"A cyclist rides 18 miles in 1.5 hours. A runner covers the same distance in 3 hours. How much faster (mph) is the cyclist?",opts:["3 mph","4 mph","6 mph","9 mph"],ans:2,exp:"Cyclist: 18/1.5 = 12 mph. Runner: 18/3 = 6 mph. Difference = <code>6 mph</code>."},
   {section:"AR",diff:2,forced:null,q:"An investment grows at 8% per year. If $5,000 is invested, how much is it worth after 2 years (compound interest)?",opts:["$5,640","$5,800","$5,832","$5,900"],ans:2,exp:"Year 1: 5,000 × 1.08 = 5,400. Year 2: 5,400 × 1.08 = <code>$5,832</code>."},
-  {section:"AR",diff:2,forced:null,q:"A container holds 3/4 gallon of juice. If you pour out 1/3 of the container, how much juice remains?",opts:["1/3 gal","1/2 gal","7/12 gal","5/8 gal"],ans:1,exp:"Remaining = 3/4 × (1 − 1/3) = 3/4 × 2/3 = 6/12 = <code>1/2 gallon</code>."},
+  {section:"AR",diff:2,forced:null,q:"A container holds 3/4 gallon of juice. If you pour out 1/3 of the container, how much juice remains?",opts:["1/3 gal","1/2 gal","7/12 gal","5/8 gal"],ans:1,exp:"Remaining = 3/4 × (1 − 1/3) = 3/4 × 2/3 = 6/12 = <code>1/2 gal</code>."},
   {section:"AR",diff:3,forced:null,q:"A tank is 1/8 full. After adding 24 gallons, it is 1/2 full. What is the tank's total capacity?",opts:["48 gal","56 gal","60 gal","64 gal"],ans:3,exp:"1/2 − 1/8 = 3/8 of the tank = 24 gal. Capacity = 24 ÷ (3/8) = 24 × (8/3) = <code>64 gal</code>."},
   {section:"AR",diff:3,forced:null,q:"Pipe A fills a pool in 6 hours. Pipe B drains it in 9 hours. If both are open simultaneously, how long to fill the pool from empty?",opts:["12 hours","15 hours","18 hours","21 hours"],ans:2,exp:"Net rate = 1/6 − 1/9 = 3/18 − 2/18 = 1/18 per hour. Time = <code>18 hours</code>."},
   {section:"AR",diff:2,forced:null,q:"A 15-foot ladder leans against a wall. The base is 9 feet from the wall. How high up the wall does the ladder reach?",opts:["10 ft","11 ft","12 ft","13 ft"],ans:2,exp:"h² = 15² − 9² = 225 − 81 = 144. h = √144 = <code>12 ft</code>."},
@@ -1760,42 +1760,42 @@ const PICAT_QUESTIONS = [
   {section:"AR",diff:1,forced:null,q:"A tank holds 500 liters. It is 3/5 full. How many liters must be added to make it 9/10 full?",opts:["100 L","125 L","140 L","150 L"],ans:3,exp:"Current = 500 × 3/5 = 300 L. Target = 500 × 9/10 = 450 L. Add = 450 − 300 = <code>150 L</code>."},
   {section:"AR",diff:2,forced:null,q:"Three workers can paint a house in 6 days. Two of the workers quit. How long will the remaining worker take alone?",opts:["9 days","12 days","15 days","18 days"],ans:3,exp:"Total work = 3 × 6 = 18 worker-days. 1 worker: 18 ÷ 1 = <code>18 days</code>."},
   {section:"AR",diff:3,forced:null,q:"A merchant buys goods for $600 and sells them at a 25% profit. Due to damage, he must discount the goods 10%. What is his final profit or loss percentage?",opts:["12.5% profit","15% profit","11.5% profit","10% loss"],ans:0,exp:"Sell price = 600 × 1.25 = $750. After discount: 750 × 0.90 = $675. Profit = 75. % = 75/600 = <code>12.5% profit</code>."},
-  {section:"AR",diff:2,forced:null,q:"A tank is being filled at 15 gallons/min and drained at 8 gallons/min. If the tank starts empty and holds 420 gallons, how long until it's full?",opts:["28 min","42 min","56 min","60 min"],ans:3,exp:"Net fill rate = 15 − 8 = 7 gal/min. Time = 420 ÷ 7 = <code>60 minutes</code>."},
+  {section:"AR",diff:2,forced:null,q:"A tank is being filled at 15 gallons/min and drained at 8 gallons/min. If the tank starts empty and holds 420 gallons, how long until it's full?",opts:["28 min","42 min","56 min","60 min"],ans:3,exp:"Net fill rate = 15 − 8 = 7 gal/min. Time = 420 ÷ 7 = <code>60 min</code>."},
   {section:"AR",diff:2,forced:null,q:"A concert hall has 720 seats. For a Tuesday show, 40% were filled. For Saturday, 85% were filled. How many more people attended on Saturday?",opts:["252","288","324","360"],ans:2,exp:"Tuesday: 720 × 0.40 = 288. Saturday: 720 × 0.85 = 612. Difference: 612 − 288 = <code>324</code>."},
   {section:"AR",diff:3,forced:null,q:"A car's value depreciates by 20% in its first year and 15% each subsequent year. After 3 years, what is the value of a car bought for $25,000?",opts:["$14,025","$14,450","$15,300","$15,750"],ans:1,exp:"Year 1: 25,000 × 0.80 = 20,000. Year 2: 20,000 × 0.85 = 17,000. Year 3: 17,000 × 0.85 = <code>$14,450</code>."},
   {section:"AR",diff:3,forced:null,q:"If 8 machines produce 400 units in 5 hours, how long will it take 10 machines to produce 1,000 units?",opts:["8 hours","10 hours","12 hours","15 hours"],ans:1,exp:"Rate per machine = 400/(8×5) = 10 units/hr. 10 machines: 100 units/hr. Time = 1,000 ÷ 100 = <code>10 hours</code>."},
   {section:"AR",diff:2,forced:null,q:"A room is 15 feet long and 12 feet wide. What is the area of the room in square yards?",opts:["15 sq. yd.","18 sq. yd.","20 sq. yd.","22 sq. yd."],ans:2,exp:"Area = 15 × 12 = 180 sq ft. Convert: 9 sq ft = 1 sq yd → 180 ÷ 9 = <code>20 sq. yd.</code>"},
-  {section:"AR",diff:1,forced:null,q:"A baker starts with 8 cups of flour. She uses 3 1/2 cups for a cake and 2 3/4 cups for cookies. How many cups of flour remain?",opts:["3/4 cup","1 1/4 cups","1 3/4 cups","2 1/4 cups"],ans:2,exp:"8 − 3½ − 2¾ = 8 − 3.5 − 2.75 = <code>1¾ cups</code>."},
+  {section:"AR",diff:1,forced:null,q:"A baker starts with 8 cups of flour. She uses 3 1/2 cups for a cake and 2 3/4 cups for cookies. How many cups of flour remain?",opts:["3/4 cup","1 1/4 cups","1 3/4 cups","2 1/4 cups"],ans:2,exp:"8 − 3½ − 2¾ = 8 − 3.5 − 2.75 = <code>1 3/4 cups</code>."},
   {section:"AR",diff:1,forced:null,q:"Two vehicles leave opposite ends of a 375-mile highway driving toward each other. One travels at 75 mph, the other at 50 mph. How long before they meet?",opts:["2 hours","2 hours 30 minutes","3 hours","3 hours 45 minutes"],ans:2,exp:"Combined speed = 75 + 50 = 125 mph. Time = 375 ÷ 125 = <code>3 hours</code>."},
-  {section:"AR",diff:2,forced:null,q:"A pump can fill 3/5 of a tank in 2 hours. At the same rate, how long will it take to fill the entire tank?",opts:["2 hours 30 minutes","3 hours","3 hours 20 minutes","3 hours 40 minutes"],ans:2,exp:"Rate = (3/5) ÷ 2 = 3/10 tank/hr. Full tank: 1 ÷ (3/10) = 10/3 hr = <code>3 hrs 20 min</code>."},
+  {section:"AR",diff:2,forced:null,q:"A pump can fill 3/5 of a tank in 2 hours. At the same rate, how long will it take to fill the entire tank?",opts:["2 hours 30 minutes","3 hours","3 hours 20 minutes","3 hours 40 minutes"],ans:2,exp:"Rate = (3/5) ÷ 2 = 3/10 tank/hr. Full tank: 1 ÷ (3/10) = 10/3 hr = <code>3 hours 20 minutes</code>."},
   {section:"AR",diff:1,forced:null,q:"A car travels 218.4 miles on 8.4 gallons of fuel. What is the car’s fuel efficiency in miles per gallon?",opts:["23 mpg","24 mpg","26 mpg","28 mpg"],ans:2,exp:"218.4 ÷ 8.4 = <code>26 mpg</code>."},
-  {section:"AR",diff:1,forced:null,q:"A soldier must drive 240 km. He covers the first 120 km at 80 km/h, then the remaining 120 km at 60 km/h. How long does the entire trip take?",opts:["2 hours 30 minutes","3 hours","3 hours 30 minutes","4 hours"],ans:2,exp:"Leg 1: 120 ÷ 80 = 1.5 hrs. Leg 2: 120 ÷ 60 = 2 hrs. Total = 1.5 + 2 = <code>3 hrs 30 min</code>."},
+  {section:"AR",diff:1,forced:null,q:"A soldier must drive 240 km. He covers the first 120 km at 80 km/h, then the remaining 120 km at 60 km/h. How long does the entire trip take?",opts:["2 hours 30 minutes","3 hours","3 hours 30 minutes","4 hours"],ans:2,exp:"Leg 1: 120 ÷ 80 = 1.5 hrs. Leg 2: 120 ÷ 60 = 2 hrs. Total = 1.5 + 2 = <code>3 hours 30 minutes</code>."},
   {section:"AR",diff:1,forced:null,q:"A car uses 2/3 of a tank of gas to travel 180 miles. At the same rate, how far can it travel on a full tank?",opts:["240 miles","255 miles","270 miles","300 miles"],ans:2,exp:"Full tank = 180 ÷ (2/3) = 180 × 3/2 = <code>270 miles</code>."},
   {section:"AR",diff:2,forced:null,q:"A fuel drum holds 55 gallons. Each vehicle requires 6 7/8 gallons per fill-up. How many complete fill-ups can be dispensed from one full drum?",opts:["6","7","8","9"],ans:2,exp:"6 7/8 = 55/8 gal. Fill-ups = 55 ÷ (55/8) = 55 × 8/55 = <code>8 complete fill-ups</code>."},
   {section:"AR",diff:2,forced:null,q:"A store marks all items down 40%. At checkout, an additional 10% is taken off the sale price. What is the total percent discount from the original price?",opts:["46%","50%","54%","60%"],ans:0,exp:"After 40% off: pay 60% of original. After 10% off that: 60% × 0.90 = 54%. Total discount = 100% − 54% = <code>46%</code>."},
   {section:"AR",diff:2,forced:null,q:"A tank is 1/3 full. After adding 120 gallons it is 3/4 full. What is the total capacity of the tank?",opts:["240 gallons","288 gallons","336 gallons","480 gallons"],ans:1,exp:"3/4 − 1/3 = 9/12 − 4/12 = 5/12 of the tank = 120 gal. Capacity = 120 × 12/5 = <code>288 gallons</code>."},
-  {section:"AR",diff:2,forced:null,q:"Two pipes fill a pool. Pipe A fills it in 4 hours, Pipe B in 6 hours. How long does it take both pipes together to fill the pool?",opts:["1 hour 12 minutes","2 hours 24 minutes","2 hours 40 minutes","5 hours"],ans:1,exp:"Combined rate = 1/4 + 1/6 = 5/12 tank/hr. Time = 12/5 hr = <code>2 hrs 24 min</code>."},
+  {section:"AR",diff:2,forced:null,q:"Two pipes fill a pool. Pipe A fills it in 4 hours, Pipe B in 6 hours. How long does it take both pipes together to fill the pool?",opts:["1 hour 12 minutes","2 hours 24 minutes","2 hours 40 minutes","5 hours"],ans:1,exp:"Combined rate = 1/4 + 1/6 = 5/12 tank/hr. Time = 12/5 hr = <code>2 hours 24 minutes</code>."},
   {section:"AR",diff:3,forced:null,q:"A car’s value depreciates 15% in the first year and 10% each subsequent year. What is the car’s value after 3 years if it originally cost $24,000?",opts:["$15,912","$16,524","$17,442","$18,360"],ans:1,exp:"Year 1 (−15%): $24,000 × 0.85 = $20,400. Year 2 (−10%): $20,400 × 0.90 = $18,360. Year 3 (−10%): $18,360 × 0.90 = <code>$16,524</code>."},
   {section:"AR",diff:1,forced:null,q:"A hallway is 4.5 feet wide and 32 feet long. An adjacent storage room measures 9 feet by 6 feet. What is the total floor area in square feet?",opts:["144 sq. ft.","180 sq. ft.","198 sq. ft.","216 sq. ft."],ans:2,exp:"Hallway: 4.5 × 32 = 144 sq ft. Storage: 9 × 6 = 54 sq ft. Total = 144 + 54 = <code>198 sq. ft.</code>"},
-  {section:"AR",diff:1,forced:null,q:"A work shift starts at 6:45 AM and ends at 3:20 PM. The worker takes a 45-minute unpaid lunch break. How many hours and minutes of paid work time does the worker complete?",opts:["7 hours 30 minutes","7 hours 50 minutes","8 hours 10 minutes","8 hours 35 minutes"],ans:1,exp:"6:45 AM to 3:20 PM = 8 hrs 35 min. Subtract 45-min lunch: 8h 35min − 45min = <code>7 hrs 50 min</code>."},
+  {section:"AR",diff:1,forced:null,q:"A work shift starts at 6:45 AM and ends at 3:20 PM. The worker takes a 45-minute unpaid lunch break. How many hours and minutes of paid work time does the worker complete?",opts:["7 hours 30 minutes","7 hours 50 minutes","8 hours 10 minutes","8 hours 35 minutes"],ans:1,exp:"6:45 AM to 3:20 PM = 8 hrs 35 min. Subtract 45-min lunch: 8h 35min − 45min = <code>7 hours 50 minutes</code>."},
   {section:"AR",diff:2,forced:null,q:"A factory completes 2/3 of its daily quota in 4 hours. At the same rate, how many hours will it take to produce 2 full daily quotas?",opts:["10 hours","12 hours","14 hours","16 hours"],ans:1,exp:"Rate = (2/3) ÷ 4 = 1/6 quota/hr. Time for 2 quotas = 2 ÷ (1/6) = <code>12 hours</code>."},
   {section:"AR",diff:1,forced:null,q:"A rectangular water tank is 8 feet long, 5 feet wide, and 4 feet deep. The tank is currently 3/4 full. How many cubic feet of water does it contain?",opts:["80 cu. ft.","100 cu. ft.","120 cu. ft.","160 cu. ft."],ans:2,exp:"Total volume = 8 × 5 × 4 = 160 cu ft. 3/4 full: 160 × 3/4 = <code>120 cu. ft.</code>"},
   {section:"AR",diff:1,forced:null,q:"A rectangular garden measures 24 feet by 18 feet. A gardener wants to lay sod over the entire area. Each piece of sod covers 6 square feet. How many pieces are needed?",opts:["56 pieces","64 pieces","72 pieces","84 pieces"],ans:2,exp:"Area = 24 × 18 = 432 sq ft. Pieces = 432 ÷ 6 = <code>72 pieces</code>."},
   {section:"AR",diff:1,forced:null,q:"A map uses a scale of 1 cm = 25 km. Two military bases are 6.4 cm apart on the map. What is the actual distance between the two bases?",opts:["140 km","150 km","160 km","175 km"],ans:2,exp:"Distance = 6.4 × 25 = <code>160 km</code>."},
   {section:"AR",diff:2,forced:null,q:"A 50-foot ladder leans against a wall. The base of the ladder is 14 feet from the wall. To the nearest foot, how high up the wall does the ladder reach?",opts:["36 feet","44 feet","48 feet","52 feet"],ans:2,exp:"h² = 50² − 14² = 2,500 − 196 = 2,304. h = √2,304 = <code>48 feet</code>."},
-  {section:"AR",diff:2,forced:null,q:"A supply depot receives 4 shipments of equipment. The shipments weigh 1.75 tons, 2,400 pounds, 3/4 ton, and 600 pounds. What is the total weight of all shipments in pounds?",opts:["7,500 lbs","8,000 lbs","9,500 lbs","10,000 lbs"],ans:2,exp:"Convert to lbs (1 ton = 2,000 lbs): 1.75 tons = 3,500 lbs; 3/4 ton = 1,500 lbs. Sum all four shipments to get <code>9,500 lbs</code>."},
+  {section:"AR",diff:2,forced:null,q:"A supply depot receives 4 shipments of equipment. The shipments weigh 1.75 tons, 2,400 pounds, 3/4 ton, and 600 pounds. What is the total weight of all shipments in pounds?",opts:["7,500 lbs","8,000 lbs","9,500 lbs","10,000 lbs"],ans:1,exp:"Convert to lbs (1 ton = 2,000 lbs): 1.75 tons = 3,500 lbs; 3/4 ton = 1,500 lbs. 3,500 + 2,400 + 1,500 + 600 = <code>8,000 lbs</code>."},
   {section:"AR",diff:2,forced:null,q:"Two tanks are each partially filled with 80 gallons of water. Tank A is 4/5 full, and Tank B is 2/5 full. What is the maximum amount of water that can be held in both tanks together?",opts:["100 gallons","200 gallons","260 gallons","300 gallons"],ans:3,exp:"Tank A capacity: 80 ÷ (4/5) = 100 gal. Tank B capacity: 80 ÷ (2/5) = 200 gal. Total max = 100 + 200 = <code>300 gallons</code>."},
   {section:"AR",diff:2,forced:null,q:"Two tanks are each partially filled with 72 gallons of water. Tank A is 3/4 full, and Tank B is 2/3 full. What is the maximum amount of water that can be held in both tanks together?",opts:["96 gallons","108 gallons","180 gallons","204 gallons"],ans:3,exp:"Tank A capacity: 72 ÷ (3/4) = 96 gal. Tank B capacity: 72 ÷ (2/3) = 108 gal. Total max = 96 + 108 = <code>204 gallons</code>."},
-  {section:"AR",diff:1,forced:null,q:"A wooden box is 2 feet high, 4 feet wide, and 6 feet long. Bob plans to paint the 4 sides and top. How many square feet will be painted?",opts:["24","40","64","88"],ans:2,exp:"Front/back: 2×(6×2)=24. Left/right: 2×(4×2)=16. Top: 6×4=24. Total = 24+16+24 = <code>64 sq ft</code>. Bottom not painted."},
-  {section:"AR",diff:1,forced:null,q:"A wooden box is 3 feet high, 2 feet wide, and 5 feet long. Bob plans to paint the 4 sides and top. How many square feet will be painted?",opts:["10","42","52","62"],ans:2,exp:"Front/back: 2×(5×3)=30. Left/right: 2×(2×3)=12. Top: 5×2=10. Total = 30+12+10 = <code>52 sq ft</code>. Bottom not painted."},
+  {section:"AR",diff:1,forced:null,q:"A wooden box is 2 feet high, 4 feet wide, and 6 feet long. Bob plans to paint the 4 sides and top. How many square feet will be painted?",opts:["24","40","64","88"],ans:2,exp:"Front/back: 2×(6×2)=24. Left/right: 2×(4×2)=16. Top: 6×4=24. Total = 24+16+24 = <code>64</code>. Bottom not painted."},
+  {section:"AR",diff:1,forced:null,q:"A wooden box is 3 feet high, 2 feet wide, and 5 feet long. Bob plans to paint the 4 sides and top. How many square feet will be painted?",opts:["10","42","52","62"],ans:2,exp:"Front/back: 2×(5×3)=30. Left/right: 2×(2×3)=12. Top: 5×2=10. Total = 30+12+10 = <code>52</code>. Bottom not painted."},
   {section:"AR",diff:2,forced:null,q:"What is the approximate surface area of a box that is 5 inches wide, 7 inches long, and 6 inches tall?",opts:["107 sq. in.","154 sq. in.","214 sq. in.","280 sq. in."],ans:2,exp:"SA = 2(lw+lh+wh) = 2(35+42+30) = 2(107) = <code>214 sq. in.</code> Trap: 107 is half the answer."},
   {section:"AR",diff:2,forced:null,q:"What is the approximate surface area of a box that is 4 inches wide, 10 inches long, and 6 inches tall?",opts:["124 sq. in.","188 sq. in.","248 sq. in.","320 sq. in."],ans:2,exp:"SA = 2(lw+lh+wh) = 2(40+60+24) = 2(124) = <code>248 sq. in.</code>"},
-  {section:"AR",diff:2,forced:null,q:"A structure in a 1:15 scale drawing has a height of 48 cm. If the ratio of the height of the structure to the width is 3:1, what is the width of the actual structure, to the nearest tenth of a meter?",opts:["1.6","2.4","3.6","7.2"],ans:1,exp:"Actual height = 48 × 15 = 720 cm = 7.2 m. H:W = 3:1 → width = 7.2 ÷ 3 = <code>2.4 m</code>. Trap D: stopping at 7.2 m (the height)."},
-  {section:"AR",diff:2,forced:null,q:"A structure in a 1:20 scale drawing has a height of 44 cm. If the ratio of the height of the structure to the width is 4:1, what is the width of the actual structure, to the nearest tenth of a meter?",opts:["1.1","2.2","4.4","8.8"],ans:1,exp:"Actual height = 44 × 20 = 880 cm = 8.8 m. H:W = 4:1 → width = 8.8 ÷ 4 = <code>2.2 m</code>. Trap D: stopping at 8.8 m (the height)."},
+  {section:"AR",diff:2,forced:null,q:"A structure in a 1:15 scale drawing has a height of 48 cm. If the ratio of the height of the structure to the width is 3:1, what is the width of the actual structure, to the nearest tenth of a meter?",opts:["1.6","2.4","3.6","7.2"],ans:1,exp:"Actual height = 48 × 15 = 720 cm = 7.2 m. H:W = 3:1 → width = 7.2 ÷ 3 = <code>2.4</code>. Trap D: stopping at 7.2 m (the height)."},
+  {section:"AR",diff:2,forced:null,q:"A structure in a 1:20 scale drawing has a height of 44 cm. If the ratio of the height of the structure to the width is 4:1, what is the width of the actual structure, to the nearest tenth of a meter?",opts:["1.1","2.2","4.4","8.8"],ans:1,exp:"Actual height = 44 × 20 = 880 cm = 8.8 m. H:W = 4:1 → width = 8.8 ÷ 4 = <code>2.2</code>. Trap D: stopping at 8.8 m (the height)."},
   {section:"AR",diff:1,forced:null,q:"A photocopy machine can copy 30 pages per minute. How long will it take the machine to make 20 copies of a 270-page document?",opts:["6 hours","4 hours 30 minutes","3 hours","1 hour 30 minutes"],ans:2,exp:"Total pages = 20 × 270 = 5,400. Time = 5,400 ÷ 30 = 180 min = <code>3 hours</code>."},
   {section:"AR",diff:1,forced:null,q:"A photocopy machine can copy 15 pages per minute. How long will it take the machine to make 48 copies of a 150-page document?",opts:["12 hours","10 hours 40 minutes","8 hours","4 hours"],ans:2,exp:"Total pages = 48 × 150 = 7,200. Time = 7,200 ÷ 15 = 480 min = <code>8 hours</code>."},
-  {section:"AR",diff:1,forced:null,q:"A local paving company has contracted to pave a parking lot that is 200 feet long and 90 feet wide. One drum of paving asphalt mix will cover 120 square feet. How many drums should the paving company deliver?",opts:["1.5","15","150","200"],ans:2,exp:"Area = 200 × 90 = 18,000 sq ft. Drums = 18,000 ÷ 120 = <code>150 drums</code>."},
-  {section:"AR",diff:1,forced:null,q:"A local paving company has contracted to pave a parking lot that is 160 feet long and 75 feet wide. One drum of paving asphalt mix will cover 120 square feet. How many drums should the paving company deliver?",opts:["1.0","10","100","120"],ans:2,exp:"Area = 160 × 75 = 12,000 sq ft. Drums = 12,000 ÷ 120 = <code>100 drums</code>."},
+  {section:"AR",diff:1,forced:null,q:"A local paving company has contracted to pave a parking lot that is 200 feet long and 90 feet wide. One drum of paving asphalt mix will cover 120 square feet. How many drums should the paving company deliver?",opts:["1.5","15","150","200"],ans:2,exp:"Area = 200 × 90 = 18,000 sq ft. Drums = 18,000 ÷ 120 = <code>150</code>."},
+  {section:"AR",diff:1,forced:null,q:"A local paving company has contracted to pave a parking lot that is 160 feet long and 75 feet wide. One drum of paving asphalt mix will cover 120 square feet. How many drums should the paving company deliver?",opts:["1.0","10","100","120"],ans:2,exp:"Area = 160 × 75 = 12,000 sq ft. Drums = 12,000 ÷ 120 = <code>100</code>."},
   {section:"AR",diff:1,forced:null,q:"A room is 15 feet long and 12 feet wide. What is the area of the room in square yards?",opts:["15 sq. yd.","18 sq. yd.","20 sq. yd.","22 sq. yd."],ans:2,exp:"Area = 15 × 12 = 180 sq ft. Since 9 sq ft = 1 sq yd: 180 ÷ 9 = <code>20 sq. yd.</code>"},
   {section:"AR",diff:1,forced:null,q:"A baker starts with 8 cups of flour. She uses 3 1/2 cups for a cake and 2 3/4 cups for cookies. How many cups of flour remain?",opts:["3/4 cup","1 1/4 cups","1 3/4 cups","2 1/4 cups"],ans:2,exp:"Used: 3.5 + 2.75 = 6.25 cups. Remaining: 8 − 6.25 = 1.75 = <code>1 3/4 cups</code>."},
   {section:"AR",diff:1,forced:null,q:"Two vehicles leave opposite ends of a 375-mile highway driving toward each other. One travels at 75 mph, the other at 50 mph. How long before they meet?",opts:["2 hours","2 hours 30 minutes","3 hours","3 hours 45 minutes"],ans:2,exp:"Combined closing speed = 75 + 50 = 125 mph. Time = 375 ÷ 125 = <code>3 hours</code>."},
@@ -1887,7 +1887,7 @@ const PICAT_QUESTIONS = [
   // ══ MATHEMATICS KNOWLEDGE (45 questions) ══
   // Q1-Q15: from real test (non-null initialUserAnswer)
   {section:"MK",diff:1,forced:"100",q:"If √x + 6 = 16, then x could equal",opts:["1","4","10","100"],ans:3,exp:"√x = 16 − 6 = 10. x = 10² = <code>100</code>."},
-  {section:"MK",diff:1,forced:"(x−8)(x−3)",q:"Factor: x² − 11x + 24",opts:["(x−8)(x−3)","(x+8)(x+3)","(x+6)(x+4)","(x−6)(x−4)"],ans:0,exp:"Need two numbers: product = 24, sum = −11 → <code>−8 and −3</code>. So (x−8)(x−3)."},
+  {section:"MK",diff:1,forced:"(x−8)(x−3)",q:"Factor: x² − 11x + 24",opts:["(x−8)(x−3)","(x+8)(x+3)","(x+6)(x+4)","(x−6)(x−4)"],ans:0,exp:"Need two numbers: product = 24, sum = −11 → <code>(x−8)(x−3)</code>. So (x−8)(x−3)."},
   {section:"MK",diff:2,forced:"3/47",q:"What is the reciprocal of 15 2/3?",opts:["15 3/2","3 2/15","45/3","3/47"],ans:3,exp:"15 2/3 = 47/3. Reciprocal = <code>3/47</code>."},
   {section:"MK",diff:1,forced:"80",q:"What is the value of x if 2/5 x − 17 = 15?",opts:["80","12 4/5","−5","−32 2/5"],ans:0,exp:"2/5 x = 32 → x = 32 × 5/2 = <code>80</code>."},
   {section:"MK",diff:2,forced:"−3x²+8x",q:"Simplify: 3x² − 2x(3x − 4)",opts:["3x²−8","−3x²+8x","−3x²−8x","3x²−6x+8"],ans:1,exp:"Distribute: 3x² − 6x² + 8x = <code>−3x² + 8x</code>."},
@@ -1896,9 +1896,9 @@ const PICAT_QUESTIONS = [
   {section:"MK",diff:1,forced:"59",q:"Which of the following is a prime number?",opts:["39","49","59","69"],ans:2,exp:"39=3×13, 49=7², 69=3×23. <code>59</code> has no factors other than 1 and itself."},
   {section:"MK",diff:2,forced:"−25/13",q:"If 2/5 x = −10/13, then x = ?",opts:["−13/4","−25/13","−4/13","−13/25"],ans:1,exp:"x = (−10/13) × (5/2) = −50/26 = <code>−25/13</code>."},
   {section:"MK",diff:2,forced:"2x + 3y = −2",initiallyWrong:true,q:"Which equation's graph has a slope of 2/3 and a y-intercept of (0, −2)?",opts:["2x − 3y = 6","3x − 2y = 6","2x + 3y = −2","3x + 2y = −2"],ans:0,exp:"2x − 3y = 6 → y = (2/3)x − 2. Slope = 2/3 ✓, y-int = −2 ✓. Trap C: 2x+3y=−2 → y = (−2/3)x − 2/3 (wrong slope)."},
-  {section:"MK",diff:1,forced:"0.573",q:"The diameter of a circle measures 57.3 centimeters. What is the diameter in meters?",opts:["0.573","5.73","573","5,730"],ans:0,exp:"57.3 ÷ 100 = <code>0.573 m</code>."},
+  {section:"MK",diff:1,forced:"0.573",q:"The diameter of a circle measures 57.3 centimeters. What is the diameter in meters?",opts:["0.573","5.73","573","5,730"],ans:0,exp:"57.3 ÷ 100 = <code>0.573</code>."},
   {section:"MK",diff:1,forced:"2/3",q:"What is the slope of the line 2x − 3y = 6?",opts:["−3","−3/2","2/3","2"],ans:2,exp:"y = (2/3)x − 2. Slope = <code>2/3</code>."},
-  {section:"MK",diff:2,forced:"(a + b)(a² − ab − b²)",initiallyWrong:true,q:"Factor completely: a³ + b³",opts:["(a + b)(a² − ab + b²)","(a + b)(a² − ab − b²)","(a − b)(a² + ab − b²)","(a + b)(a + b)(a + b)"],ans:0,exp:"Sum of cubes: <code>a³ + b³ = (a+b)(a²−ab+b²)</code>. Middle term NEGATIVE, last term POSITIVE. Trap B has −b² (wrong sign)."},
+  {section:"MK",diff:2,forced:"(a + b)(a² − ab − b²)",initiallyWrong:true,q:"Factor completely: a³ + b³",opts:["(a + b)(a² − ab + b²)","(a + b)(a² − ab − b²)","(a − b)(a² + ab − b²)","(a + b)(a + b)(a + b)"],ans:0,exp:"Sum of cubes: a³ + b³ = <code>(a + b)(a² − ab + b²)</code>. Middle term NEGATIVE, last term POSITIVE. Trap B has −b² (wrong sign)."},
   {section:"MK",diff:1,forced:"a=9, b=12, c=15",q:"Which of the following a, b, c side lengths will form a right triangle?",opts:["a=6, b=9, c=15","a=9, b=12, c=15","a=3, b=12, c=36","a=18, b=18, c=36"],ans:1,exp:"9²+12²=81+144=225=15². ✓ This is a 3-4-5 triple ×3."},
   {section:"MK",diff:3,forced:"2x³ + 92x² + 2x + xy − 1",initiallyWrong:true,q:"Which of the following is equivalent to 92x² + x − 1 + xy + 2x³/x?",opts:["94x² + x + xy − 1","92x² + 3x + xy − 1","2x² + 92x + y − 1","2x³ + 92x² + 2x + xy − 1"],ans:0,exp:"2x³/x = 2x². So: 92x² + 2x² + x − 1 + xy = <code>94x² + x + xy − 1</code>. Trap D: fails to simplify 2x³/x before adding."},
   // Q16-Q45: fresh practice pool
@@ -1911,8 +1911,8 @@ const PICAT_QUESTIONS = [
   {section:"MK",diff:2,forced:null,q:"What is the sum of interior angles of a pentagon?",opts:["360°","450°","540°","720°"],ans:2,exp:"Sum = (n−2)×180. For pentagon: (5−2)×180 = 3×180 = <code>540°</code>."},
   {section:"MK",diff:2,forced:null,q:"If x² − 5x + 6 = 0, what are the values of x?",opts:["x=2 or x=3","x=−2 or x=−3","x=1 or x=6","x=−1 or x=6"],ans:0,exp:"Factor: (x−2)(x−3) = 0 → <code>x = 2 or x = 3</code>."},
   {section:"MK",diff:3,forced:null,q:"What is the value of (2³)² ÷ 2⁴?",opts:["4","8","16","32"],ans:0,exp:"(2³)² = 2⁶ = 64. 64 ÷ 2⁴ = 64 ÷ 16 = <code>4</code>."},
-  {section:"MK",diff:2,forced:null,q:"Solve: 4x + 7 = 3x − 2",opts:["x = −9","x = 5","x = 9","x = −5"],ans:0,exp:"4x − 3x = −2 − 7 → x = <code>−9</code>."},
-  {section:"MK",diff:2,forced:null,q:"Which of the following is the equation of a line with slope 3 passing through (1, 2)?",opts:["y = 3x − 1","y = 3x + 1","y = 3x − 2","y = 3x + 2"],ans:0,exp:"y − 2 = 3(x − 1) → y = 3x − 3 + 2 = <code>3x − 1</code>."},
+  {section:"MK",diff:2,forced:null,q:"Solve: 4x + 7 = 3x − 2",opts:["x = −9","x = 5","x = 9","x = −5"],ans:0,exp:"4x − 3x = −2 − 7 → x = <code>x = −9</code>."},
+  {section:"MK",diff:2,forced:null,q:"Which of the following is the equation of a line with slope 3 passing through (1, 2)?",opts:["y = 3x − 1","y = 3x + 1","y = 3x − 2","y = 3x + 2"],ans:0,exp:"y − 2 = 3(x − 1) → y = 3x − 3 + 2 = <code>y = 3x − 1</code>."},
   {section:"MK",diff:3,forced:null,q:"Simplify: (a²b³)² ÷ (a³b²)",opts:["a b⁴","ab⁴","a²b³","a³b⁴"],ans:1,exp:"Numerator: a⁴b⁶. ÷ a³b² = a^(4-3) × b^(6-2) = <code>ab⁴</code>."},
   {section:"MK",diff:2,forced:null,q:"What is 20% of 350?",opts:["60","70","75","80"],ans:1,exp:"20% × 350 = 0.20 × 350 = <code>70</code>."},
   {section:"MK",diff:1,forced:null,q:"What is the perimeter of a rectangle with length 12 and width 5?",opts:["60","34","24","17"],ans:1,exp:"P = 2(l + w) = 2(12+5) = 2(17) = <code>34</code>."},
@@ -1925,7 +1925,7 @@ const PICAT_QUESTIONS = [
   {section:"MK",diff:2,forced:null,q:"What is 3⁻² equal to?",opts:["−9","−6","1/9","1/6"],ans:2,exp:"3⁻² = 1/3² = <code>1/9</code>."},
   {section:"MK",diff:2,forced:null,q:"Solve the system: x + y = 10, x − y = 4",opts:["x=6, y=4","x=7, y=3","x=4, y=6","x=3, y=7"],ans:1,exp:"Add equations: 2x=14 → x=7. y=10−7=3. Solution: <code>x=7, y=3</code>."},
   {section:"MK",diff:3,forced:null,q:"Which of the following is a zero of f(x) = x³ − 8?",opts:["−2","2","−8","8"],ans:1,exp:"x³ = 8 → x = ∛8 = <code>2</code>."},
-  {section:"MK",diff:2,forced:null,q:"A triangle has sides 5, 12, and 13. What type of triangle is it?",opts:["Acute","Right","Obtuse","Equilateral"],ans:1,exp:"5² + 12² = 25 + 144 = 169 = 13². Pythagorean triple → <code>Right triangle</code>."},
+  {section:"MK",diff:2,forced:null,q:"A triangle has sides 5, 12, and 13. What type of triangle is it?",opts:["Acute","Right","Obtuse","Equilateral"],ans:1,exp:"5² + 12² = 25 + 144 = 169 = 13². Pythagorean triple → <code>Right</code>."},
   {section:"MK",diff:3,forced:null,q:"Simplify: (x² − 4) / (x − 2)",opts:["x − 2","x + 2","x² − 2","x + 4"],ans:1,exp:"Factor: (x−2)(x+2) / (x−2) = <code>x + 2</code> (for x ≠ 2)."},
   {section:"MK",diff:2,forced:null,q:"What is the volume of a cylinder with radius 3 and height 7?",opts:["21π","42π","63π","126π"],ans:2,exp:"V = πr²h = π(9)(7) = <code>63π</code>."},
   {section:"MK",diff:3,forced:null,q:"If log₂(x) = 5, then x = ?",opts:["10","25","32","64"],ans:2,exp:"log₂(x) = 5 → x = 2⁵ = <code>32</code>."},
@@ -1935,38 +1935,38 @@ const PICAT_QUESTIONS = [
   {section:"MK",diff:3,forced:null,q:"A circle has a circumference of 10π. What is its area?",opts:["5π","10π","25π","100π"],ans:2,exp:"C = 2πr = 10π → r = 5. Area = πr² = π(25) = <code>25π</code>."},
   {section:"MK",diff:1,forced:null,q:"If √x - 3 = 5, then x could equal",opts:["16","25","36","64"],ans:3,exp:"√x = 5 + 3 = 8. x = 8² = <code>64</code>."},
   {section:"MK",diff:1,forced:null,q:"What is the reciprocal of 8 1/3?",opts:["8 3/1","3 1/8","3/25","1/25"],ans:2,exp:"8 1/3 = 25/3. Reciprocal = <code>3/25</code>."},
-  {section:"MK",diff:2,forced:null,q:"Simplify: 4x² - 3x(2x - 5)",opts:["-2x²+15x","2x²+15x","-2x²-15x","x²+15x"],ans:0,exp:"Distribute: 4x² − 6x² + 15x = <code>−2x² + 15x</code>."},
-  {section:"MK",diff:2,forced:null,q:"If 3/4x = -(9/16), then x = ?",opts:["-(3/4)","-(4/3)","-(9/12)","-(27/16)"],ans:0,exp:"x = −(9/16) ÷ (3/4) = −(9/16) × (4/3) = −36/48 = <code>−3/4</code>."},
-  {section:"MK",diff:2,forced:null,q:"Which equation’s graph has a slope of 3/4 and a y-intercept of (0, -3)?",opts:["3x - 4y = 12","4x - 3y = 12","3x + 4y = -3","4x + 3y = -3"],ans:0,exp:"y = (3/4)x − 3. Multiply by 4: 4y = 3x − 12 → <code>3x − 4y = 12</code>."},
-  {section:"MK",diff:2,forced:null,q:"Which equation of a line contains the point (2, -1) and is parallel to y = 3x + 4?",opts:["y = 3x - 7","y = -1/3x + 2","y = 3x + 4","y = 3x + 2"],ans:0,exp:"Parallel slope = 3. Sub (2,−1): −1 = 6 + b → b = −7. Equation: <code>y = 3x − 7</code>."},
-  {section:"MK",diff:1,forced:null,q:"Factor: x² - 7x + 12",opts:["(x-3)(x-4)","(x+3)(x+4)","(x-6)(x-2)","(x+6)(x-2)"],ans:0,exp:"Need product = 12, sum = −7 → −3 and −4. <code>(x−3)(x−4)</code>."},
+  {section:"MK",diff:2,forced:null,q:"Simplify: 4x² - 3x(2x - 5)",opts:["-2x²+15x","2x²+15x","-2x²-15x","x²+15x"],ans:0,exp:"Distribute: 4x² − 6x² + 15x = <code>-2x²+15x</code>."},
+  {section:"MK",diff:2,forced:null,q:"If 3/4x = -(9/16), then x = ?",opts:["-(3/4)","-(4/3)","-(9/12)","-(27/16)"],ans:0,exp:"x = −(9/16) ÷ (3/4) = −(9/16) × (4/3) = −36/48 = <code>-(3/4)</code>."},
+  {section:"MK",diff:2,forced:null,q:"Which equation’s graph has a slope of 3/4 and a y-intercept of (0, -3)?",opts:["3x - 4y = 12","4x - 3y = 12","3x + 4y = -3","4x + 3y = -3"],ans:0,exp:"y = (3/4)x − 3. Multiply by 4: 4y = 3x − 12 → <code>3x - 4y = 12</code>."},
+  {section:"MK",diff:2,forced:null,q:"Which equation of a line contains the point (2, -1) and is parallel to y = 3x + 4?",opts:["y = 3x - 7","y = -1/3x + 2","y = 3x + 4","y = 3x + 2"],ans:0,exp:"Parallel slope = 3. Sub (2,−1): −1 = 6 + b → b = −7. Equation: <code>y = 3x - 7</code>."},
+  {section:"MK",diff:1,forced:null,q:"Factor: x² - 7x + 12",opts:["(x-3)(x-4)","(x+3)(x+4)","(x-6)(x-2)","(x+6)(x-2)"],ans:0,exp:"Need product = 12, sum = −7 → −3 and −4. <code>(x-3)(x-4)</code>."},
   {section:"MK",diff:1,forced:null,q:"Which of the following pairs of numbers represents a perfect square and its square root?",opts:["49 and 8","81 and 9","100 and 12","144 and 14"],ans:1,exp:"√81 = 9 ✓. Others: √49=7≠8, √100=10≠12, √144=12≠14."},
-  {section:"MK",diff:1,forced:null,q:"What is the slope of the line 3x + 4y = 8?",opts:["3/4","-3/4","4/3","-4/3"],ans:1,exp:"4y = −3x + 8 → y = (−3/4)x + 2. Slope = <code>−3/4</code>."},
-  {section:"MK",diff:2,forced:null,q:"Factor: a³ - b³",opts:["(a - b)(a² + ab + b²)","(a - b)(a² - ab + b²)","(a + b)(a² - ab + b²)","(a - b)(a² + ab - b²)"],ans:0,exp:"Difference of cubes: <code>a³ − b³ = (a−b)(a²+ab+b²)</code>. Middle term positive, last term positive."},
+  {section:"MK",diff:1,forced:null,q:"What is the slope of the line 3x + 4y = 8?",opts:["3/4","-3/4","4/3","-4/3"],ans:1,exp:"4y = −3x + 8 → y = (−3/4)x + 2. Slope = <code>-3/4</code>."},
+  {section:"MK",diff:2,forced:null,q:"Factor: a³ - b³",opts:["(a - b)(a² + ab + b²)","(a - b)(a² - ab + b²)","(a + b)(a² - ab + b²)","(a - b)(a² + ab - b²)"],ans:0,exp:"Difference of cubes: <code>(a - b)(a² + ab + b²)</code>. Middle term positive, last term positive."},
   {section:"MK",diff:1,forced:null,q:"Which of the following sets of side lengths forms a right triangle?",opts:["a=5, b=12, c=13","a=6, b=8, c=11","a=7, b=10, c=13","a=8, b=15, c=18"],ans:0,exp:"5²+12²=25+144=169=13² ✓. Classic 5-12-13 Pythagorean triple."},
   {section:"MK",diff:1,forced:null,q:"If √x + 4 = 9, then x could equal",opts:["5","10","25","81"],ans:2,exp:"√x = 9 − 4 = 5. x = 5² = <code>25</code>."},
-  {section:"MK",diff:1,forced:null,q:"Factor: x² - 9x + 20",opts:["(x-4)(x-5)","(x+4)(x+5)","(x-10)(x+2)","(x-2)(x-10)"],ans:0,exp:"Need product = 20, sum = −9 → −4 and −5. <code>(x−4)(x−5)</code>."},
+  {section:"MK",diff:1,forced:null,q:"Factor: x² - 9x + 20",opts:["(x-4)(x-5)","(x+4)(x+5)","(x-10)(x+2)","(x-2)(x-10)"],ans:0,exp:"Need product = 20, sum = −9 → −4 and −5. <code>(x-4)(x-5)</code>."},
   {section:"MK",diff:1,forced:null,q:"What is the reciprocal of 6 2/5?",opts:["6 5/2","5 2/6","5/32","3/16"],ans:2,exp:"6 2/5 = 32/5. Reciprocal = <code>5/32</code>."},
   {section:"MK",diff:2,forced:null,q:"What is the value of x if 3/7x + 5 = 17?",opts:["28","2 4/7","-7","-28"],ans:0,exp:"3/7x = 12. x = 12 × 7/3 = <code>28</code>."},
-  {section:"MK",diff:2,forced:null,q:"Simplify: 5x² - x(4x + 3)",opts:["x²-3x","x²+3x","-x²-3x","9x²-3x"],ans:0,exp:"Distribute: 5x² − 4x² − 3x = <code>x² − 3x</code>."},
+  {section:"MK",diff:2,forced:null,q:"Simplify: 5x² - x(4x + 3)",opts:["x²-3x","x²+3x","-x²-3x","9x²-3x"],ans:0,exp:"Distribute: 5x² − 4x² − 3x = <code>x²-3x</code>."},
   {section:"MK",diff:1,forced:null,q:"Which of the following pairs of numbers represents a perfect square and its square root?",opts:["36 and 7","121 and 11","144 and 14","169 and 14"],ans:1,exp:"√121 = 11 ✓. Others: √36=6≠7, √144=12≠14, √169=13≠14."},
-  {section:"MK",diff:2,forced:null,q:"Which equation of a line passes through (4, -3) and is parallel to y = -1/2x + 5?",opts:["y = -1/2x - 1","y = 2x - 3","y = -1/2x + 1","y = -2x - 1"],ans:0,exp:"Parallel slope = −1/2. Sub (4,−3): −3 = −2 + b → b = −1. Equation: <code>y = −1/2x − 1</code>."},
+  {section:"MK",diff:2,forced:null,q:"Which equation of a line passes through (4, -3) and is parallel to y = -1/2x + 5?",opts:["y = -1/2x - 1","y = 2x - 3","y = -1/2x + 1","y = -2x - 1"],ans:0,exp:"Parallel slope = −1/2. Sub (4,−3): −3 = −2 + b → b = −1. Equation: <code>y = -1/2x - 1</code>."},
   {section:"MK",diff:1,forced:null,q:"Which of the following is NOT a prime number?",opts:["41","43","47","51"],ans:3,exp:"51 = 3 × 17 — composite. 41, 43, and 47 are all prime. Answer: <code>51</code>."},
-  {section:"MK",diff:2,forced:null,q:"If 5/6x = -(25/18), then x = ?",opts:["-(5/3)","-(3/5)","-(25/15)","-(18/25)"],ans:0,exp:"x = −(25/18) ÷ (5/6) = −(25/18) × (6/5) = −150/90 = <code>−5/3</code>."},
+  {section:"MK",diff:2,forced:null,q:"If 5/6x = -(25/18), then x = ?",opts:["-(5/3)","-(3/5)","-(25/15)","-(18/25)"],ans:0,exp:"x = −(25/18) ÷ (5/6) = −(25/18) × (6/5) = −150/90 = <code>-(5/3)</code>."},
   {section:"MK",diff:2,forced:null,q:"Which equation’s graph has a slope of -2/5 and a y-intercept of (0, 4)?",opts:["2x + 5y = 20","5x + 2y = 20","2x - 5y = 4","-2x + 5y = 4"],ans:0,exp:"y = (−2/5)x + 4. Multiply by 5: 5y = −2x + 20 → <code>2x + 5y = 20</code>."},
-  {section:"MK",diff:1,forced:null,q:"A length of cable measures 3,840 millimeters. What is that length in meters?",opts:["0.384","3.84","38.4","384"],ans:1,exp:"3,840 mm ÷ 1,000 = <code>3.84 m</code>."},
+  {section:"MK",diff:1,forced:null,q:"A length of cable measures 3,840 millimeters. What is that length in meters?",opts:["0.384","3.84","38.4","384"],ans:1,exp:"3,840 mm ÷ 1,000 = <code>3.84</code>."},
   {section:"MK",diff:1,forced:null,q:"What is the slope of the line 5x - 2y = 10?",opts:["5","5/2","2/5","-5/2"],ans:1,exp:"−2y = −5x + 10 → y = (5/2)x − 5. Slope = <code>5/2</code>."},
-  {section:"MK",diff:3,forced:null,q:"Factor: 8x³ + 27",opts:["(2x+3)(4x²-6x+9)","(2x-3)(4x²+6x+9)","(2x+3)(4x²+6x+9)","(2x+3)(4x²-6x-9)"],ans:0,exp:"Sum of cubes: (2x)³ + 3³ = (2x+3)((2x)²−(2x)(3)+3²) = <code>(2x+3)(4x²−6x+9)</code>."},
+  {section:"MK",diff:3,forced:null,q:"Factor: 8x³ + 27",opts:["(2x+3)(4x²-6x+9)","(2x-3)(4x²+6x+9)","(2x+3)(4x²+6x+9)","(2x+3)(4x²-6x-9)"],ans:0,exp:"Sum of cubes: (2x)³ + 3³ = (2x+3)((2x)²−(2x)(3)+3²) = <code>(2x+3)(4x²-6x+9)</code>."},
   {section:"MK",diff:2,forced:null,q:"Which of the following sets of side lengths does NOT form a right triangle?",opts:["a=3, b=4, c=5","a=8, b=15, c=17","a=7, b=24, c=25","a=6, b=9, c=12"],ans:3,exp:"6²+9²=36+81=117 ≠ 144=12². Not a right triangle. All others are Pythagorean triples. Answer: <code>a=6, b=9, c=12</code>."},
-  {section:"MK",diff:2,forced:null,q:"Which of the following expressions is equivalent to (6x³ + 4x² - 2x) ÷ 2x?",opts:["3x² + 2x - 1","3x³ + 2x² - 1","6x² + 4x - 2","3x² + 2x - 2"],ans:0,exp:"6x³/2x=3x², 4x²/2x=2x, −2x/2x=−1. Result: <code>3x² + 2x − 1</code>."},
-  {section:"MK",diff:2,forced:null,q:"If |3x + 6| = 12, what are the possible values of x?",opts:["x=2 or x=-6","x=6 or x=-2","x=2 or x=6","x=-2 or x=-6"],ans:0,exp:"Case 1: 3x+6=12 → x=2. Case 2: 3x+6=−12 → x=−6. Solutions: <code>x=2 or x=−6</code>."},
+  {section:"MK",diff:2,forced:null,q:"Which of the following expressions is equivalent to (6x³ + 4x² - 2x) ÷ 2x?",opts:["3x² + 2x - 1","3x³ + 2x² - 1","6x² + 4x - 2","3x² + 2x - 2"],ans:0,exp:"6x³/2x=3x², 4x²/2x=2x, −2x/2x=−1. Result: <code>3x² + 2x - 1</code>."},
+  {section:"MK",diff:2,forced:null,q:"If |3x + 6| = 12, what are the possible values of x?",opts:["x=2 or x=-6","x=6 or x=-2","x=2 or x=6","x=-2 or x=-6"],ans:0,exp:"Case 1: 3x+6=12 → x=2. Case 2: 3x+6=−12 → x=−6. Solutions: <code>x=2 or x=-6</code>."},
   {section:"MK",diff:1,forced:null,q:"What is the area of a circle with a diameter of 12 cm? (Use π ≈ 3.14)",opts:["37.68 cm²","75.36 cm²","113.04 cm²","452.16 cm²"],ans:2,exp:"r = 6. Area = π × r² = 3.14 × 36 = <code>113.04 cm²</code>."},
   {section:"MK",diff:2,forced:null,q:"Simplify: (2x³y²)(5x²y⁴)",opts:["7x⁵y⁶","10x⁵y⁶","10x⁶y⁸","7x⁶y⁸"],ans:1,exp:"Multiply coefficients: 2×5=10. Add exponents: x^(3+2)=x⁵, y^(2+4)=y⁶. Result: <code>10x⁵y⁶</code>."},
   {section:"MK",diff:1,forced:null,q:"What is the sum of the interior angles of a pentagon?",opts:["360°","450°","540°","720°"],ans:2,exp:"Sum = (n−2)×180 = (5−2)×180 = 3×180 = <code>540°</code>."},
   {section:"MK",diff:1,forced:null,q:"If √x − 3 = 5, then x could equal",opts:["16","25","36","64"],ans:3,exp:"√x = 5 + 3 = 8. x = 8² = <code>64</code>."},
   {section:"MK",diff:2,forced:null,q:"What is the reciprocal of 8 1/3?",opts:["8 3/1","3 1/8","3/25","1/25"],ans:2,exp:"8 1/3 = 25/3. Reciprocal = <code>3/25</code>."},
-  {section:"MK",diff:2,forced:null,q:"Simplify: 4x² − 3x(2x − 5)",opts:["-2x²+15x","2x²+15x","-2x²-15x","x²+15x"],ans:0,exp:"Distribute: 4x² − 6x² + 15x = <code>−2x²+15x</code>."},
-  {section:"MK",diff:2,forced:null,q:"If 3/4 x = −9/16, then x = ?",opts:["−(3/4)","−(4/3)","−(9/12)","−(27/16)"],ans:0,exp:"x = (−9/16) × (4/3) = −36/48 = <code>−3/4</code>."},
+  {section:"MK",diff:2,forced:null,q:"Simplify: 4x² − 3x(2x − 5)",opts:["-2x²+15x","2x²+15x","-2x²-15x","x²+15x"],ans:0,exp:"Distribute: 4x² − 6x² + 15x = <code>-2x²+15x</code>."},
+  {section:"MK",diff:2,forced:null,q:"If 3/4 x = −9/16, then x = ?",opts:["−(3/4)","−(4/3)","−(9/12)","−(27/16)"],ans:0,exp:"x = (−9/16) × (4/3) = −36/48 = <code>−(3/4)</code>."},
   {section:"MK",diff:2,forced:null,q:"Which equation's graph has a slope of 3/4 and a y-intercept of (0, −3)?",opts:["3x − 4y = 12","4x − 3y = 12","3x + 4y = −3","4x + 3y = −3"],ans:0,exp:"3x − 4y = 12 → y = (3/4)x − 3. Slope = 3/4 ✓, y-intercept = −3 ✓."},
   {section:"MK",diff:2,forced:null,q:"Which equation of a line contains the point (2, −1) and is parallel to y = 3x + 4?",opts:["y = 3x − 7","y = −1/3x + 2","y = 3x + 4","y = 3x + 2"],ans:0,exp:"Parallel → slope = 3. Sub (2,−1): −1 = 6 + b → b = −7. Equation: <code>y = 3x − 7</code>."},
   {section:"MK",diff:1,forced:null,q:"Factor: x² − 7x + 12",opts:["(x−3)(x−4)","(x+3)(x+4)","(x−6)(x−2)","(x+6)(x−2)"],ans:0,exp:"Need product = 12, sum = −7 → −3 and −4. Answer: <code>(x−3)(x−4)</code>."},
@@ -1982,7 +1982,7 @@ const PICAT_QUESTIONS = [
   {section:"MK",diff:1,forced:null,q:"Which pair correctly identifies a perfect square and its square root?",opts:["36 and 7","121 and 11","144 and 14","169 and 14"],ans:1,exp:"√121 = 11 ✓. √36=6 (not 7), √144=12 (not 14), √169=13 (not 14). Answer: <code>121 and 11</code>."},
   {section:"MK",diff:2,forced:null,q:"Which equation of a line passes through (4, −3) and is parallel to y = −1/2 x + 5?",opts:["y = −1/2 x − 1","y = 2x − 3","y = −1/2 x + 1","y = −2x − 1"],ans:0,exp:"Parallel → slope = −1/2. Sub (4,−3): −3 = −2 + b → b = −1. Equation: <code>y = −1/2 x − 1</code>."},
   {section:"MK",diff:1,forced:null,q:"Which of the following is NOT a prime number?",opts:["41","43","47","51"],ans:3,exp:"41, 43, 47 are all prime. 51 = 3 × 17, so <code>51</code> is NOT prime."},
-  {section:"MK",diff:2,forced:null,q:"If 5/6 x = −25/18, then x = ?",opts:["−(5/3)","−(3/5)","−(25/15)","−(18/25)"],ans:0,exp:"x = (−25/18) × (6/5) = −150/90 = <code>−5/3</code>."},
+  {section:"MK",diff:2,forced:null,q:"If 5/6 x = −25/18, then x = ?",opts:["−(5/3)","−(3/5)","−(25/15)","−(18/25)"],ans:0,exp:"x = (−25/18) × (6/5) = −150/90 = <code>−(5/3)</code>."},
   {section:"MK",diff:2,forced:null,q:"Which equation's graph has a slope of −2/5 and a y-intercept of (0, 4)?",opts:["2x + 5y = 20","5x + 2y = 20","2x − 5y = 4","−2x + 5y = 4"],ans:0,exp:"2x + 5y = 20 → y = (−2/5)x + 4. Slope = −2/5 ✓, y-intercept = 4 ✓."},
   {section:"MK",diff:1,forced:null,q:"A length of cable measures 3,840 millimeters. What is that length in meters?",opts:["0.384","3.84","38.4","384"],ans:1,exp:"3,840 mm ÷ 1,000 = <code>3.84</code> m."},
   {section:"MK",diff:2,forced:null,q:"What is the slope of the line 5x − 2y = 10?",opts:["5","5/2","2/5","−5/2"],ans:1,exp:"−2y = −5x + 10 → y = (5/2)x − 5. Slope = <code>5/2</code>."},
@@ -2042,7 +2042,7 @@ const QB = {
     {section:"EI",diff:2,q:"In a series circuit containing multiple resistors, the total circuit resistance equals:",opts:["The product of all individual resistances multiplied together","The simple arithmetic sum of all individual resistances","The reciprocal of the sum of the reciprocals of each resistance","The arithmetic average of all individual resistance values"],ans:1,exp:"Series resistance: R_total = R₁ + R₂ + R₃ + ... Each resistor adds directly to the total. This is why Christmas lights used to go dark when one bulb failed in older series-wired strands."},
     {section:"EI",diff:3,q:"A 12-volt battery powers a series circuit containing a 4-ohm resistor and an 8-ohm resistor. What is the total current flowing through the circuit?",opts:["0.5 amperes","1 ampere","2 amperes","3 amperes"],ans:1,exp:"Total resistance = 4 + 8 = 12 Ω. Using Ohm's Law: I = V ÷ R = 12 ÷ 12 = <code>1 ampere</code>. In a series circuit, the same current flows through all components."},
     {section:"EI",diff:3,q:"On a standard circuit diagram, the symbol for an NPN bipolar transistor shows an arrow on the emitter lead pointing in which direction?",opts:["Inward toward the base, indicating conventional current flows into the emitter","Into the center of the transistor symbol, toward the base-collector junction","Outward, away from the transistor body—indicating conventional current flows out of the emitter","Along the collector lead, pointing from collector to base"],ans:2,exp:"NPN mnemonic: 'Not Pointing iN.' The emitter arrow points outward (away from the transistor base) in an NPN. PNP transistors have the arrow pointing inward toward the base."},
-    {section:"EI",diff:3,q:"Two 10-microfarad capacitors are connected in parallel. What is their combined total capacitance?",opts:["5 microfarads, because parallel capacitors halve capacitance","10 microfarads, unchanged from a single capacitor","20 microfarads, because parallel capacitors add directly","100 microfarads, because parallel capacitors multiply"],ans:2,exp:"Capacitors in parallel add directly: C_total = C₁ + C₂ = 10 + 10 = <code>20 μF</code>. (Note: this is opposite to resistors, where parallel connections reduce total resistance.)"},
+    {section:"EI",diff:3,q:"Two 10-microfarad capacitors are connected in parallel. What is their combined total capacitance?",opts:["5 μF","10 μF","20 μF","100 μF"],ans:2,exp:"Capacitors in parallel add directly: C_total = C₁ + C₂ = 10 + 10 = <code>20 μF</code>. (Note: this is opposite to resistors, where parallel connections reduce total resistance.)"},
   ],
   AI:[
     {section:"AI",diff:1,q:"In a four-stroke internal combustion engine, what is the primary function of the crankshaft?",opts:["It regulates oil pressure to prevent engine overheating during operation","It converts the linear up-and-down piston motion into rotational power","It converts electrical energy from the battery into mechanical motion to start the engine","It converts fuel pressure into compressed air for the intake manifold"],ans:1,exp:"The crankshaft is connected to the pistons via connecting rods. As pistons move up and down during combustion, the crankshaft converts that linear motion into the rotational force (torque) that ultimately drives the wheels."},
@@ -2064,12 +2064,12 @@ const QB = {
     {section:"MC",diff:2,q:"A large gear with 40 teeth is rotating at 100 RPM and is meshed with a small gear that has 10 teeth. At what speed does the small gear rotate?",opts:["25 RPM","100 RPM","250 RPM","400 RPM"],ans:3,exp:"Gear ratio = large teeth ÷ small teeth = 40 ÷ 10 = 4. Small gear speed = 100 × 4 = <code>400 RPM</code>. When a small gear meshes with a large gear, the small one spins faster."},
     {section:"MC",diff:1,q:"A sealed rigid container holds a fixed amount of gas at room temperature. If the gas is compressed into a smaller volume while the temperature remains constant, what happens to the pressure inside the container?",opts:["The pressure decreases as the volume decreases","The mass of the gas decreases along with the volume","The pressure increases because the same gas molecules occupy less space","The temperature automatically increases to compensate for the compression"],ans:2,exp:"Boyle's Law states: at constant temperature, pressure and volume are inversely proportional (P₁V₁ = P₂V₂). Compressing the volume forces the same number of molecules into less space, increasing pressure."},
     {section:"MC",diff:2,q:"A block-and-tackle pulley system uses 4 rope strands supporting the movable lower block. What is the mechanical advantage of this system, ignoring friction?",opts:["2","4","6","8"],ans:1,exp:"In a block-and-tackle system, mechanical advantage equals the number of rope strands supporting the load (the movable block). With 4 supporting strands, MA = <code>4</code>. A 400-lb load requires only 100 lb of effort."},
-    {section:"MC",diff:2,q:"A vertical water storage tank is 10 feet deep and completely filled with water. Water pressure increases approximately 0.433 psi per foot of depth. What is the water pressure at the very bottom of the tank?",opts:["4.3 psi","6.2 psi","10 psi","14.7 psi"],ans:0,exp:"Pressure = depth × pressure per foot = 10 × 0.433 = <code>4.33 psi ≈ 4.3 psi</code>. Note: 14.7 psi is standard atmospheric pressure at sea level—a common distractor."},
+    {section:"MC",diff:2,q:"A vertical water storage tank is 10 feet deep and completely filled with water. Water pressure increases approximately 0.433 psi per foot of depth. What is the water pressure at the very bottom of the tank?",opts:["4.3 psi","6.2 psi","10 psi","14.7 psi"],ans:0,exp:"Pressure = depth × pressure per foot = 10 × 0.433 = 4.33 psi ≈ <code>4.3 psi</code>. Note: 14.7 psi is standard atmospheric pressure at sea level—a common distractor."},
     {section:"MC",diff:3,q:"A hydraulic press has a small input piston with an area of 2 square inches and a large output piston with an area of 20 square inches. If a force of 50 pounds is applied to the input piston, what force does the output piston exert?",opts:["5 lb","50 lb","500 lb","5,000 lb"],ans:2,exp:"Pascal's Law: pressure is transmitted equally throughout a fluid. F_out = F_in × (A_out ÷ A_in) = 50 × (20 ÷ 2) = 50 × 10 = <code>500 lb</code>."},
     {section:"MC",diff:2,q:"A small pulley wheel with a radius of 2 feet is connected by a belt to a large pulley wheel with a radius of 4 feet. If the small wheel turns at 200 RPM, at what speed does the large wheel rotate?",opts:["100 RPM","200 RPM","400 RPM","50 RPM"],ans:0,exp:"Belt-connected wheels share the same linear belt speed. Speed is inversely proportional to radius. Large wheel RPM = 200 × (2 ÷ 4) = <code>100 RPM</code>. Larger wheel = slower rotation."},
     {section:"MC",diff:3,q:"A spring is compressed 3 inches by a force of 30 pounds. According to Hooke's Law, how much force is required to compress the same spring 5 inches?",opts:["18 lb","30 lb","50 lb","60 lb"],ans:2,exp:"Hooke's Law: F = k × x. Spring constant k = 30 ÷ 3 = 10 lb/in. Force for 5 inches: F = 10 × 5 = <code>50 lb</code>."},
     {section:"MC",diff:2,q:"A 200-pound crate sits on a frictionless inclined ramp angled at 30 degrees. What force, applied parallel to the ramp surface, is required to prevent the crate from sliding down?",opts:["100 lb","115 lb","173 lb","200 lb"],ans:0,exp:"The force needed to hold an object on a frictionless incline = Weight × sin(angle). F = 200 × sin(30°) = 200 × 0.5 = <code>100 lb</code>. The component perpendicular to the ramp is 200 × cos(30°) ≈ 173 lb."},
-    {section:"MC",diff:3,q:"A moving object's kinetic energy (KE = ½mv²) depends on the square of its speed. If a vehicle's speed is doubled while its mass stays the same, how does its kinetic energy change?",opts:["It doubles — KE increases by a factor of 2","It triples — KE increases by a factor of 3","It quadruples — KE increases by a factor of 4","It stays the same — mass is the primary factor in KE"],ans:2,exp:"KE = ½mv². If speed doubles (2v), KE = ½m(2v)² = ½m × 4v² = 4 × (½mv²). KE <code>quadruples</code>. This is why high-speed crashes are so much more destructive than low-speed ones."},
+    {section:"MC",diff:3,q:"A moving object's kinetic energy (KE = ½mv²) depends on the square of its speed. If a vehicle's speed is doubled while its mass stays the same, how does its kinetic energy change?",opts:["Doubles","Triples","Quadruples","Stays the same"],ans:2,exp:"KE = ½mv². If speed doubles (2v), KE = ½m(2v)² = ½m × 4v² = 4 × (½mv²). KE <code>quadruples</code>. This is why high-speed crashes are so much more destructive than low-speed ones."},
     {section:"MC",diff:3,q:"In a first-class lever, the fulcrum is positioned between the effort force and the load. Which of the following tools or everyday objects operates as a first-class lever?",opts:["A wheelbarrow, where the wheel acts as the fulcrum and the load sits between wheel and handles","A fishing rod, where effort is applied at the handle and load is the fish at the tip","A pair of scissors, where the pivot point (fulcrum) is between the cutting blades and the hand grips","A bottle opener used to pry a cap, where the bottle rim is the fulcrum at one end"],ans:2,exp:"Scissors: the pivot (fulcrum) sits between the handles (effort) and the cutting tips (load) — classic first-class lever. Wheelbarrow = 2nd class (load between fulcrum and effort). Fishing rod = 3rd class (effort between fulcrum and load)."},
     {section:"MC",diff:3,q:"A ball is dropped from a height of 80 meters. Ignoring air resistance and using g = 10 m/s², what is the ball's approximate speed just before it hits the ground?",opts:["20 m/s","40 m/s","80 m/s","160 m/s"],ans:1,exp:"Using kinematics: v² = 2gh = 2 × 10 × 80 = 1,600. v = √1,600 = <code>40 m/s</code>. Alternatively, all potential energy (mgh) converts to kinetic energy (½mv²) — solve for v."},
   ],
@@ -2116,16 +2116,16 @@ const FULL_QB = {
   AR: [
     {section:"AR",diff:1,q:"A store sells notebooks for $3.50 each. What is the total cost of 8 notebooks?",opts:["$24.00","$26.50","$28.00","$29.50"],ans:2,exp:"8 × $3.50 = $28.00."},
     {section:"AR",diff:1,q:"A runner completes a 5-mile race in 40 minutes. What is her average speed in miles per hour?",opts:["6 mph","7 mph","7.5 mph","8 mph"],ans:2,exp:"40 min = 2/3 hr. Speed = 5 ÷ (2/3) = <code>7.5 mph</code>."},
-    {section:"AR",diff:1,q:"A bag of dog food weighs 18 pounds. A dog eats 3/4 pound per day. How many days will the bag last?",opts:["18","20","24","27"],ans:2,exp:"18 ÷ (3/4) = 18 × (4/3) = <code>24 days</code>."},
+    {section:"AR",diff:1,q:"A bag of dog food weighs 18 pounds. A dog eats 3/4 pound per day. How many days will the bag last?",opts:["18","20","24","27"],ans:2,exp:"18 ÷ (3/4) = 18 × (4/3) = <code>24</code> days."},
     {section:"AR",diff:1,q:"A class of 36 students has a 25% absence rate today. How many students are present?",opts:["9","24","27","30"],ans:2,exp:"Absent = 36 × 0.25 = 9. Present = 36 − 9 = <code>27</code>."},
     {section:"AR",diff:2,q:"Tom is 3 times as old as his sister. In 5 years he will be twice her age. How old is Tom now?",opts:["10","12","15","18"],ans:2,exp:"Let sister = x, Tom = 3x. In 5 years: 3x+5 = 2(x+5) → x = 5. Tom = <code>15</code>."},
-    {section:"AR",diff:2,q:"A car uses 2 gallons of fuel per 50 miles. How many gallons are needed for a 375-mile trip?",opts:["12","13","14","15"],ans:3,exp:"Rate = 1 gal per 25 mi. 375 ÷ 25 = <code>15 gallons</code>."},
+    {section:"AR",diff:2,q:"A car uses 2 gallons of fuel per 50 miles. How many gallons are needed for a 375-mile trip?",opts:["12","13","14","15"],ans:3,exp:"Rate = 1 gal per 25 mi. 375 ÷ 25 = <code>15</code>."},
     {section:"AR",diff:2,q:"An item priced at $80 is on sale for 35% off. What is the sale price?",opts:["$48","$50","$52","$56"],ans:2,exp:"Discount = 80 × 0.35 = $28. Sale price = $80 − $28 = <code>$52</code>."},
     {section:"AR",diff:2,q:"Workers A and B together paint a house in 6 days. Worker A alone takes 9 days. How long does Worker B alone take?",opts:["12 days","15 days","18 days","21 days"],ans:2,exp:"Rate B = 1/6 − 1/9 = 1/18 per day. Time = <code>18 days</code>."},
     {section:"AR",diff:2,q:"A room is 14 feet long and 11 feet wide. Carpet costs $4.50 per square foot. What is the total cost?",opts:["$567.00","$630.00","$693.00","$756.00"],ans:2,exp:"Area = 14 × 11 = 154 sq ft. Cost = 154 × $4.50 = <code>$693.00</code>."},
     {section:"AR",diff:2,q:"Train A departs at 8:00 AM at 75 mph. Train B departs the same point at 8:30 AM at 100 mph in the same direction. At what time does Train B catch Train A?",opts:["9:30 AM","10:00 AM","10:30 AM","11:00 AM"],ans:1,exp:"By 8:30 AM, Train A has a 37.5-mile lead. Closing rate = 25 mph. Time = 37.5 ÷ 25 = 1.5 hrs after 8:30 AM = <code>10:00 AM</code>."},
     {section:"AR",diff:3,q:"A 10-liter mixture is 40% acid. How many liters of water must be added to reduce it to 25% acid?",opts:["4 L","5 L","6 L","8 L"],ans:2,exp:"Acid = 4 L. New total T: 4/T = 0.25 → T = 16 L. Water to add = 16 − 10 = <code>6 L</code>."},
-    {section:"AR",diff:3,q:"A factory has 6 machines producing 240 units in 8 hours. How many units will 9 machines produce in 10 hours at the same rate?",opts:["360","400","420","450"],ans:3,exp:"Rate per machine per hour = 240 ÷ (6×8) = 5 units. 9 × 10 × 5 = <code>450 units</code>."},
+    {section:"AR",diff:3,q:"A factory has 6 machines producing 240 units in 8 hours. How many units will 9 machines produce in 10 hours at the same rate?",opts:["360","400","420","450"],ans:3,exp:"Rate per machine per hour = 240 ÷ (6×8) = 5 units. 9 × 10 × 5 = <code>450</code> units."},
     {section:"AR",diff:3,q:"A boat travels 48 km downstream in 2 hours and returns upstream in 3 hours. What is the speed of the current?",opts:["3 km/h","4 km/h","5 km/h","6 km/h"],ans:1,exp:"Downstream = 24 km/h. Upstream = 16 km/h. Current = (24−16) ÷ 2 = <code>4 km/h</code>."},
     {section:"AR",diff:3,q:"If 5 workers finish a job in 12 days at 8 hours/day, how many workers finish the same job in 6 days at 10 hours/day?",opts:["6","7","8","9"],ans:2,exp:"Total work = 5×12×8 = 480 worker-hours. Workers = 480 ÷ (6×10) = <code>8</code>."},
     {section:"AR",diff:3,q:"A $4,000 investment earns 8% simple interest per year. What is the total interest earned in 5 years?",opts:["$1,200","$1,400","$1,600","$1,800"],ans:2,exp:"Interest = P × r × t = 4,000 × 0.08 × 5 = <code>$1,600</code>."},
@@ -2700,10 +2700,14 @@ function setDrillMode(m) {
 const ACTIVE_SESSION_KEY     = 'asvab_active_session';
 const ACTIVE_SESSION_TTL     = 7  * 24 * 60 * 60 * 1000; // 7 days  — interrupted sessions
 const COMPLETED_SESSION_TTL  = 30 * 24 * 60 * 60 * 1000; // 30 days — completed sessions
+// Bump this version whenever a change could make saved session data invalid.
+// Any session saved with a different version is silently discarded on resume.
+const SESSION_SCHEMA_VERSION = 3; // bumped: fixed shuffleOpts ans-index sync bug
 
 function saveActiveSession() {
   try {
     const payload = {
+      schemaVersion: SESSION_SCHEMA_VERSION,
       savedAt:     Date.now(),
       mode,
       isPractice:  isPracticeMode,
@@ -2727,6 +2731,13 @@ function loadActiveSession() {
     if (!raw) return null;
     const p = JSON.parse(raw);
     if (!p || !p.savedAt) return null;
+    // Discard sessions saved by a different schema version — they may have
+    // corrupted ans indices due to the shuffleOpts sync bug (now fixed).
+    if ((p.schemaVersion || 0) !== SESSION_SCHEMA_VERSION) {
+      console.warn(`ASVAB SIM — discarding stale session (schema v${p.schemaVersion || 0}, expected v${SESSION_SCHEMA_VERSION})`);
+      localStorage.removeItem(ACTIVE_SESSION_KEY);
+      return null;
+    }
     if (Date.now() - p.savedAt > ACTIVE_SESSION_TTL) {
       localStorage.removeItem(ACTIVE_SESSION_KEY);
       return null;
@@ -2819,10 +2830,11 @@ function resumeSession(payload) {
   Object.keys(adaptiveState).forEach(k => delete adaptiveState[k]);
 
   // ── Step 1: sync QUESTIONS[i].ans from the patched PICAT_QUESTIONS pool ──
-  // auditQuestionBank() and auditExplanations() both patch PICAT_QUESTIONS in-place
-  // during DOMContentLoaded, but QUESTIONS was deserialized from localStorage and
-  // still carries the old ans values from when the session was saved.
-  // Walk every question in the session and apply any patches the audits found.
+  // auditQuestionBank() patches PICAT_QUESTIONS in-place on DOMContentLoaded.
+  // QUESTIONS is deserialized from localStorage with shuffled opts (shuffleOpts
+  // randomises option order and remaps ans). We must NOT compare raw index values
+  // across unshuffled PICAT and shuffled session objects — the same index means
+  // a different option in each. We compare by correct OPTION TEXT instead.
   if (QUESTIONS) {
     const pqMap = {};
     PICAT_QUESTIONS.forEach(pq => {
@@ -2830,11 +2842,22 @@ function resumeSession(payload) {
     });
     let syncPatched = 0;
     QUESTIONS.forEach(q => {
-      if (!q.q) return;
+      if (!q.q || !q.opts || typeof q.ans !== 'number') return;
       const norm = q.q.trim().toLowerCase().replace(/\s+/g, ' ');
       const canonical = pqMap[norm];
-      if (canonical && canonical.ans !== q.ans) {
-        q.ans = canonical.ans;
+      if (!canonical || typeof canonical.ans !== 'number') return;
+
+      const canonicalCorrectText = (canonical.opts[canonical.ans] || '').trim().toLowerCase();
+      const sessionCorrectText   = (q.opts[q.ans] || '').trim().toLowerCase();
+
+      // If they already agree on which text is correct, nothing to do.
+      if (canonicalCorrectText === sessionCorrectText) return;
+
+      // They disagree — find where the canonical correct text lives in the
+      // shuffled opts and update ans to that position.
+      const newAns = q.opts.findIndex(o => o.trim().toLowerCase() === canonicalCorrectText);
+      if (newAns !== -1) {
+        q.ans = newAns;
         syncPatched++;
       }
     });
@@ -3290,28 +3313,26 @@ function renderQuestion() {
 function selectAnswer(idx) {
   const q = QUESTIONS[current];
 
-  // Live answer-key guard: cross-check q.ans against canonical pool before
-  // using it for highlighting. Catches any edge case where auditQuestionBank()
-  // couldn't auto-resolve a conflict at startup.
+  // Live answer-key guard: only fires for questions that have a DUPLICATE copy
+  // in PICAT_QUESTIONS with a DIFFERENT correct-answer text. For all other
+  // questions the loop exits immediately on the first text match.
+  // Compares by option TEXT (not raw index) so shuffled session questions
+  // are handled correctly.
   (function verifyLiveAns() {
     if (!q.q || !q.opts || typeof q.ans !== 'number') return;
     const norm = q.q.trim().toLowerCase().replace(/\s+/g,' ');
     const currentCorrectText = (q.opts[q.ans] || '').trim().toLowerCase();
-    // Find another copy in the pool with a matching question but different ans
     for (let k = 0; k < PICAT_QUESTIONS.length; k++) {
       const pq = PICAT_QUESTIONS[k];
       if (!pq.q || !pq.opts || typeof pq.ans !== 'number') continue;
       if (pq.q.trim().toLowerCase().replace(/\s+/g,' ') !== norm) continue;
-      if (pq === q) continue;
+      // Found a PICAT entry with matching question text.
       const otherCorrectText = (pq.opts[pq.ans] || '').trim().toLowerCase();
-      if (otherCorrectText === currentCorrectText) break; // both agree — fine
-      // Disagreement: verify which answer text appears in THIS question's opts
-      const thisHasOther = q.opts.findIndex(o => o.trim().toLowerCase() === otherCorrectText);
-      const otherHasThis = pq.opts.findIndex(o => o.trim().toLowerCase() === currentCorrectText);
-      if (thisHasOther !== -1 && otherHasThis === -1) {
-        // The other copy's answer is the one validated — patch live
-        q.ans = thisHasOther;
-      }
+      if (otherCorrectText === currentCorrectText) break; // agree — fine
+      // Texts disagree: find the canonical answer text in the shuffled opts
+      // and update ans to its (shuffled) position.
+      const newAns = q.opts.findIndex(o => o.trim().toLowerCase() === otherCorrectText);
+      if (newAns !== -1) q.ans = newAns;
       break;
     }
   })();
@@ -3627,21 +3648,13 @@ function auditExplanations() {
       const nc = normVal(lastCode);
       const no = normVal(correctOpt);
       if (nc.length >= 2 && no.length >= 2 && !no.includes(nc) && !nc.includes(no)) {
+        // Log only — never auto-patch based on code-tag matching.
+        // Auto-patching here caused false positives (e.g. Unicode minus vs ASCII minus
+        // in algebra options) that corrupted correct ans values.
         issues.push(
           `${loc} — explanation ends with <code>${lastCode}</code> ` +
-          `but opts[ans=${q.ans}] = "${correctOpt}"`
+          `but opts[ans=${q.ans}] = "${correctOpt}" — review needed`
         );
-        const matchIdx = q.opts.findIndex(o => {
-          const n = normVal(o);
-          return n.length >= 2 && (n.includes(nc) || nc.includes(n));
-        });
-        if (matchIdx !== -1 && matchIdx !== q.ans) {
-          issues.push(
-            `  → auto-patching ans from ${q.ans} ("${q.opts[q.ans]}") ` +
-            `to ${matchIdx} ("${q.opts[matchIdx]}") to align with explanation`
-          );
-          q.ans = matchIdx;
-        }
       }
     }
 
