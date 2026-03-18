@@ -1608,7 +1608,7 @@ window.IS_DEV = location.protocol === 'file:' ||
   </div>
 
   <button class="start-btn" onclick="showCategorySelect()">BEGIN TIMED QUIZ</button>
-  <div class="quiz-meta">up to 50 questions · adaptive timer · MK/AR priority · adaptive difficulty</div>
+  <div class="quiz-meta">up to 30 questions · adaptive timer · MK/AR priority · adaptive difficulty</div>
   <button class="full-btn" onclick="startQuiz('full')">ASVAB SIMULATION →</button>
   <div class="full-meta">71 questions · 90 minutes · GS · AR · WK · PC · MK · AFQT score</div>
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:18px;opacity:0;animation:fadeUp 0.6s 1.5s forwards">
@@ -1683,7 +1683,7 @@ window.IS_DEV = location.protocol === 'file:' ||
   <div style="max-width:540px;width:100%;padding:20px">
     <div class="rank-badge" style="opacity:1;animation:none;margin-bottom:20px">▶ CUSTOMIZE YOUR DRILL</div>
     <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.95;margin-bottom:8px">SELECT<br><span style="color:var(--accent)">SECTIONS</span></h2>
-    <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:36px;letter-spacing:1px">toggle sections on/off · up to 50 questions · adaptive weighting</p>
+    <p style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:36px;letter-spacing:1px">toggle sections on/off · up to 30 questions · adaptive weighting</p>
     <div class="cat-grid" id="catGrid"></div>
     <div class="cat-summary" id="catSummary"></div>
     <div style="margin-top:22px;margin-bottom:8px;text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted)">SELECT MODE</div>
@@ -2215,6 +2215,19 @@ const FULL_QB = {
     {section:"MK",diff:3,q:"A circle's area is 36π. What is its circumference?",opts:["6π","9π","12π","18π"],ans:2,exp:"πr²=36π → r=6. Circumference = 2πr = <code>12π</code>."},
   ],
 };
+
+// ── UNIQUE QUESTION IDs ──
+// Assign a stable numeric _uid to every question object across all banks.
+// Session builders use these to guarantee no question appears twice in a
+// single session, regardless of how the sampling pools overlap.
+;(function assignQuestionIds() {
+  let uid = 0;
+  [
+    ...PICAT_QUESTIONS,
+    ...Object.values(QB).flat(),
+    ...Object.values(FULL_QB).flat(),
+  ].forEach(q => { if (q._uid === undefined) q._uid = uid++; });
+})();
 
 const SECTION_COLORS = {AR:'var(--ar)',WK:'var(--wk)',MK:'var(--mk)',PC:'#34d399',GS:'#fb923c',EI:'#60a5fa',AI:'#f472b6',MC:'#a3e635',AO:'#c084fc'};
 const SECTION_LABELS = {AR:'Arithmetic Reasoning',WK:'Word Knowledge',MK:'Math Knowledge',PC:'Paragraph Comprehension',GS:'General Science',EI:'Electronics Info',AI:'Auto & Shop Info',MC:'Mechanical Comprehension',AO:'Assembling Objects'};
@@ -3175,17 +3188,23 @@ function startQuiz(selectedMode) {
     const ALLOC = calcQuestionAlloc(activeSecs);
     const selected = [];
 
-    // Section order: AR → WK → PC → MK (mirrors real PICAT structure)
-    const SEC_ORDER = ['AR','WK','PC','MK'];
-    SEC_ORDER.filter(s => ALLOC[s]).forEach(sec => {
+    // Sample from each section's pool independently (weighted, without replacement),
+    // then merge and shuffle all sections together so questions are interleaved
+    // randomly — just like the real PICAT verification test, with no subject grouping.
+    // A _uid Set prevents the same question object from appearing twice even if
+    // the same stem exists as a variant in multiple entries.
+    const seenUids = new Set();
+    ['AR','WK','PC','MK'].filter(s => ALLOC[s]).forEach(sec => {
       const pool    = PICAT_QUESTIONS.filter(q => q.section === sec && q.forced === null);
       const weights = pool.map(q => flavor.diffMod[q.diff || 1] || 1);
       const picked  = weightedSample(pool, weights, ALLOC[sec]);
-      // Shuffle within section so question order varies each session
-      selected.push(...shuffle(picked));
+      picked.forEach(q => {
+        if (!seenUids.has(q._uid)) { seenUids.add(q._uid); selected.push(q); }
+      });
     });
 
-    QUESTIONS = selected.map(shuffleOpts);
+    // Final shuffle interleaves all sections — no subject clustering
+    QUESTIONS = shuffle(selected).map(shuffleOpts);
 
     // 30-minute hard cap
     secondsLeft = 30 * 60;
