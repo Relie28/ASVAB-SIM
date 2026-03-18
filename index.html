@@ -2818,6 +2818,21 @@ function resumeSession(payload) {
   selectedSections = payload.selectedSections || ['MK','AR','WK','PC'];
   Object.keys(adaptiveState).forEach(k => delete adaptiveState[k]);
 
+  // Re-audit already-answered questions: if a bad answer key was saved in a
+  // previous session, correct it now so the rest of the session and final
+  // results use the verified correct answers.
+  if (userAnswers && QUESTIONS) {
+    const reaudit = auditUserAnswers(userAnswers, QUESTIONS);
+    if (reaudit.recovered.length) {
+      reaudit.recovered.forEach(r => { userAnswers[r.qIdx] = QUESTIONS[r.qIdx].ans; });
+      console.group('%c⚠ ASVAB SIM — Resume: Answer Recovery', 'color:#ffd600;font-weight:bold');
+      reaudit.recovered.forEach(r =>
+        console.warn(`Corrected Q${r.qIdx} (${r.section}) on resume: "${r.questionPreview}"`)  
+      );
+      console.groupEnd();
+    }
+  }
+
   const banner = document.getElementById('resumeBanner');
   if (banner) banner.remove();
 
@@ -3246,6 +3261,33 @@ function renderQuestion() {
 
 function selectAnswer(idx) {
   const q = QUESTIONS[current];
+
+  // Live answer-key guard: cross-check q.ans against canonical pool before
+  // using it for highlighting. Catches any edge case where auditQuestionBank()
+  // couldn't auto-resolve a conflict at startup.
+  (function verifyLiveAns() {
+    if (!q.q || !q.opts || typeof q.ans !== 'number') return;
+    const norm = q.q.trim().toLowerCase().replace(/\s+/g,' ');
+    const currentCorrectText = (q.opts[q.ans] || '').trim().toLowerCase();
+    // Find another copy in the pool with a matching question but different ans
+    for (let k = 0; k < PICAT_QUESTIONS.length; k++) {
+      const pq = PICAT_QUESTIONS[k];
+      if (!pq.q || !pq.opts || typeof pq.ans !== 'number') continue;
+      if (pq.q.trim().toLowerCase().replace(/\s+/g,' ') !== norm) continue;
+      if (pq === q) continue;
+      const otherCorrectText = (pq.opts[pq.ans] || '').trim().toLowerCase();
+      if (otherCorrectText === currentCorrectText) break; // both agree — fine
+      // Disagreement: verify which answer text appears in THIS question's opts
+      const thisHasOther = q.opts.findIndex(o => o.trim().toLowerCase() === otherCorrectText);
+      const otherHasThis = pq.opts.findIndex(o => o.trim().toLowerCase() === currentCorrectText);
+      if (thisHasOther !== -1 && otherHasThis === -1) {
+        // The other copy's answer is the one validated — patch live
+        q.ans = thisHasOther;
+      }
+      break;
+    }
+  })();
+
   const opts = document.querySelectorAll('.option');
 
   // ── Full ASVAB Simulation: re-selectable until Next is clicked ──
