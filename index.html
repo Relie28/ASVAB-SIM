@@ -3206,8 +3206,13 @@ function startQuiz(selectedMode) {
     // Final shuffle interleaves all sections — no subject clustering
     QUESTIONS = shuffle(selected).map(shuffleOpts);
 
-    // 30-minute hard cap
-    secondsLeft = 30 * 60;
+    // Timer scales with how many sections are active:
+    //   4 sections → 45 min  (full PICAT-width drill)
+    //   3 sections → 35 min
+    //   2 sections → 30 min
+    //   1 section  → 25 min
+    const drillMins = activeSecs.length >= 4 ? 45 : activeSecs.length === 3 ? 35 : activeSecs.length === 2 ? 30 : 25;
+    secondsLeft = drillMins * 60;
   } else {
     // Full ASVAB: GS → AR → WK → PC → MK in fixed section order, adaptive within each section
     const FULL_SECTIONS = [
