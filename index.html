@@ -2472,6 +2472,86 @@ function flagId(q) {
   return (q.section || '') + '::' + (q.q || '').substring(0, 80);
 }
 
+// ── Flagged-review helpers — module-level to prevent closure accumulation ──
+// Pre-built map: flagId → canonical question (first occurrence wins).
+// Computed once at startup so showFlaggedReview never rebuilds the full array.
+const _allQMap = (function() {
+  const map = new Map();
+  [...PICAT_QUESTIONS, ...Object.values(QB).flat(), ...Object.values(FULL_QB).flat()]
+    .forEach(q => { const id = flagId(q); if (!map.has(id)) map.set(id, q); });
+  return map;
+})();
+
+function _buildFlaggedItem(q, flagMeta) {
+  const letters   = ['A','B','C','D','E'];
+  const secColor  = SECTION_COLORS[q.section] || 'var(--accent)';
+  const forcedIdx = (q.forced != null) ? (q.opts || []).indexOf(q.forced) : -1;
+  const metaEntry = flagMeta[q._flagId] || {};
+  const sessionAns = (metaEntry.userAnswer !== undefined && metaEntry.userAnswer !== null) ? metaEntry.userAnswer : -1;
+  const hasSession = sessionAns !== -1;
+  const optsHTML = (q.opts || []).map((opt, i) => {
+    const isCorrect = i === q.ans;
+    const isForced  = q.forced != null && i === forcedIdx;
+    const isPicked  = hasSession && i === sessionAns;
+    let cls = '';
+    if (isCorrect) cls = ' correct-opt';
+    else if (isForced) cls = ' forced-wrong-opt';
+    else if (isPicked) cls = ' user-picked-opt';
+    const tags = [];
+    if (isForced && q.forced != null) {
+      const label = isCorrect ? '\u2691 YOUR ANSWER ON REAL TEST (\u2713)' : '\u2691 YOUR ANSWER ON REAL TEST';
+      tags.push(`<span style="font-size:9px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;color:var(--accent3);white-space:nowrap">${label}</span>`);
+    }
+    if (isPicked) {
+      const label = isCorrect ? '\u25ce YOU CHOSE (\u2713)' : '\u25ce YOU CHOSE';
+      const col   = isCorrect ? 'var(--correct)' : 'var(--ar)';
+      tags.push(`<span style="font-size:9px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;color:${col};white-space:nowrap">${label}</span>`);
+    }
+    const indicatorHTML = tags.length
+      ? `<div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px;padding-left:8px;flex-shrink:0">${tags.join('')}</div>`
+      : '';
+    return `<div class="fr-opt${cls}"><div class="fr-opt-letter">${letters[i]}</div><div>${opt}</div>${indicatorHTML}</div>`;
+  }).join('');
+  const realBadge = q.forced != null
+    ? `<span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;padding:2px 7px;border-radius:3px;flex-shrink:0;margin-left:6px;${q.initiallyWrong ? 'background:rgba(255,61,90,0.1);color:var(--wrong);border:1px solid rgba(255,61,90,0.3)' : 'background:rgba(0,201,122,0.1);color:var(--correct);border:1px solid rgba(0,201,122,0.3)'}">${q.initiallyWrong ? '\u2717 REAL MISS' : '\u2713 REAL HIT'}</span>`
+    : '';
+  const realBanner = q.forced != null
+    ? `<div class="forced-banner ${q.initiallyWrong ? 'b-wrong' : 'b-correct'}" style="margin-bottom:10px;">${q.initiallyWrong ? '\u2717 Real PICAT question \u2014 you missed this on the real test' : '\u2713 Real PICAT question \u2014 you answered this correctly'}</div>`
+    : '';
+  const passageHTML = q.passage
+    ? `<div style="font-size:12px;color:var(--muted);line-height:1.6;background:var(--surface2);border-radius:4px;padding:10px 12px;margin-bottom:10px;">${q.passage}</div>` : '';
+  const safeId = q._flagId.replace(/"/g, '&quot;');
+  const div = document.createElement('div');
+  div.className = 'fr-item';
+  div.innerHTML = `
+    <div class="fr-header" onclick="this.closest('.fr-item').classList.toggle('expanded')">
+      <div class="fr-section" style="background:transparent;color:${secColor};border:1px solid ${secColor};">${q.section}</div>
+      ${realBadge}
+      <div class="fr-q">${q.q}</div>
+      <div class="fr-chevron">&#9654;</div>
+    </div>
+    <div class="fr-body">
+      ${passageHTML}
+      ${realBanner}
+      <div class="fr-opts">${optsHTML}</div>
+      <div class="fr-exp">${q.exp || ''}</div>
+      <button class="fr-unflag" data-flagid="${safeId}" onclick="unflagFromReview(this)">REMOVE FLAG</button>
+    </div>
+  `;
+  return div;
+}
+
+function _buildFlagGroupHeader(title, count, accentColor, bgColor, borderColor) {
+  const wrap = document.createElement('div');
+  wrap.className = 'fr-group-header';
+  wrap.style.cssText = `display:flex;align-items:center;gap:10px;margin:8px 0 12px;padding:10px 14px;background:${bgColor};border:1px solid ${borderColor};border-radius:6px;`;
+  wrap.innerHTML = `
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:${accentColor};text-transform:uppercase;">${title}</span>
+    <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);background:var(--surface2);padding:1px 8px;border-radius:10px;border:1px solid var(--border);">${count} question${count !== 1 ? 's' : ''}</span>
+  `;
+  return wrap;
+}
+
 function toggleFlag() {
   const q    = QUESTIONS[current];
   const id   = flagId(q);
@@ -2482,7 +2562,12 @@ function toggleFlag() {
     delete meta[id];
   } else {
     set.add(id);
-    meta[id] = { userAnswer: userAnswers[current] };
+    meta[id] = {
+      userAnswer:     userAnswers[current],
+      isRealTest:     (q.forced !== null && q.forced !== undefined),
+      initiallyWrong: (q.initiallyWrong === true),
+      section:        q.section,
+    };
   }
   saveFlags(set);
   saveFlagMeta(meta);
@@ -2509,93 +2594,48 @@ function showFlaggedReview() {
   showScreen('flagged-review');
   const set  = loadFlags();
   const list = document.getElementById('flaggedList');
-  list.innerHTML = '';
 
-  const allQ = [
-    ...PICAT_QUESTIONS,
-    ...Object.values(QB).flat(),
-    ...Object.values(FULL_QB).flat(),
-  ];
-  const seen = new Set();
+  // Explicit child removal — releases DOM references without relying on innerHTML GC
+  while (list.firstChild) list.removeChild(list.firstChild);
+
+  const flagMeta = loadFlagMeta();
+  // O(flags) lookup via pre-built map — no full-array scan
   const flaggedQ = [];
-  for (const q of allQ) {
-    const id = flagId(q);
-    if (set.has(id) && !seen.has(id)) {
-      seen.add(id);
-      flaggedQ.push({ ...q, _flagId: id });
-    }
+  for (const id of set) {
+    const q = _allQMap.get(id);
+    if (q) flaggedQ.push({ ...q, _flagId: id });
   }
 
   if (flaggedQ.length === 0) {
-    list.innerHTML = '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:13px;color:var(--muted);padding:40px 0;text-align:center;">No flagged questions yet.<br><br>Hit the &#x2691; button on any question<br>during a quiz or practice session to flag it for later.</div>';
+    const msg = document.createElement('div');
+    msg.style.cssText = "font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);padding:40px 0;text-align:center;";
+    msg.innerHTML = 'No flagged questions yet.<br><br>Hit the &#x2691; button on any question<br>during a quiz or practice session to flag it for later.';
+    list.appendChild(msg);
     return;
   }
 
-  const letters = ['A','B','C','D','E'];
-  const flagMeta = loadFlagMeta();
-  flaggedQ.forEach(q => {
-    const secColor    = SECTION_COLORS[q.section] || 'var(--accent)';
-    const forcedIdx   = (q.forced != null) ? (q.opts || []).indexOf(q.forced) : -1;
-    const metaEntry   = flagMeta[q._flagId] || {};
-    const sessionAns  = (metaEntry.userAnswer !== undefined && metaEntry.userAnswer !== null) ? metaEntry.userAnswer : -1;
-    const hasSession  = sessionAns !== -1;
-    const optsHTML = (q.opts || []).map((opt, i) => {
-      const isCorrect = i === q.ans;
-      const isForced  = q.forced != null && i === forcedIdx;
-      const isPicked  = hasSession && i === sessionAns;
-      // Determine border class — priority: correct > forced > user pick
-      let cls = '';
-      if (isCorrect) cls = ' correct-opt';
-      else if (isForced) cls = ' forced-wrong-opt';
-      else if (isPicked) cls = ' user-picked-opt';
-      // Build indicator tags
-      const tags = [];
-      if (isForced && q.forced != null) {
-        const label = isCorrect ? '⚑ YOUR ANSWER ON REAL TEST (✓)' : '⚑ YOUR ANSWER ON REAL TEST';
-        tags.push(`<span style="font-size:9px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;color:var(--accent3);white-space:nowrap">${label}</span>`);
-      }
-      if (isPicked) {
-        const label = isCorrect ? '◎ YOU CHOSE (✓)' : '◎ YOU CHOSE';
-        const col   = isCorrect ? 'var(--correct)' : 'var(--ar)';
-        tags.push(`<span style="font-size:9px;font-family:'IBM Plex Mono',monospace;letter-spacing:0.5px;color:${col};white-space:nowrap">${label}</span>`);
-      }
-      const indicatorHTML = tags.length
-        ? `<div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px;padding-left:8px;flex-shrink:0">${tags.join('')}</div>`
-        : '';
-      return `<div class="fr-opt${cls}">
-        <div class="fr-opt-letter">${letters[i]}</div>
-        <div>${opt}</div>
-        ${indicatorHTML}
-      </div>`;
-    }).join('');
-    const realBadge = q.forced != null
-      ? `<span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;padding:2px 7px;border-radius:3px;flex-shrink:0;margin-left:6px;${q.initiallyWrong ? 'background:rgba(255,61,90,0.1);color:var(--wrong);border:1px solid rgba(255,61,90,0.3)' : 'background:rgba(0,201,122,0.1);color:var(--correct);border:1px solid rgba(0,201,122,0.3)'}">${q.initiallyWrong ? '✗ REAL MISS' : '✓ REAL HIT'}</span>`
-      : '';
-    const realBanner = q.forced != null
-      ? `<div class="forced-banner ${q.initiallyWrong ? 'b-wrong' : 'b-correct'}" style="margin-bottom:10px;">${q.initiallyWrong ? '✗ Real PICAT question — you missed this on the real test' : '✓ Real PICAT question — you answered this correctly'}</div>`
-      : '';
-    const passageHTML = q.passage
-      ? `<div style="font-size:12px;color:var(--muted);line-height:1.6;background:var(--surface2);border-radius:4px;padding:10px 12px;margin-bottom:10px;">${q.passage}</div>` : '';
-    const safeId = q._flagId.replace(/"/g, '&quot;');
-    const div = document.createElement('div');
-    div.className = 'fr-item';
-    div.innerHTML = `
-      <div class="fr-header" onclick="this.closest('.fr-item').classList.toggle('expanded')">
-        <div class="fr-section" style="background:transparent;color:${secColor};border:1px solid ${secColor};">${q.section}</div>
-        ${realBadge}
-        <div class="fr-q">${q.q}</div>
-        <div class="fr-chevron">&#9654;</div>
-      </div>
-      <div class="fr-body">
-        ${passageHTML}
-        ${realBanner}
-        <div class="fr-opts">${optsHTML}</div>
-        <div class="fr-exp">${q.exp || ''}</div>
-        <button class="fr-unflag" data-flagid="${safeId}" onclick="unflagFromReview(this)">REMOVE FLAG</button>
-      </div>
-    `;
-    list.appendChild(div);
-  });
+  const realTestQ = flaggedQ.filter(q => q.forced != null);
+  const practiceQ = flaggedQ.filter(q => q.forced == null);
+
+  // Batch all node creation into a DocumentFragment — single reflow on append
+  const frag = document.createDocumentFragment();
+
+  if (realTestQ.length > 0) {
+    frag.appendChild(_buildFlagGroupHeader('\u2691 From Your Real Test', realTestQ.length, 'var(--accent3)', 'rgba(255,214,0,0.04)', 'rgba(255,214,0,0.2)'));
+    realTestQ.forEach(q => frag.appendChild(_buildFlaggedItem(q, flagMeta)));
+  }
+
+  if (practiceQ.length > 0) {
+    if (realTestQ.length > 0) {
+      const spacer = document.createElement('div');
+      spacer.style.height = '20px';
+      frag.appendChild(spacer);
+    }
+    frag.appendChild(_buildFlagGroupHeader('Practice Pool', practiceQ.length, 'var(--accent)', 'rgba(0,229,255,0.03)', 'rgba(0,229,255,0.15)'));
+    practiceQ.forEach(q => frag.appendChild(_buildFlaggedItem(q, flagMeta)));
+  }
+
+  list.appendChild(frag);
 }
 
 function unflagFromReview(btn) {
@@ -2612,7 +2652,7 @@ function unflagFromReview(btn) {
   item.style.opacity = '0';
   setTimeout(() => {
     item.remove();
-    if (document.getElementById('flaggedList').children.length === 0) showFlaggedReview();
+    if (document.getElementById('flaggedList').querySelectorAll('.fr-item').length === 0) showFlaggedReview();
   }, 200);
 }
 
