@@ -4824,6 +4824,147 @@ const FORMULA_CARDS = [
     appQs:[
       {q:'A floor is 12 square yards. How many square feet is that?',opts:['36 sq ft','72 sq ft','96 sq ft','108 sq ft'],ans:3,exp:'12 × 9 = 108 sq ft'},
     ]},
+
+  // ── METRIC LENGTH ──────────────────────────────────────────────────────────
+  { id:'unit_metric_length', name:'Metric Length Chain',           formula:'km → m → cm → mm',
+    svg:`<svg viewBox="0 0 240 80" width="210" height="70" xmlns="http://www.w3.org/2000/svg">
+      <text x="4"   y="26" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ffd600" font-weight="bold">km</text>
+      <text x="30"  y="26" font-size="10" font-family="IBM Plex Mono,monospace" fill="#5a6070">×1000</text>
+      <text x="76"  y="26" font-size="13" font-family="IBM Plex Mono,monospace" fill="#00e5ff" font-weight="bold">m</text>
+      <text x="90"  y="26" font-size="10" font-family="IBM Plex Mono,monospace" fill="#5a6070">×100</text>
+      <text x="130" y="26" font-size="13" font-family="IBM Plex Mono,monospace" fill="#a78bfa" font-weight="bold">cm</text>
+      <text x="155" y="26" font-size="10" font-family="IBM Plex Mono,monospace" fill="#5a6070">×10</text>
+      <text x="186" y="26" font-size="13" font-family="IBM Plex Mono,monospace" fill="#34d399" font-weight="bold">mm</text>
+      <line x1="4" y1="34" x2="236" y2="34" stroke="#1e2330" stroke-width="1"/>
+      <text x="4" y="52" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">÷1000</text>
+      <text x="4" y="65" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">← to go back up the chain, divide</text>
+    </svg>`,
+    vars:['1 km = 1,000 m','1 m = 100 cm','1 m = 1,000 mm','1 cm = 10 mm'],
+    tip:'Each step DOWN the chain multiplies by 10/100/1000. Going UP divides. km → m (×1000) → cm (×100) → mm (×10).',
+    ex:'2.5 km = 2,500 m = 250,000 cm = 2,500,000 mm',
+    appQs:[
+      {q:'How many centimeters are in 3.5 meters?',opts:['35 cm','350 cm','3,500 cm','35,000 cm'],ans:1,exp:'1 m = 100 cm → 3.5 × 100 = 350 cm'},
+      {q:'A road is 4.2 km long. How many meters is that?',opts:['420 m','4,200 m','42,000 m','420,000 m'],ans:1,exp:'1 km = 1,000 m → 4.2 × 1,000 = 4,200 m'},
+    ]},
+
+  { id:'unit_mph_kmh', name:'Speed: mph ↔ km/h',                  formula:'1 mph = 1.609 km/h',   alt:'also: 1 km/h ≈ 0.621 mph',
+    svg:`<svg viewBox="0 0 200 68" width="178" height="60" xmlns="http://www.w3.org/2000/svg">
+      <text x="8"  y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#ffd600">mph</text>
+      <text x="60" y="28" font-size="12" font-family="IBM Plex Mono,monospace" fill="#5a6070">× 1.609</text>
+      <polygon points="134,22 150,28 134,34" fill="#00e5ff"/>
+      <text x="155" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#00e5ff">km/h</text>
+      <line x1="8" y1="38" x2="192" y2="38" stroke="#1e2330" stroke-width="1"/>
+      <text x="8" y="56" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">km/h × 0.621 → mph</text>
+    </svg>`,
+    vars:['1 mph = 1.609 km/h','1 km/h ≈ 0.621 mph','multiply mph × 1.609 to get km/h','divide km/h ÷ 1.609 to get mph'],
+    tip:'Rough check: 60 mph ≈ 96 km/h. 100 km/h ≈ 62 mph.',
+    ex:'55 mph × 1.609 = 88.5 km/h',
+    appQs:[
+      {q:'A speed limit is 60 mph. Approximately how many km/h is that?',opts:['72 km/h','88 km/h','97 km/h','106 km/h'],ans:2,exp:'60 × 1.609 ≈ 96.5 km/h. Closest = 97 km/h'},
+      {q:'A sign shows 80 km/h. About how fast is that in mph?',opts:['42 mph','50 mph','55 mph','64 mph'],ans:1,exp:'80 ÷ 1.609 ≈ 49.7 ≈ 50 mph'},
+    ]},
+
+  // ── ELECTRICAL ────────────────────────────────────────────────────────────
+  { id:'ohms_law', name:"Ohm's Law",                              formula:'V = I × R',            alt:'I = V÷R  |  R = V÷I',
+    svg:`<svg viewBox="0 0 180 100" width="158" height="88" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="90,8 22,92 158,92" fill="rgba(255,214,0,0.07)" stroke="#ffd600" stroke-width="2"/>
+      <text x="82" y="38" font-size="14" font-family="IBM Plex Mono,monospace" fill="#ffd600" font-weight="bold">V</text>
+      <line x1="22" y1="92" x2="158" y2="92" stroke="#1e2330" stroke-width="2"/>
+      <text x="38" y="88" font-size="14" font-family="IBM Plex Mono,monospace" fill="#00e5ff" font-weight="bold">I</text>
+      <text x="116" y="88" font-size="14" font-family="IBM Plex Mono,monospace" fill="#a78bfa" font-weight="bold">R</text>
+      <text x="4" y="12" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">Cover the one you want to find</text>
+    </svg>`,
+    vars:['V = Voltage (Volts, V)','I = Current (Amperes, A)','R = Resistance (Ohms, Ω)'],
+    tip:'Use the VIR triangle — cover what you want: V=IR, I=V/R, R=V/I.',
+    ex:'V=12 V, R=4 Ω → I = 12÷4 = 3 A',
+    appQs:[
+      {q:'A circuit has voltage 24 V and resistance 8 Ω. What is the current?',opts:['2 A','3 A','4 A','6 A'],ans:1,exp:'I = V÷R = 24÷8 = 3 A'},
+      {q:'A current of 5 A flows through a 10 Ω resistor. What is the voltage?',opts:['2 V','15 V','50 V','500 V'],ans:2,exp:'V = IR = 5 × 10 = 50 V'},
+    ]},
+
+  { id:'elec_power', name:'Electrical Power (Watts)',             formula:'P = V × I',            alt:'also: P = I²R  |  P = V²÷R',
+    svg:`<svg viewBox="0 0 180 100" width="158" height="88" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="90,8 22,92 158,92" fill="rgba(0,229,255,0.07)" stroke="#00e5ff" stroke-width="2"/>
+      <text x="82" y="38" font-size="14" font-family="IBM Plex Mono,monospace" fill="#34d399" font-weight="bold">P</text>
+      <line x1="22" y1="92" x2="158" y2="92" stroke="#1e2330" stroke-width="2"/>
+      <text x="38" y="88" font-size="14" font-family="IBM Plex Mono,monospace" fill="#ffd600" font-weight="bold">V</text>
+      <text x="116" y="88" font-size="14" font-family="IBM Plex Mono,monospace" fill="#00e5ff" font-weight="bold">I</text>
+      <text x="4" y="12" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">Watts = Volts × Amps</text>
+    </svg>`,
+    vars:['P = Power (Watts, W)','V = Voltage (Volts)','I = Current (Amps)','R = Resistance (Ohms)'],
+    tip:'Power triangle like VIR: P=VI, V=P/I, I=P/V. With R: P=I²R or P=V²/R.',
+    ex:'V=120 V, I=2 A → P = 120×2 = 240 W',
+    appQs:[
+      {q:'A device draws 3 A at 110 V. How many watts does it use?',opts:['36 W','113 W','330 W','366 W'],ans:2,exp:'P = V×I = 110×3 = 330 W'},
+      {q:'A 60 W bulb runs on 120 V. What current does it draw?',opts:['0.5 A','2 A','5 A','7.2 A'],ans:0,exp:'I = P÷V = 60÷120 = 0.5 A'},
+    ]},
+
+  { id:'elec_energy', name:'Electrical Energy (Joules)',          formula:'E = P × t',            alt:'1 Joule = 1 Watt × 1 second',
+    svg:`<svg viewBox="0 0 200 68" width="178" height="60" xmlns="http://www.w3.org/2000/svg">
+      <text x="8"  y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#34d399" font-weight="bold">E (J)</text>
+      <text x="70" y="28" font-size="12" font-family="IBM Plex Mono,monospace" fill="#5a6070">=</text>
+      <text x="86" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#00e5ff">P (W)</text>
+      <text x="140" y="28" font-size="12" font-family="IBM Plex Mono,monospace" fill="#5a6070">×</text>
+      <text x="155" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#a78bfa">t (s)</text>
+      <line x1="8" y1="38" x2="192" y2="38" stroke="#1e2330" stroke-width="1"/>
+      <text x="8" y="56" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">1 kWh = 3,600,000 J = 3.6 MJ</text>
+    </svg>`,
+    vars:['E = Energy (Joules, J)','P = Power (Watts, W)','t = time (seconds, s)','1 kWh = 3,600,000 J'],
+    tip:'A Joule is a tiny unit. 1 Watt burning for 1 second = 1 Joule. Multiply watts × seconds.',
+    ex:'100 W bulb for 30 s → E = 100×30 = 3,000 J',
+    appQs:[
+      {q:'A 500 W motor runs for 120 seconds. How many joules of energy does it use?',opts:['4 J','620 J','6,000 J','60,000 J'],ans:2,exp:'E = P×t = 500×120 = 60,000 J'},
+    ]},
+
+  { id:'unit_milliamp', name:'Amps & Milliamps',                  formula:'1 A = 1,000 mA',
+    svg:`<svg viewBox="0 0 200 68" width="178" height="60" xmlns="http://www.w3.org/2000/svg">
+      <text x="8"  y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#ffd600">1 A</text>
+      <text x="46" y="28" font-size="12" font-family="IBM Plex Mono,monospace" fill="#5a6070">=</text>
+      <text x="62" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#00e5ff">1,000 mA</text>
+      <line x1="8" y1="38" x2="192" y2="38" stroke="#1e2330" stroke-width="1"/>
+      <text x="8" y="54" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">mA × 0.001 → A  |  A × 1,000 → mA</text>
+    </svg>`,
+    vars:['1 Ampere (A) = 1,000 milliamps (mA)','1 mA = 0.001 A','milliamp prefix milli- = ÷1,000','also: 1 kΩ = 1,000 Ω  |  1 MΩ = 1,000,000 Ω'],
+    tip:'Milli- always means ÷1,000. So 250 mA = 0.25 A. Dangerous current starts around 100 mA through the body.',
+    ex:'350 mA = 350 ÷ 1,000 = 0.35 A',
+    appQs:[
+      {q:'A circuit carries 750 mA. How many amps is that?',opts:['0.075 A','0.75 A','7.5 A','75 A'],ans:1,exp:'750 ÷ 1,000 = 0.75 A'},
+      {q:'A sensor requires 0.045 A. How many milliamps is that?',opts:['4.5 mA','45 mA','450 mA','4,500 mA'],ans:1,exp:'0.045 × 1,000 = 45 mA'},
+    ]},
+
+  // ── PHYSICS ───────────────────────────────────────────────────────────────
+  { id:'force_newtons', name:"Newton's 2nd Law (Force)",          formula:'F = m × a',            alt:'also: a = F÷m  |  m = F÷a',
+    svg:`<svg viewBox="0 0 200 80" width="178" height="71" xmlns="http://www.w3.org/2000/svg">
+      <rect x="60" y="24" width="60" height="36" rx="4" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="2"/>
+      <text x="78" y="47" font-size="13" font-family="IBM Plex Mono,monospace" fill="#00e5ff">m</text>
+      <polygon points="120,42 152,42 148,37 148,47" fill="#ff3d5a"/>
+      <text x="155" y="46" font-size="12" font-family="IBM Plex Mono,monospace" fill="#ff3d5a">F</text>
+      <text x="8" y="75" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">Force(N) = mass(kg) × acceleration(m/s²)</text>
+    </svg>`,
+    vars:['F = Force (Newtons, N)','m = mass (kilograms, kg)','a = acceleration (m/s²)','Weight = m × g  (g ≈ 9.8 m/s²)'],
+    tip:'Bigger mass OR bigger acceleration = bigger force. Weight is a force: W = mg.',
+    ex:'m=10 kg, a=3 m/s² → F = 10×3 = 30 N',
+    appQs:[
+      {q:'A 5 kg object accelerates at 4 m/s². What force is applied?',opts:['1.25 N','9 N','20 N','45 N'],ans:2,exp:'F = ma = 5×4 = 20 N'},
+      {q:'A 70 kg person stands on Earth (g = 9.8 m/s²). What is their weight?',opts:['71.4 N','686 N','700 N','7,140 N'],ans:1,exp:'W = mg = 70×9.8 = 686 N'},
+    ]},
+
+  { id:'heat_transfer', name:'Heat Transfer',                     formula:'Q = m × c × ΔT',
+    svg:`<svg viewBox="0 0 200 78" width="178" height="69" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="18" width="56" height="42" rx="4" fill="rgba(255,61,90,0.08)" stroke="#ff3d5a" stroke-width="2"/>
+      <text x="22" y="44" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ff3d5a">T₁</text>
+      <polygon points="80,38 104,30 104,46" fill="#ffd600"/>
+      <text x="89" y="28" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">Q=mcΔT</text>
+      <rect x="112" y="18" width="56" height="42" rx="4" fill="rgba(255,214,0,0.08)" stroke="#ffd600" stroke-width="2"/>
+      <text x="126" y="44" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ffd600">T₂</text>
+      <text x="8" y="74" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">ΔT = T₂ − T₁  (change in temperature)</text>
+    </svg>`,
+    vars:['Q = heat energy (Joules)','m = mass (grams or kg)','c = specific heat capacity','ΔT = change in temperature (T₂ − T₁)','Water: c = 4.186 J/(g·°C)'],
+    tip:'ΔT is just the temperature change. More mass, higher c, or bigger temp change = more heat needed.',
+    ex:'m=200g, c=4.186, ΔT=10°C → Q = 200×4.186×10 = 8,372 J',
+    appQs:[
+      {q:'How much heat is needed to raise 100 g of water by 5°C? (c = 4.186 J/g°C)',opts:['20.93 J','209.3 J','2,093 J','20,930 J'],ans:2,exp:'Q = mcΔT = 100×4.186×5 = 2,093 J'},
+    ]},
 ];
 
 // ── FL runtime state ──────────────────────────────────────────────────────────
@@ -5189,7 +5330,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;gap:16px;flex-wrap:wrap">
         <div>
           <div class="rank-badge" style="opacity:1;animation:none;text-align:left;margin-bottom:10px">&#x1F4D0; FORMULA LAB</div>
-          <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.9">FORMULA<br><span style="color:var(--mk)">MASTERY</span></h2>
+          <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.9">FORMULA<br><span style="color:var(--mk)">SMART</span></h2>
         </div>
         <button class="full-btn" style="opacity:1;animation:none;margin-top:8px" onclick="showScreen('splash')">&#8592; HOME</button>
       </div>
