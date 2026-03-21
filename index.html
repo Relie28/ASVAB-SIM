@@ -1414,6 +1414,55 @@
     .disc-title { font-size: 22px; }
     .disc-btn-row { flex-direction: column; }
   }
+
+  /* ── FORMULA LAB ── */
+  #formula-lab { display:none; min-height:100vh; padding-bottom:60px; }
+  .fl-wrap { max-width:640px; margin:0 auto; padding:48px 24px; width:100%; }
+  .fl-mastery-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:8px; margin-bottom:24px; }
+  .fl-chip { border:1px solid var(--border); border-radius:6px; padding:8px 10px; transition:border-color 0.15s; }
+  .fl-chip.mastered   { border-color:rgba(0,201,122,0.4);  background:rgba(0,201,122,0.04); }
+  .fl-chip.learning   { border-color:rgba(255,214,0,0.4);   background:rgba(255,214,0,0.04); }
+  .fl-chip.needs-work { border-color:rgba(255,61,90,0.4);   background:rgba(255,61,90,0.04); }
+  .fl-chip-name    { font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:0.5px; color:var(--muted); margin-bottom:3px; }
+  .fl-chip-formula { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text); }
+  .fl-chip-bar  { height:3px; background:var(--surface2); border-radius:2px; margin-top:5px; overflow:hidden; }
+  .fl-chip-fill { height:100%; border-radius:2px; transition:width 0.3s; }
+  .fl-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:32px 24px 24px; text-align:center; min-height:340px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:border-color 0.2s; }
+  .fl-card:hover { border-color:rgba(0,229,255,0.2); }
+  .fl-card.revealed { cursor:default; border-color:rgba(255,214,0,0.2); }
+  .fl-card-front, .fl-card-back { width:100%; }
+  .fl-card.revealed .fl-card-front { display:none; }
+  .fl-card-back { display:none; text-align:left; }
+  .fl-card.revealed .fl-card-back  { display:block; }
+  .fl-card-title { font-family:'Barlow Condensed',sans-serif; font-size:26px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:14px; }
+  .fl-hint { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:2px; color:var(--muted); margin-top:14px; animation:fl-pulse 2s infinite; }
+  @keyframes fl-pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+  .fl-formula-big { font-family:'IBM Plex Mono',monospace; font-size:22px; color:var(--mk); letter-spacing:1px; padding:12px 18px; background:rgba(255,214,0,0.06); border:1px solid rgba(255,214,0,0.2); border-radius:6px; display:inline-block; margin-bottom:8px; }
+  .fl-alt  { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); margin-bottom:12px; }
+  .fl-vars { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); line-height:1.9; margin-bottom:10px; }
+  .fl-vars span { color:var(--text); }
+  .fl-ex-box   { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--accent); background:rgba(0,229,255,0.05); padding:8px 12px; border-left:2px solid var(--accent); border-radius:0 4px 4px 0; margin-top:8px; }
+  .fl-tip-text { font-size:12px; color:var(--muted); margin-top:10px; font-style:italic; line-height:1.5; }
+  .fl-grade-row { display:flex; gap:10px; justify-content:center; margin-top:18px; width:100%; }
+  .fl-btn-nope, .fl-btn-got { flex:1; max-width:185px; padding:12px 0; border-radius:6px; cursor:pointer; transition:all 0.15s; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:1px; }
+  .fl-btn-nope { background:rgba(255,61,90,0.07);  border:1px solid rgba(255,61,90,0.3);  color:var(--wrong); }
+  .fl-btn-got  { background:rgba(0,201,122,0.07);  border:1px solid rgba(0,201,122,0.3);  color:var(--correct); }
+  .fl-btn-nope:hover { background:rgba(255,61,90,0.15); }
+  .fl-btn-got:hover  { background:rgba(0,201,122,0.15); }
+  .fl-progress     { display:flex; align-items:center; gap:12px; margin-bottom:20px; }
+  .fl-progress-bar { flex:1; height:4px; background:var(--surface2); border-radius:2px; overflow:hidden; }
+  .fl-progress-fill{ height:100%; background:var(--accent); border-radius:2px; transition:width 0.4s; }
+  .fl-prog-lbl     { font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); white-space:nowrap; }
+  .fl-quiz-q       { font-family:'Barlow',sans-serif; font-size:17px; font-weight:500; line-height:1.5; margin-bottom:16px; }
+  .fl-formula-hint { font-family:'IBM Plex Mono',monospace; font-size:15px; color:var(--mk); padding:10px 16px; background:rgba(255,214,0,0.06); border:1px solid rgba(255,214,0,0.2); border-radius:6px; text-align:center; margin-bottom:16px; }
+  .fl-opt { display:flex; align-items:center; gap:12px; padding:12px 16px; border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:all 0.15s; margin-bottom:8px; font-family:'IBM Plex Mono',monospace; font-size:12px; }
+  .fl-opt:hover:not(.fl-done) { border-color:rgba(0,229,255,0.4); background:rgba(0,229,255,0.04); }
+  .fl-opt.correct { border-color:var(--correct); background:rgba(0,201,122,0.08); color:var(--correct); }
+  .fl-opt.wrong   { border-color:var(--wrong);   background:rgba(255,61,90,0.08);  color:var(--wrong);   }
+  .fl-opt-ltr { width:22px; height:22px; border-radius:50%; border:1px solid currentColor; display:flex; align-items:center; justify-content:center; font-size:10px; flex-shrink:0; }
+  .fl-quiz-exp { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); padding:10px 14px; background:var(--surface2); border-radius:6px; line-height:1.6; display:none; margin-top:10px; }
+  .fl-score-big { font-family:'Barlow Condensed',sans-serif; font-size:80px; font-weight:900; line-height:1; text-align:center; }
+  .fl-score-lbl { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:3px; color:var(--muted); text-align:center; margin-bottom:24px; }
 </style>
 </head>
 <body>
@@ -1614,6 +1663,7 @@ window.IS_DEV = location.protocol === 'file:' ||
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:18px;opacity:0;animation:fadeUp 0.6s 1.5s forwards">
     <button class="stats-btn" style="margin-top:0" onclick="showStats()">VIEW MY STATS →</button>
     <button id="flaggedSplashBtn" class="stats-btn" style="margin-top:0;border-color:rgba(255,214,0,0.35);color:rgba(255,214,0,0.75)" onclick="showFlaggedReview()">&#x2691; FLAGGED QUESTIONS</button>
+    <button class="stats-btn" style="margin-top:0;border-color:rgba(52,211,153,0.4);color:rgba(52,211,153,0.8)" onclick="showFormulaLab()">&#x1F4D0; FORMULA LAB</button>
   </div>
 </div>
 
@@ -2317,8 +2367,8 @@ function adaptAfterAnswer(wasCorrect) {
 
 // ── SCREEN NAVIGATION ──
 function showScreen(id) {
-  const BLOCK = { quiz:1, results:1, stats:1, 'flagged-review':1 };
-  ['splash','category-select','quiz','results','stats','flagged-review'].forEach(s => {
+  const BLOCK = { quiz:1, results:1, stats:1, 'flagged-review':1, 'formula-lab':1 };
+  ['splash','category-select','quiz','results','stats','flagged-review','formula-lab'].forEach(s => {
     const el = document.getElementById(s);
     if (!el) return;
     el.style.display = s === id ? (BLOCK[s] ? 'block' : 'flex') : 'none';
@@ -4624,6 +4674,447 @@ function hideSyncModal() {
   if (modal) modal.classList.remove('open');
 }
 
+// ══ FORMULA LAB ══════════════════════════════════════════════════════════════
+const FL_KEY = 'asvab_formula_mastery';
+
+// Pre-built SVG shapes for each formula category
+const _FL_SVG = {
+  circle: `<svg viewBox="0 0 120 120" width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="52" fill="rgba(0,229,255,0.07)" stroke="#00e5ff" stroke-width="2.5"/><line x1="60" y1="60" x2="112" y2="60" stroke="#ffd600" stroke-width="1.5" stroke-dasharray="5,3"/><circle cx="60" cy="60" r="3.5" fill="#ffd600"/><text x="81" y="55" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ffd600">r</text></svg>`,
+  rect:   `<svg viewBox="0 0 170 108" width="148" height="94" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="140" height="80" fill="rgba(0,229,255,0.07)" stroke="#00e5ff" stroke-width="2.5" rx="1"/><text x="71" y="103" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ffd600">l</text><text x="154" y="54" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ffd600">w</text></svg>`,
+  tri:    `<svg viewBox="0 0 160 135" width="140" height="118" xmlns="http://www.w3.org/2000/svg"><polygon points="80,8 8,122 152,122" fill="rgba(0,229,255,0.07)" stroke="#00e5ff" stroke-width="2.5"/><line x1="80" y1="8" x2="80" y2="122" stroke="#ffd600" stroke-width="1.5" stroke-dasharray="5,3"/><rect x="76" y="114" width="8" height="8" fill="none" stroke="#ffd600" stroke-width="1.5"/><text x="83" y="72" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ffd600">h</text><text x="74" y="134" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ffd600">b</text></svg>`,
+  sq:     `<svg viewBox="0 0 122 124" width="102" height="104" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="106" height="106" fill="rgba(0,229,255,0.07)" stroke="#00e5ff" stroke-width="2.5" rx="1"/><text x="54" y="122" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ffd600">s</text><text x="118" y="64" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ffd600">s</text></svg>`,
+  prism:  `<svg viewBox="0 0 174 148" width="150" height="128" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="54" width="102" height="76" fill="rgba(0,229,255,0.07)" stroke="#00e5ff" stroke-width="2"/><polygon points="10,54 44,18 148,18 114,54" fill="rgba(0,229,255,0.04)" stroke="#00e5ff" stroke-width="2"/><polygon points="112,54 148,18 148,94 112,130" fill="rgba(0,229,255,0.05)" stroke="#00e5ff" stroke-width="2"/><text x="53" y="98" font-size="12" font-family="IBM Plex Mono,monospace" fill="#ffd600">l</text><text x="2" y="96" font-size="12" font-family="IBM Plex Mono,monospace" fill="#ffd600">h</text><text x="130" y="62" font-size="12" font-family="IBM Plex Mono,monospace" fill="#ffd600">w</text></svg>`,
+  cyl:    `<svg viewBox="0 0 120 164" width="100" height="137" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="40" width="80" height="104" fill="rgba(0,229,255,0.06)" stroke="none"/><line x1="20" y1="40" x2="20" y2="144" stroke="#00e5ff" stroke-width="2"/><line x1="100" y1="40" x2="100" y2="144" stroke="#00e5ff" stroke-width="2"/><ellipse cx="60" cy="144" rx="40" ry="14" fill="rgba(0,229,255,0.1)" stroke="#00e5ff" stroke-width="2"/><ellipse cx="60" cy="40" rx="40" ry="14" fill="rgba(0,229,255,0.14)" stroke="#00e5ff" stroke-width="2"/><line x1="60" y1="40" x2="100" y2="40" stroke="#ffd600" stroke-width="1.5" stroke-dasharray="4,2.5"/><circle cx="60" cy="40" r="2.5" fill="#ffd600"/><text x="74" y="33" font-size="11" font-family="IBM Plex Mono,monospace" fill="#ffd600">r</text><text x="104" y="97" font-size="11" font-family="IBM Plex Mono,monospace" fill="#ffd600">h</text></svg>`,
+  cone:   `<svg viewBox="0 0 140 158" width="118" height="133" xmlns="http://www.w3.org/2000/svg"><polygon points="70,8 12,140 128,140" fill="rgba(0,229,255,0.06)" stroke="#00e5ff" stroke-width="2"/><ellipse cx="70" cy="140" rx="58" ry="16" fill="rgba(0,229,255,0.1)" stroke="#00e5ff" stroke-width="2"/><line x1="70" y1="8" x2="70" y2="140" stroke="#ffd600" stroke-width="1.5" stroke-dasharray="5,3"/><rect x="66" y="132" width="8" height="8" fill="none" stroke="#ffd600" stroke-width="1.5"/><text x="74" y="80" font-size="11" font-family="IBM Plex Mono,monospace" fill="#ffd600">h</text><line x1="70" y1="140" x2="128" y2="140" stroke="#ffd600" stroke-width="1.5" stroke-dasharray="4,2.5"/><text x="94" y="157" font-size="11" font-family="IBM Plex Mono,monospace" fill="#ffd600">r</text></svg>`,
+  rtri:   `<svg viewBox="0 0 162 142" width="140" height="123" xmlns="http://www.w3.org/2000/svg"><polygon points="14,128 14,14 148,128" fill="rgba(0,229,255,0.07)" stroke="#00e5ff" stroke-width="2.5"/><rect x="14" y="114" width="14" height="14" fill="none" stroke="#00e5ff" stroke-width="1.5"/><text x="2" y="75" font-size="14" font-family="IBM Plex Mono,monospace" fill="#ffd600">a</text><text x="74" y="141" font-size="14" font-family="IBM Plex Mono,monospace" fill="#ffd600">b</text><text x="90" y="62" font-size="14" font-family="IBM Plex Mono,monospace" fill="#ff3d5a" font-weight="bold">c</text></svg>`,
+  spd:    `<svg viewBox="0 0 180 90" width="158" height="79" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="28" width="164" height="36" fill="rgba(0,229,255,0.06)" rx="18" stroke="#00e5ff" stroke-width="2"/><polygon points="158,46 174,38 174,54" fill="#00e5ff"/><text x="22" y="51" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ffd600">D</text><text x="50" y="51" font-size="13" font-family="IBM Plex Mono,monospace" fill="rgba(0,229,255,0.5)">▶▶▶</text><text x="10" y="17" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">distance ÷ time = speed</text></svg>`,
+};
+
+const FORMULA_CARDS = [
+  { id:'circumference', name:'Circumference of a Circle',      formula:'C = 2πr',           alt:'also: C = πd',
+    svg:_FL_SVG.circle,
+    vars:['C = circumference','r = radius','d = diameter','π ≈ 3.14159'],
+    tip:'The distance around the outside of a circle — like a perimeter for circles.',
+    ex:'r = 7  →  C = 2π(7) = 14π ≈ 43.98',
+    appQs:[
+      {q:'A circle has radius 5. What is its circumference? (π ≈ 3.14)',opts:['15.7','31.4','47.1','62.8'],ans:1,exp:'C = 2πr = 2 × 3.14 × 5 = 31.4'},
+      {q:'A wheel has diameter 14 inches. What is its circumference? (π ≈ 3.14)',opts:['21.98 in','43.96 in','65.94 in','87.92 in'],ans:1,exp:'C = πd = 3.14 × 14 = 43.96 in'},
+    ]},
+  { id:'area_circle',    name:'Area of a Circle',               formula:'A = πr²',
+    svg:_FL_SVG.circle,
+    vars:['A = area','r = radius','π ≈ 3.14159'],
+    tip:'Square the radius FIRST, then multiply by π. Forgetting the ² is the most common mistake.',
+    ex:'r = 6  →  A = π(6²) = 36π ≈ 113.1',
+    appQs:[
+      {q:'A circle has radius 4. What is its area? (π ≈ 3.14)',opts:['12.56','25.12','50.24','78.54'],ans:2,exp:'A = πr² = 3.14 × 4² = 3.14 × 16 = 50.24'},
+    ]},
+  { id:'area_rect',      name:'Area of a Rectangle',            formula:'A = l × w',
+    svg:_FL_SVG.rect,
+    vars:['A = area','l = length','w = width'],
+    tip:'Length times width. Count the unit squares that fit inside.',
+    ex:'l = 8, w = 5  →  A = 8 × 5 = 40',
+    appQs:[
+      {q:'A rectangle is 12 cm long and 7 cm wide. What is its area?',opts:['38 cm²','72 cm²','84 cm²','96 cm²'],ans:2,exp:'A = 12 × 7 = 84 cm²'},
+    ]},
+  { id:'perim_rect',     name:'Perimeter of a Rectangle',       formula:'P = 2(l + w)',    alt:'also: P = 2l + 2w',
+    svg:_FL_SVG.rect,
+    vars:['P = perimeter','l = length','w = width'],
+    tip:'Two lengths + two widths. Add them first, then multiply by 2.',
+    ex:'l = 9, w = 4  →  P = 2(9 + 4) = 26',
+    appQs:[
+      {q:'A garden is 15 m long and 8 m wide. What is its perimeter?',opts:['23 m','40 m','46 m','120 m'],ans:2,exp:'P = 2(15 + 8) = 2(23) = 46 m'},
+    ]},
+  { id:'area_sq',        name:'Area of a Square',               formula:'A = s²',
+    svg:_FL_SVG.sq,
+    vars:['A = area','s = side length'],
+    tip:'A square is a rectangle where l = w = s, so A = s × s = s².',
+    ex:'s = 7  →  A = 7² = 49',
+    appQs:[
+      {q:'A square has side length 9 cm. What is its area?',opts:['18 cm²','36 cm²','72 cm²','81 cm²'],ans:3,exp:'A = s² = 9² = 81 cm²'},
+    ]},
+  { id:'perim_sq',       name:'Perimeter of a Square',          formula:'P = 4s',
+    svg:_FL_SVG.sq,
+    vars:['P = perimeter','s = side length'],
+    tip:'Four equal sides — multiply one side by 4.',
+    ex:'s = 6  →  P = 4 × 6 = 24',
+    appQs:[
+      {q:'A square room has sides of 11 feet. What is the perimeter?',opts:['22 ft','33 ft','44 ft','121 ft'],ans:2,exp:'P = 4s = 4 × 11 = 44 ft'},
+    ]},
+  { id:'area_tri',       name:'Area of a Triangle',             formula:'A = ½bh',           alt:'also: A = (b × h) ÷ 2',
+    svg:_FL_SVG.tri,
+    vars:['A = area','b = base','h = height (perpendicular to base)'],
+    tip:'A triangle is exactly half a rectangle with the same base and height.',
+    ex:'b = 10, h = 6  →  A = ½(10)(6) = 30',
+    appQs:[
+      {q:'A triangle has base 14 and height 8. What is its area?',opts:['22','56','112','168'],ans:1,exp:'A = ½bh = ½ × 14 × 8 = 56'},
+    ]},
+  { id:'pythagorean',    name:'Pythagorean Theorem',            formula:'a² + b² = c²',
+    svg:_FL_SVG.rtri,
+    vars:['a, b = the two legs (shorter sides)','c = hypotenuse (opposite the right angle)'],
+    tip:'Only for RIGHT triangles. c is ALWAYS the hypotenuse — the longest side.',
+    ex:'a = 3, b = 4  →  c² = 9 + 16 = 25  →  c = 5',
+    appQs:[
+      {q:'A right triangle has legs of 5 and 12. What is the hypotenuse?',opts:['11','13','15','17'],ans:1,exp:'c² = 5² + 12² = 25 + 144 = 169 → c = √169 = 13'},
+      {q:'A ladder 10 ft long leans against a wall, base 6 ft away. How high does it reach?',opts:['6 ft','7 ft','8 ft','9 ft'],ans:2,exp:'h² = 10² – 6² = 100 – 36 = 64 → h = 8 ft'},
+    ]},
+  { id:'sa_prism',       name:'Surface Area: Rect. Prism',      formula:'SA = 2(lw + lh + wh)',
+    svg:_FL_SVG.prism,
+    vars:['SA = surface area','l = length','w = width','h = height'],
+    tip:'A box has 3 pairs of identical faces. Sum all 3 pairs, then ×2.',
+    ex:'l=5, w=3, h=4  →  SA = 2(15+20+12) = 94',
+    appQs:[
+      {q:'A box is 8 in × 6 in × 4 in. What is its surface area?',opts:['192 in²','208 in²','224 in²','256 in²'],ans:1,exp:'SA = 2(8×6 + 8×4 + 6×4) = 2(48+32+24) = 208 in²'},
+    ]},
+  { id:'vol_prism',      name:'Volume of a Rectangular Prism',  formula:'V = l × w × h',
+    svg:_FL_SVG.prism,
+    vars:['V = volume','l = length','w = width','h = height'],
+    tip:'Multiply all three dimensions. The number of unit cubes that fit inside.',
+    ex:'l=6, w=4, h=3  →  V = 72',
+    appQs:[
+      {q:'A box is 10 cm × 5 cm × 3 cm. What is its volume?',opts:['50 cm³','100 cm³','150 cm³','200 cm³'],ans:2,exp:'V = 10 × 5 × 3 = 150 cm³'},
+    ]},
+  { id:'vol_cyl',        name:'Volume of a Cylinder',           formula:'V = πr²h',
+    svg:_FL_SVG.cyl,
+    vars:['V = volume','r = radius of circular base','h = height','π ≈ 3.14159'],
+    tip:'Area of the circular base (πr²) × height. Think: a stack of flat circles.',
+    ex:'r=3, h=10  →  V = π(9)(10) = 90π ≈ 282.7',
+    appQs:[
+      {q:'A cylinder has radius 5 and height 8. What is its volume? (π ≈ 3.14)',opts:['502.4','628','753.6','1004.8'],ans:1,exp:'V = πr²h = 3.14 × 25 × 8 = 628'},
+    ]},
+  { id:'vol_cone',       name:'Volume of a Cone',               formula:'V = ⅓πr²h',         alt:'also: V = (πr²h) ÷ 3',
+    svg:_FL_SVG.cone,
+    vars:['V = volume','r = radius of circular base','h = height','π ≈ 3.14159'],
+    tip:'A cone is exactly ⅓ the volume of a cylinder with the same base and height.',
+    ex:'r=3, h=9  →  V = ⅓π(9)(9) = 27π ≈ 84.8',
+    appQs:[
+      {q:'A cone has radius 6 and height 10. What is its volume? (π ≈ 3.14)',opts:['376.8','502.4','628','753.6'],ans:0,exp:'V = ⅓πr²h = ⅓ × 3.14 × 36 × 10 = ⅓ × 1130.4 ≈ 376.8'},
+    ]},
+  { id:'speed',          name:'Speed / Distance / Time',        formula:'S = D ÷ T',         alt:'also: D = S×T  |  T = D÷S',
+    svg:_FL_SVG.spd,
+    vars:['S = speed','D = distance','T = time'],
+    tip:'DST triangle: cover what you want to find. D=S×T, S=D/T, T=D/S.',
+    ex:'D=150 mi, T=3 hr  →  S = 50 mph',
+    appQs:[
+      {q:'A car travels 240 miles in 4 hours. What is its speed?',opts:['45 mph','55 mph','60 mph','65 mph'],ans:2,exp:'S = D ÷ T = 240 ÷ 4 = 60 mph'},
+      {q:'A train goes 80 mph for 2.5 hours. How far does it travel?',opts:['160 mi','180 mi','200 mi','220 mi'],ans:2,exp:'D = S × T = 80 × 2.5 = 200 miles'},
+    ]},
+  { id:'unit_ton',       name:'Unit: Tons → Pounds',            formula:'1 ton = 2,000 lbs',
+    svg:`<svg viewBox="0 0 200 70" width="178" height="62" xmlns="http://www.w3.org/2000/svg"><text x="8" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#ffd600">1 ton</text><text x="78" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#5a6070">=</text><text x="98" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#00e5ff">2,000 lbs</text><line x1="8" y1="38" x2="192" y2="38" stroke="#1e2330" stroke-width="1"/><text x="8" y="58" font-size="10" font-family="IBM Plex Mono,monospace" fill="#5a6070">× 2,000 to convert tons → lbs</text></svg>`,
+    vars:['1 ton = 2,000 pounds','× 2,000 to convert tons to pounds','÷ 2,000 to convert pounds to tons'],
+    tip:'A car weighs about 1–2 tons. Remember: 2,000 is the magic number.',
+    ex:'3.5 tons = 3.5 × 2,000 = 7,000 lbs',
+    appQs:[
+      {q:'How many pounds are in 4.5 tons?',opts:['4,500','6,500','8,000','9,000'],ans:3,exp:'4.5 × 2,000 = 9,000 lbs'},
+    ]},
+  { id:'unit_yard',      name:'Unit: Yards → Feet',             formula:'1 yard = 3 feet',
+    svg:`<svg viewBox="0 0 200 70" width="178" height="62" xmlns="http://www.w3.org/2000/svg"><text x="8" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#ffd600">1 yard</text><text x="84" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#5a6070">=</text><text x="104" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#00e5ff">3 feet</text><line x1="8" y1="38" x2="192" y2="38" stroke="#1e2330" stroke-width="1"/><text x="8" y="58" font-size="10" font-family="IBM Plex Mono,monospace" fill="#5a6070">× 3 to convert yards → feet</text></svg>`,
+    vars:['1 yard = 3 feet','1 foot = 12 inches','1 yard = 36 inches'],
+    tip:'A yard is about a meter — or the length of a guitar. Three feet.',
+    ex:'5 yards = 5 × 3 = 15 feet',
+    appQs:[
+      {q:'How many feet are in 8 yards?',opts:['16 ft','24 ft','32 ft','48 ft'],ans:1,exp:'8 × 3 = 24 feet'},
+    ]},
+  { id:'unit_sqyard',    name:'Unit: Sq Yards → Sq Feet',        formula:'1 sq yd = 9 sq ft',
+    svg:`<svg viewBox="0 0 200 80" width="178" height="71" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="54" height="54" fill="rgba(255,214,0,0.08)" stroke="#ffd600" stroke-width="2"/><text x="22" y="40" font-size="10" font-family="IBM Plex Mono,monospace" fill="#ffd600">1 yd²</text><text x="74" y="36" font-size="14" font-family="IBM Plex Mono,monospace" fill="#5a6070">=</text><rect x="94" y="8" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="114" y="8" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="134" y="8" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="94" y="28" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="114" y="28" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="134" y="28" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="94" y="48" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="114" y="48" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="134" y="48" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><text x="94" y="76" font-size="10" font-family="IBM Plex Mono,monospace" fill="#5a6070">9 sq ft</text></svg>`,
+    vars:['1 sq yard = 9 sq feet','(because 3 ft × 3 ft = 9 ft²)','multiply sq yards × 9 for sq feet'],
+    tip:'When you square the unit, you square the number too. 3² = 9.',
+    ex:'4 sq yd = 4 × 9 = 36 sq ft',
+    appQs:[
+      {q:'A floor is 12 square yards. How many square feet is that?',opts:['36 sq ft','72 sq ft','96 sq ft','108 sq ft'],ans:3,exp:'12 × 9 = 108 sq ft'},
+    ]},
+];
+
+// ── FL runtime state ──────────────────────────────────────────────────────────
+const _fl = {
+  deck:[], idx:0, revealed:false,
+  batchSeen:[],
+  qQueue:[], qIdx:0, qDone:false,
+  sCorrect:0, sTotal:0,
+  fromTrain:false,
+};
+
+function _flLoad()  { try { return JSON.parse(localStorage.getItem(FL_KEY)||'{}'); } catch { return {}; } }
+function _flSave(m) { localStorage.setItem(FL_KEY, JSON.stringify(m)); }
+
+function _flPanel(show) {
+  ['fl-home','fl-train','fl-quiz','fl-summary'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = id === show ? 'block' : 'none';
+  });
+}
+
+function showFormulaLab() {
+  showScreen('formula-lab');
+  _flPanel('fl-home');
+  _flRenderHome();
+}
+
+function flBack() {
+  _flPanel('fl-home');
+  _flRenderHome();
+}
+
+// ── HOME ──────────────────────────────────────────────────────────────────────
+function _flRenderHome() {
+  const m = _flLoad();
+  let mastered=0, learning=0, weak=0, unseen=0;
+  FORMULA_CARDS.forEach(c => {
+    const r = m[c.id];
+    if (!r || !r.seen) unseen++;
+    else if ((r.streak||0) >= 3) mastered++;
+    else if ((r.streak||0) >= 1) learning++;
+    else weak++;
+  });
+  const total = FORMULA_CARDS.length;
+  const pct   = Math.round(mastered / total * 100);
+
+  let html = `
+    <div style="margin-bottom:24px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted)">MASTERY PROGRESS</span>
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--mk)">${pct}%</span>
+      </div>
+      <div style="height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-bottom:14px">
+        <div style="height:100%;width:${pct}%;background:var(--mk);border-radius:3px;transition:width 0.5s"></div>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:20px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)"><span style="color:var(--correct)">&#9679;</span> ${mastered} mastered</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)"><span style="color:var(--mk)">&#9679;</span> ${learning} learning</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)"><span style="color:var(--wrong)">&#9679;</span> ${weak} needs work</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)"><span style="color:var(--border)">&#9679;</span> ${unseen} not seen</span>
+      </div>
+    </div>
+    <div class="fl-mastery-grid">`;
+
+  FORMULA_CARDS.forEach(c => {
+    const r = m[c.id];
+    const streak = r ? (r.streak||0) : 0;
+    const seen   = r && r.seen;
+    let cls='fl-chip', fillColor='var(--border)', fillPct='0%';
+    if (seen) {
+      if (streak >= 3)    { cls+=' mastered';   fillColor='var(--correct)'; fillPct='100%'; }
+      else if (streak>=1) { cls+=' learning';   fillColor='var(--mk)';      fillPct=`${Math.round(streak/3*100)}%`; }
+      else                { cls+=' needs-work'; fillColor='var(--wrong)';   fillPct='15%'; }
+    }
+    html += `<div class="${cls}"><div class="fl-chip-name">${c.name}</div><div class="fl-chip-formula">${c.formula}</div><div class="fl-chip-bar"><div class="fl-chip-fill" style="width:${fillPct};background:${fillColor}"></div></div></div>`;
+  });
+  html += `</div>`;
+  document.getElementById('fl-mastery-overview').innerHTML = html;
+}
+
+// ── TRAINING ─────────────────────────────────────────────────────────────────
+function _flBuildDeck() {
+  const m = _flLoad();
+  const g = [[],[],[],[]]; // [needs-work, unseen, learning, mastered]
+  FORMULA_CARDS.forEach(c => {
+    const r = m[c.id];
+    const s = r ? (r.streak||0) : -1;
+    if (!r || !r.seen) g[1].push(c);
+    else if (s === 0)  g[0].push(c);
+    else if (s <= 2)   g[2].push(c);
+    else               g[3].push(c);
+  });
+  const shuf = a => a.sort(() => Math.random()-0.5);
+  return [...shuf(g[0]), ...shuf(g[1]), ...shuf(g[2]), ...shuf(g[3])];
+}
+
+function startFLTraining() {
+  _fl.deck = _flBuildDeck();
+  _fl.idx  = 0;
+  _fl.batchSeen = [];
+  _fl.fromTrain = true;
+  _flPanel('fl-train');
+  _flRenderCard();
+}
+
+function _flRenderCard() {
+  const card = _fl.deck[_fl.idx];
+  if (!card) { _flCheckpoint(); return; }
+  _fl.revealed = false;
+  const cardEl = document.getElementById('fl-card');
+  cardEl.classList.remove('revealed');
+  cardEl.style.cursor = 'pointer';
+  document.getElementById('fl-grade').style.display = 'none';
+  document.getElementById('fl-cf').innerHTML = `
+    <div class="fl-card-title">${card.name}</div>
+    <div style="margin:0 auto 8px;display:inline-block">${card.svg}</div>
+    <div class="fl-hint">TAP TO REVEAL FORMULA</div>
+  `;
+  const altHtml = card.alt ? `<div class="fl-alt">${card.alt}</div>` : '';
+  document.getElementById('fl-cb').innerHTML = `
+    <div class="fl-formula-big">${card.formula}</div>
+    ${altHtml}
+    <div class="fl-vars">${card.vars.map(v=>`<div>• <span>${v}</span></div>`).join('')}</div>
+    <div class="fl-ex-box">Example: ${card.ex}</div>
+    <div class="fl-tip-text">${card.tip}</div>
+  `;
+  const total = _fl.deck.length;
+  document.getElementById('fl-train-bar').style.width = Math.round(_fl.idx/total*100) + '%';
+  document.getElementById('fl-train-lbl').textContent  = `${_fl.idx+1} / ${total}`;
+}
+
+function revealFLCard() {
+  if (_fl.revealed) return;
+  _fl.revealed = true;
+  document.getElementById('fl-card').classList.add('revealed');
+  document.getElementById('fl-card').style.cursor = 'default';
+  document.getElementById('fl-grade').style.display = 'flex';
+}
+
+function gradeFLCard(gotIt) {
+  const card = _fl.deck[_fl.idx];
+  const m    = _flLoad();
+  if (!m[card.id]) m[card.id] = {seen:0,correct:0,wrong:0,streak:0};
+  m[card.id].seen++;
+  if (gotIt) { m[card.id].correct++; m[card.id].streak = (m[card.id].streak||0)+1; }
+  else       { m[card.id].wrong++;   m[card.id].streak = 0; }
+  _flSave(m);
+  if (!_fl.batchSeen.includes(card.id)) _fl.batchSeen.push(card.id);
+  _fl.idx++;
+  if (_fl.batchSeen.length >= 5 && _fl.batchSeen.length % 5 === 0) _flCheckpoint();
+  else _flRenderCard();
+}
+
+function _flCheckpoint() {
+  const n = _fl.batchSeen.length;
+  document.getElementById('fl-grade').style.display = 'none';
+  const cardEl = document.getElementById('fl-card');
+  cardEl.classList.remove('revealed');
+  cardEl.style.cursor = 'default';
+  document.getElementById('fl-cf').innerHTML = `
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--mk);margin-bottom:14px">CHECKPOINT</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:700;margin-bottom:8px">QUICK CHECK</div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:22px">You’ve seen <strong style="color:var(--text)">${n}</strong> formula${n!==1?'s':''}.<br>Test what’s sticking!</div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button onclick="event.stopPropagation();_flStartBatchQuiz()" style="padding:12px 22px;background:rgba(255,214,0,0.08);border:1px solid rgba(255,214,0,0.4);color:var(--mk);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;border-radius:6px;cursor:pointer;text-transform:uppercase">QUIZ ME →</button>
+      <button onclick="event.stopPropagation();_flRenderCard()" style="padding:12px 22px;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;border-radius:6px;cursor:pointer;text-transform:uppercase">KEEP TRAINING</button>
+    </div>
+  `;
+  document.getElementById('fl-cb').innerHTML = '';
+}
+
+// ── QUIZ ──────────────────────────────────────────────────────────────────────
+function _flStartBatchQuiz() { startFLQuiz(_fl.batchSeen, true); }
+function startFLQuizAll()    { startFLQuiz(FORMULA_CARDS.map(c=>c.id), false); }
+
+function startFLQuiz(ids, fromTrain) {
+  _fl.qQueue   = _flGenQ(ids, Math.min(ids.length * 2, 14));
+  _fl.qIdx     = 0;
+  _fl.qDone    = false;
+  _fl.sCorrect = 0;
+  _fl.sTotal   = _fl.qQueue.length;
+  _fl.fromTrain = !!fromTrain;
+  _flPanel('fl-quiz');
+  _flRenderQ();
+}
+
+function _flGenQ(ids, maxCount) {
+  const cardMap = Object.fromEntries(FORMULA_CARDS.map(c=>[c.id,c]));
+  const out = [];
+  for (const id of [...ids].sort(()=>Math.random()-0.5)) {
+    const card = cardMap[id];
+    if (!card) continue;
+    // Type 1: identify the formula by name
+    const others = FORMULA_CARDS.filter(c=>c.id!==id).sort(()=>Math.random()-0.5).slice(0,3);
+    const opts1  = [...others.map(c=>c.formula), card.formula].sort(()=>Math.random()-0.5);
+    out.push({ q:`Which formula correctly calculates the <strong>${card.name}</strong>?`, svg:card.svg,
+               opts:opts1, ans:opts1.indexOf(card.formula),
+               exp:`${card.formula}${card.alt?' | '+card.alt:''}. ${card.tip}`, cardId:id });
+    // Type 2: application
+    if (card.appQs && card.appQs.length) {
+      const appQ = card.appQs[Math.floor(Math.random()*card.appQs.length)];
+      out.push({ q:appQ.q, formulaHint:card.formula, opts:appQ.opts, ans:appQ.ans, exp:appQ.exp, cardId:id });
+    }
+    if (out.length >= maxCount) break;
+  }
+  return out.slice(0, maxCount).sort(()=>Math.random()-0.5);
+}
+
+function _flRenderQ() {
+  const q = _fl.qQueue[_fl.qIdx];
+  if (!q) { _flShowSummary(); return; }
+  _fl.qDone = false;
+  const pct = Math.round(_fl.qIdx / _fl.qQueue.length * 100);
+  document.getElementById('fl-quiz-bar').style.width = pct + '%';
+  document.getElementById('fl-quiz-lbl').textContent = `${_fl.qIdx+1} / ${_fl.qQueue.length}`;
+  const letters = ['A','B','C','D'];
+  const svgHtml  = q.svg         ? `<div style="text-align:center;margin-bottom:14px">${q.svg}</div>` : '';
+  const hintHtml = q.formulaHint ? `<div class="fl-formula-hint">${q.formulaHint}</div>` : '';
+  const optsHtml = q.opts.map((opt,i)=>`
+    <div class="fl-opt" id="flopt${i}" onclick="_flAnswer(${i})">
+      <div class="fl-opt-ltr">${letters[i]}</div>
+      <div>${opt}</div>
+    </div>`).join('');
+  document.getElementById('fl-quiz-body').innerHTML = `
+    ${svgHtml}
+    ${hintHtml}
+    <div class="fl-quiz-q">${q.q}</div>
+    <div>${optsHtml}</div>
+    <div class="fl-quiz-exp" id="fl-qexp">${q.exp}</div>
+    <button id="fl-qnext" onclick="_flNextQ()" style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;background:transparent;border:1px solid rgba(0,229,255,0.3);color:var(--accent);padding:10px 24px;border-radius:6px;cursor:pointer;margin-top:16px;display:none;transition:all 0.15s" onmouseover="this.style.background='rgba(0,229,255,0.08)'" onmouseout="this.style.background='transparent'">NEXT →</button>
+  `;
+}
+
+function _flAnswer(idx) {
+  if (_fl.qDone) return;
+  _fl.qDone = true;
+  const q  = _fl.qQueue[_fl.qIdx];
+  const ok = idx === q.ans;
+  document.querySelectorAll('.fl-opt').forEach(el => el.classList.add('fl-done'));
+  document.getElementById(`flopt${q.ans}`).classList.add('correct');
+  if (!ok) document.getElementById(`flopt${idx}`).classList.add('wrong');
+  document.getElementById('fl-qexp').style.display  = 'block';
+  document.getElementById('fl-qnext').style.display = 'inline-block';
+  const m  = _flLoad();
+  const id = q.cardId;
+  if (!m[id]) m[id] = {seen:0,correct:0,wrong:0,streak:0};
+  m[id].seen++;
+  if (ok) { m[id].correct++; m[id].streak=(m[id].streak||0)+1; _fl.sCorrect++; }
+  else    { m[id].wrong++;   m[id].streak=0; }
+  _flSave(m);
+}
+
+function _flNextQ() {
+  _fl.qIdx++;
+  if (_fl.qIdx >= _fl.qQueue.length) _flShowSummary();
+  else _flRenderQ();
+}
+
+// ── SUMMARY ───────────────────────────────────────────────────────────────────
+function _flShowSummary() {
+  _flPanel('fl-summary');
+  const correct = _fl.sCorrect, total = _fl.sTotal;
+  const pct     = total ? Math.round(correct/total*100) : 0;
+  const color   = pct>=80 ? 'var(--correct)' : pct>=60 ? 'var(--mk)' : 'var(--wrong)';
+  const m       = _flLoad();
+  const weakCards = FORMULA_CARDS.filter(c => { const r=m[c.id]; return r&&r.seen&&(r.streak||0)===0; });
+  const weakHtml  = weakCards.length
+    ? `<div style="margin-top:20px;padding:16px;background:rgba(255,61,90,0.05);border:1px solid rgba(255,61,90,0.2);border-radius:8px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--wrong);margin-bottom:10px">NEEDS MORE PRACTICE</div>
+        ${weakCards.map(c=>`<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text);margin-bottom:6px">• ${c.name}: <span style="color:var(--mk)">${c.formula}</span></div>`).join('')}
+      </div>` : '';
+  const continueBtn = _fl.fromTrain
+    ? `<button onclick="startFLTraining()" style="flex:1;min-width:140px;padding:14px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.3);color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;text-transform:uppercase">TRAIN AGAIN</button>` : '';
+  document.getElementById('fl-summary-body').innerHTML = `
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;gap:16px;flex-wrap:wrap">
+      <div>
+        <div class="rank-badge" style="opacity:1;animation:none;text-align:left;margin-bottom:10px">&#x1F4D0; FORMULA LAB</div>
+        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.9">QUIZ<br><span style="color:${color}">RESULTS</span></h2>
+      </div>
+      <button onclick="flBack()" class="full-btn" style="opacity:1;animation:none;margin-top:8px">← BACK</button>
+    </div>
+    <div style="text-align:center;padding:10px 0 4px">
+      <div class="fl-score-big" style="color:${color}">${pct}%</div>
+      <div class="fl-score-lbl">${correct} / ${total} CORRECT</div>
+    </div>
+    ${weakHtml}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px">
+      ${continueBtn}
+      <button onclick="startFLQuizAll()" style="flex:1;min-width:140px;padding:14px;background:rgba(255,214,0,0.06);border:1px solid rgba(255,214,0,0.3);color:var(--mk);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;text-transform:uppercase">QUIZ AGAIN</button>
+    </div>
+  `;
+}
+
 // Run on page load
 document.addEventListener('DOMContentLoaded', () => {
   auditQuestionBank();   // patches bad answer keys before any session starts
@@ -4684,6 +5175,62 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="rm-actions">
       <button class="rm-unlock-btn" onclick="submitReplayCode()">UNLOCK →</button>
       <button class="rm-close-btn" onclick="dismissReplayModal()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- FORMULA LAB -->
+<div id="formula-lab" class="screen">
+  <div class="fl-wrap">
+    <!-- HOME PANEL -->
+    <div id="fl-home">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;gap:16px;flex-wrap:wrap">
+        <div>
+          <div class="rank-badge" style="opacity:1;animation:none;text-align:left;margin-bottom:10px">&#x1F4D0; FORMULA LAB</div>
+          <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.9">FORMULA<br><span style="color:var(--mk)">MASTERY</span></h2>
+        </div>
+        <button class="full-btn" style="opacity:1;animation:none;margin-top:8px" onclick="showScreen('splash')">&#8592; HOME</button>
+      </div>
+      <div id="fl-mastery-overview"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px">
+        <button onclick="startFLTraining()" style="flex:1;min-width:150px;padding:16px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.3);color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;transition:all 0.15s;text-transform:uppercase" onmouseover="this.style.background='rgba(0,229,255,0.12)'" onmouseout="this.style.background='rgba(0,229,255,0.06)'">FLASHCARDS →</button>
+        <button onclick="startFLQuizAll()" style="flex:1;min-width:150px;padding:16px;background:rgba(255,214,0,0.06);border:1px solid rgba(255,214,0,0.3);color:var(--mk);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;transition:all 0.15s;text-transform:uppercase" onmouseover="this.style.background='rgba(255,214,0,0.12)'" onmouseout="this.style.background='rgba(255,214,0,0.06)'">QUIZ ME →</button>
+      </div>
+    </div>
+    <!-- TRAIN PANEL -->
+    <div id="fl-train" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <div class="rank-badge" style="opacity:1;animation:none;margin:0">FLASHCARDS</div>
+        <button onclick="flBack()" style="margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;padding:6px 14px;border-radius:4px;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='var(--muted)'" onmouseout="this.style.borderColor='var(--border)'">&#8592; HOME</button>
+      </div>
+      <div class="fl-progress">
+        <div class="fl-progress-bar"><div class="fl-progress-fill" id="fl-train-bar"></div></div>
+        <div class="fl-prog-lbl" id="fl-train-lbl"></div>
+      </div>
+      <div class="fl-card" id="fl-card" onclick="revealFLCard()">
+        <div class="fl-card-front" id="fl-cf"></div>
+        <div class="fl-card-back"  id="fl-cb"></div>
+      </div>
+      <div class="fl-grade-row" id="fl-grade" style="display:none">
+        <button class="fl-btn-nope" onclick="gradeFLCard(false)">&#x2717; STILL LEARNING</button>
+        <button class="fl-btn-got"  onclick="gradeFLCard(true)">&#x2713; GOT IT</button>
+      </div>
+    </div>
+    <!-- QUIZ PANEL -->
+    <div id="fl-quiz" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <div class="rank-badge" style="opacity:1;animation:none;margin:0">FORMULA QUIZ</div>
+        <button onclick="flBack()" style="margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;padding:6px 14px;border-radius:4px;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='var(--muted)'" onmouseout="this.style.borderColor='var(--border)'">&#8592; HOME</button>
+      </div>
+      <div class="fl-progress">
+        <div class="fl-progress-bar"><div class="fl-progress-fill" id="fl-quiz-bar"></div></div>
+        <div class="fl-prog-lbl" id="fl-quiz-lbl"></div>
+      </div>
+      <div id="fl-quiz-body"></div>
+    </div>
+    <!-- SUMMARY PANEL -->
+    <div id="fl-summary" style="display:none">
+      <div id="fl-summary-body"></div>
     </div>
   </div>
 </div>
