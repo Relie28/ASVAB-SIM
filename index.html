@@ -1087,6 +1087,8 @@
     animation: fadeUp 0.6s 1.5s forwards;
   }
   .stats-btn:hover { border-color: var(--accent3); color: var(--accent3); transform: translateY(-2px); }
+  #flaggedSplashBtn:hover    { border-color: var(--accent3) !important; color: var(--accent3) !important; transform: translateY(-2px); }
+  #formulaLabSplashBtn:hover { border-color: #34d399 !important;        color: #34d399 !important;        transform: translateY(-2px); }
 
   /* ── CATEGORY SELECT ── */
   #category-select { display:none; min-height:100vh; flex-direction:column; justify-content:center; align-items:center; padding:40px 20px; text-align:center; }
@@ -1663,7 +1665,7 @@ window.IS_DEV = location.protocol === 'file:' ||
   <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:18px;opacity:0;animation:fadeUp 0.6s 1.5s forwards">
     <button class="stats-btn" style="margin-top:0" onclick="showStats()">VIEW MY STATS →</button>
     <button id="flaggedSplashBtn" class="stats-btn" style="margin-top:0;border-color:rgba(255,214,0,0.35);color:rgba(255,214,0,0.75)" onclick="showFlaggedReview()">&#x2691; FLAGGED QUESTIONS</button>
-    <button class="stats-btn" style="margin-top:0;border-color:rgba(52,211,153,0.4);color:rgba(52,211,153,0.8)" onclick="showFormulaLab()">&#x1F4D0; FORMULA LAB</button>
+    <button id="formulaLabSplashBtn" class="stats-btn" style="margin-top:0;border-color:rgba(52,211,153,0.4);color:rgba(52,211,153,0.8)" onclick="showFormulaLab()">&#x1F4D0; FORMULA LAB</button>
   </div>
 </div>
 
