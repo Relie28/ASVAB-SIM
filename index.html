@@ -1557,15 +1557,25 @@
   /* ── FORMULA LAB ── */
   #formula-lab { display:none; min-height:100vh; padding-bottom:60px; }
   .fl-wrap { max-width:640px; margin:0 auto; padding:48px 24px; width:100%; }
+  .fl-sticky-actions { position:sticky; bottom:0; background:linear-gradient(to top, var(--bg) 70%, transparent); padding:16px 0 12px; margin-top:12px; display:flex; gap:12px; flex-wrap:wrap; z-index:10; }
   .fl-mastery-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:8px; margin-bottom:24px; }
-  .fl-chip { border:1px solid var(--border); border-radius:6px; padding:8px 10px; transition:border-color 0.15s; }
+  .fl-chip { border:1px solid var(--border); border-radius:6px; padding:8px 10px; transition:border-color 0.15s,background 0.15s,box-shadow 0.15s; cursor:pointer; user-select:none; position:relative; }
+  .fl-chip:hover { border-color:rgba(0,229,255,0.3); }
   .fl-chip.mastered   { border-color:rgba(0,201,122,0.4);  background:rgba(0,201,122,0.04); }
   .fl-chip.learning   { border-color:rgba(255,214,0,0.4);   background:rgba(255,214,0,0.04); }
   .fl-chip.needs-work { border-color:rgba(255,61,90,0.4);   background:rgba(255,61,90,0.04); }
-  .fl-chip-name    { font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:0.5px; color:var(--muted); margin-bottom:3px; }
+  .fl-chip.selected   { border-color:rgba(0,229,255,0.7) !important; background:rgba(0,229,255,0.09) !important; box-shadow:0 0 0 1px rgba(0,229,255,0.18) inset; }
+  .fl-chip.selected::after { content:'✓'; position:absolute; top:5px; right:7px; font-size:10px; color:var(--accent); font-weight:700; }
+  .fl-chip.selected .fl-chip-name { color:var(--accent); }
+  .fl-chip-name    { font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:0.5px; color:var(--muted); margin-bottom:3px; transition:color 0.15s; }
   .fl-chip-formula { font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text); }
   .fl-chip-bar  { height:3px; background:var(--surface2); border-radius:2px; margin-top:5px; overflow:hidden; }
   .fl-chip-fill { height:100%; border-radius:2px; transition:width 0.3s; }
+  .fl-select-bar { display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+  .fl-sel-count { font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:1px; color:var(--muted); flex:1; }
+  .fl-sel-count span { color:var(--accent); font-weight:700; }
+  .fl-sel-action { font-family:'IBM Plex Mono',monospace; font-size:9px; letter-spacing:1.5px; padding:4px 10px; background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:4px; cursor:pointer; transition:all 0.15s; text-transform:uppercase; }
+  .fl-sel-action:hover { border-color:var(--muted); color:var(--text); }
   .fl-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:32px 24px 24px; text-align:center; min-height:340px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; transition:border-color 0.2s; }
   .fl-card:hover { border-color:rgba(0,229,255,0.2); }
   .fl-card.revealed { cursor:default; border-color:rgba(255,214,0,0.2); }
@@ -4951,6 +4961,7 @@ const FORMULA_CARDS = [
     ex:'3.5 tons = 3.5 × 2,000 = 7,000 lbs',
     appQs:[
       {q:'How many pounds are in 4.5 tons?',opts:['4,500','6,500','8,000','9,000'],ans:3,exp:'4.5 × 2,000 = 9,000 lbs'},
+      {q:'A dump truck carries 3 tons of gravel. How many pounds is that?',opts:['3,000 lbs','4,500 lbs','6,000 lbs','7,500 lbs'],ans:2,exp:'3 × 2,000 = 6,000 lbs'},
     ]},
   { id:'unit_yard',      name:'Unit: Yards → Feet',             formula:'1 yard = 3 feet',
     svg:`<svg viewBox="0 0 200 70" width="178" height="62" xmlns="http://www.w3.org/2000/svg"><text x="8" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#ffd600">1 yard</text><text x="84" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#5a6070">=</text><text x="104" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#00e5ff">3 feet</text><line x1="8" y1="38" x2="192" y2="38" stroke="#1e2330" stroke-width="1"/><text x="8" y="58" font-size="10" font-family="IBM Plex Mono,monospace" fill="#5a6070">× 3 to convert yards → feet</text></svg>`,
@@ -4959,6 +4970,8 @@ const FORMULA_CARDS = [
     ex:'5 yards = 5 × 3 = 15 feet',
     appQs:[
       {q:'How many feet are in 8 yards?',opts:['16 ft','24 ft','32 ft','48 ft'],ans:1,exp:'8 × 3 = 24 feet'},
+      {q:'A football field is 100 yards long. How many feet is that?',opts:['100 ft','200 ft','300 ft','400 ft'],ans:2,exp:'100 × 3 = 300 feet'},
+      {q:'A rope measures 21 feet. How many yards is that?',opts:['3 yards','5 yards','7 yards','9 yards'],ans:2,exp:'21 ÷ 3 = 7 yards — divide feet by 3 to convert back to yards'},
     ]},
   { id:'unit_sqyard',    name:'Unit: Sq Yards → Sq Feet',        formula:'1 sq yd = 9 sq ft',
     svg:`<svg viewBox="0 0 200 80" width="178" height="71" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="54" height="54" fill="rgba(255,214,0,0.08)" stroke="#ffd600" stroke-width="2"/><text x="22" y="40" font-size="10" font-family="IBM Plex Mono,monospace" fill="#ffd600">1 yd²</text><text x="74" y="36" font-size="14" font-family="IBM Plex Mono,monospace" fill="#5a6070">=</text><rect x="94" y="8" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="114" y="8" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="134" y="8" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="94" y="28" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="114" y="28" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="134" y="28" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="94" y="48" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="114" y="48" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><rect x="134" y="48" width="18" height="18" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.5"/><text x="94" y="76" font-size="10" font-family="IBM Plex Mono,monospace" fill="#5a6070">9 sq ft</text></svg>`,
@@ -4967,6 +4980,7 @@ const FORMULA_CARDS = [
     ex:'4 sq yd = 4 × 9 = 36 sq ft',
     appQs:[
       {q:'A floor is 12 square yards. How many square feet is that?',opts:['36 sq ft','72 sq ft','96 sq ft','108 sq ft'],ans:3,exp:'12 × 9 = 108 sq ft'},
+      {q:'A room measures 8 square yards. How many square feet is that?',opts:['24 sq ft','48 sq ft','72 sq ft','96 sq ft'],ans:2,exp:'8 × 9 = 72 sq ft'},
     ]},
 
   // ── METRIC LENGTH ──────────────────────────────────────────────────────────
@@ -5109,15 +5123,316 @@ const FORMULA_CARDS = [
     appQs:[
       {q:'How much heat is needed to raise 100 g of water by 5°C? (c = 4.186 J/g°C)',opts:['20.93 J','209.3 J','2,093 J','20,930 J'],ans:2,exp:'Q = mcΔT = 100×4.186×5 = 2,093 J'},
     ]},
+
+  // ── QUADRATIC ROOTS ────────────────────────────────────────────────────────
+  { id:'quadratic_formula', name:'Quadratic Formula',             formula:'x = (−b ± √(b²−4ac)) / 2a',
+    svg:`<svg viewBox="0 0 260 100" width="230" height="88" xmlns="http://www.w3.org/2000/svg">
+      <text x="8"  y="30" font-size="14" font-family="IBM Plex Mono,monospace" fill="#ffd600" font-weight="bold">ax² + bx + c = 0</text>
+      <line x1="8" y1="40" x2="252" y2="40" stroke="#1e2330" stroke-width="1"/>
+      <text x="8"  y="58" font-size="11" font-family="IBM Plex Mono,monospace" fill="#5a6070">x =</text>
+      <text x="36" y="52" font-size="11" font-family="IBM Plex Mono,monospace" fill="#00e5ff">−b ± √(b²− 4ac)</text>
+      <line x1="36" y1="56" x2="194" y2="56" stroke="#00e5ff" stroke-width="1.5"/>
+      <text x="96" y="72" font-size="11" font-family="IBM Plex Mono,monospace" fill="#00e5ff">2a</text>
+      <text x="8"  y="90" font-size="9"  font-family="IBM Plex Mono,monospace" fill="#5a6070">b²−4ac is the discriminant (Δ)</text>
+    </svg>`,
+    vars:['a, b, c = coefficients of ax²+bx+c=0','± means two roots (one with +, one with −)','b²−4ac = discriminant','Δ > 0 → two real roots  |  Δ = 0 → one root  |  Δ < 0 → no real roots'],
+    tip:'Plug a, b, c straight into the formula. Do the discriminant (b²−4ac) first to check if real roots exist.',
+    ex:'x²−5x+6=0 → a=1,b=−5,c=6 → x=(5±√1)/2 → x=3 or x=2',
+    appQs:[
+      {q:'For x²−7x+10=0, what are the roots?',opts:['x=2 and x=5','x=−2 and x=−5','x=1 and x=10','x=3 and x=4'],ans:0,exp:'Discriminant = 49−40=9. x=(7±3)/2 → x=5 or x=2'},
+      {q:'What is the discriminant of 2x²+3x−2=0?',opts:['7','17','25','41'],ans:2,exp:'b²−4ac = 9−4(2)(−2) = 9+16 = 25'},
+    ]},
+
+  { id:'sum_of_roots', name:'Sum of the Roots',                   formula:'r₁ + r₂ = −b / a',
+    svg:`<svg viewBox="0 0 240 88" width="212" height="78" xmlns="http://www.w3.org/2000/svg">
+      <text x="8"  y="22" font-size="12" font-family="IBM Plex Mono,monospace" fill="#5a6070">For  ax² + bx + c = 0:</text>
+      <text x="8"  y="50" font-size="15" font-family="IBM Plex Mono,monospace" fill="#ffd600" font-weight="bold">r₁ + r₂</text>
+      <text x="100" y="50" font-size="14" font-family="IBM Plex Mono,monospace" fill="#5a6070">=</text>
+      <text x="118" y="44" font-size="14" font-family="IBM Plex Mono,monospace" fill="#00e5ff">−b</text>
+      <line x1="118" y1="48" x2="148" y2="48" stroke="#00e5ff" stroke-width="1.5"/>
+      <text x="126" y="64" font-size="14" font-family="IBM Plex Mono,monospace" fill="#00e5ff">a</text>
+      <text x="8"   y="84" font-size="9"  font-family="IBM Plex Mono,monospace" fill="#5a6070">no need to solve — just use coefficients</text>
+    </svg>`,
+    vars:['r₁, r₂ = the two roots of the quadratic','a = leading coefficient','b = middle coefficient','Result: r₁ + r₂ = −b ÷ a'],
+    tip:'You can find the SUM of the roots directly from coefficients — no quadratic formula needed. Just −b/a.',
+    ex:'3x²−12x+9=0 → sum = −(−12)/3 = 12/3 = 4',
+    appQs:[
+      {q:'For 2x²−10x+8=0, what is the sum of the roots?',opts:['−5','4','5','10'],ans:2,exp:'Sum = −b/a = −(−10)/2 = 10/2 = 5'},
+      {q:'For x²+6x+5=0, what is the sum of the roots?',opts:['−6','−5','5','6'],ans:0,exp:'Sum = −b/a = −6/1 = −6'},
+    ]},
+
+  { id:'product_of_roots', name:'Product of the Roots',           formula:'r₁ × r₂ = c / a',
+    svg:`<svg viewBox="0 0 240 88" width="212" height="78" xmlns="http://www.w3.org/2000/svg">
+      <text x="8"  y="22" font-size="12" font-family="IBM Plex Mono,monospace" fill="#5a6070">For  ax² + bx + c = 0:</text>
+      <text x="8"  y="50" font-size="15" font-family="IBM Plex Mono,monospace" fill="#ffd600" font-weight="bold">r₁ × r₂</text>
+      <text x="100" y="50" font-size="14" font-family="IBM Plex Mono,monospace" fill="#5a6070">=</text>
+      <text x="118" y="44" font-size="14" font-family="IBM Plex Mono,monospace" fill="#a78bfa">c</text>
+      <line x1="118" y1="48" x2="136" y2="48" stroke="#a78bfa" stroke-width="1.5"/>
+      <text x="120" y="64" font-size="14" font-family="IBM Plex Mono,monospace" fill="#a78bfa">a</text>
+      <text x="8"   y="84" font-size="9"  font-family="IBM Plex Mono,monospace" fill="#5a6070">constant term ÷ leading coefficient</text>
+    </svg>`,
+    vars:['r₁, r₂ = the two roots of the quadratic','a = leading coefficient','c = constant term (no x)','Result: r₁ × r₂ = c ÷ a'],
+    tip:'The PRODUCT of the roots is just c/a — the constant divided by the leading coefficient. Works for any quadratic.',
+    ex:'3x²−12x+9=0 → product = 9/3 = 3',
+    appQs:[
+      {q:'For 2x²−10x+8=0, what is the product of the roots?',opts:['−5','4','5','8'],ans:1,exp:'Product = c/a = 8/2 = 4'},
+      {q:'For x²+6x+5=0, what is the product of the roots?',opts:['−6','−5','5','6'],ans:2,exp:'Product = c/a = 5/1 = 5. Roots are −1 and −5, and (−1)(−5) = 5 ✓'},
+    ]},
+
+  // ── ALGEBRA & COORDINATE GEOMETRY ─────────────────────────────────────────
+  { id:'slope',            name:'Slope of a Line',                formula:'m = (y₂−y₁) / (x₂−x₁)',  alt:'rise over run',
+    svg:`<svg viewBox="0 0 200 120" width="176" height="106" xmlns="http://www.w3.org/2000/svg">
+      <line x1="20" y1="100" x2="180" y2="100" stroke="#1e2330" stroke-width="1.5"/>
+      <line x1="20" y1="100" x2="20"  y2="10"  stroke="#1e2330" stroke-width="1.5"/>
+      <line x1="40" y1="80"  x2="160" y2="20"  stroke="#00e5ff" stroke-width="2.5"/>
+      <circle cx="40" cy="80" r="4" fill="#ffd600"/>
+      <circle cx="160" cy="20" r="4" fill="#ffd600"/>
+      <line x1="40"  y1="80" x2="160" y2="80" stroke="#ff3d5a" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <line x1="160" y1="80" x2="160" y2="20" stroke="#34d399"  stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="88" y="95"  font-size="10" font-family="IBM Plex Mono,monospace" fill="#ff3d5a">run (Δx)</text>
+      <text x="163" y="52" font-size="10" font-family="IBM Plex Mono,monospace" fill="#34d399">rise (Δy)</text>
+    </svg>`,
+    vars:['m = slope (steepness of line)','(x₁,y₁) and (x₂,y₂) = any two points on the line','Positive m → goes up left to right','Negative m → goes down left to right','m = 0 → horizontal  |  undefined → vertical'],
+    tip:'Rise over run. Subtract y-values on top, x-values on bottom. Keep the same point order for both.',
+    ex:'Points (2,3) and (6,11) → m = (11−3)/(6−2) = 8/4 = 2',
+    appQs:[
+      {q:'What is the slope of the line through (1,2) and (4,8)?',opts:['1','2','3','4'],ans:1,exp:'m = (8−2)/(4−1) = 6/3 = 2'},
+      {q:'A line passes through (−1,4) and (3,−4). What is its slope?',opts:['−2','−½','½','2'],ans:0,exp:'m = (−4−4)/(3−(−1)) = −8/4 = −2'},
+    ]},
+
+  { id:'slope_intercept',  name:'Slope-Intercept Form',           formula:'y = mx + b',
+    svg:`<svg viewBox="0 0 200 120" width="176" height="106" xmlns="http://www.w3.org/2000/svg">
+      <line x1="20" y1="100" x2="180" y2="100" stroke="#1e2330" stroke-width="1.5"/>
+      <line x1="20" y1="100" x2="20"  y2="10"  stroke="#1e2330" stroke-width="1.5"/>
+      <line x1="20" y1="70"  x2="170" y2="20"  stroke="#00e5ff" stroke-width="2.5"/>
+      <circle cx="20" cy="70" r="5" fill="#ffd600"/>
+      <text x="24" y="68" font-size="10" font-family="IBM Plex Mono,monospace" fill="#ffd600">b (y-int)</text>
+      <text x="100" y="38" font-size="10" font-family="IBM Plex Mono,monospace" fill="#a78bfa">slope = m</text>
+    </svg>`,
+    vars:['m = slope','b = y-intercept (where line crosses y-axis)','x,y = any point on the line'],
+    tip:'b is where the line STARTS (hits the y-axis). m is how fast it rises or falls. Identify both from an equation instantly.',
+    ex:'y = 3x − 5 → slope = 3, y-intercept = −5',
+    appQs:[
+      {q:'What is the y-intercept of y = 4x + 7?',opts:['4','7','−4','−7'],ans:1,exp:'y = mx + b → b = 7'},
+      {q:'Which equation has slope −2 and y-intercept 3?',opts:['y = 3x − 2','y = −2x − 3','y = −2x + 3','y = 2x + 3'],ans:2,exp:'y = mx + b with m=−2 and b=3 → y = −2x + 3'},
+    ]},
+
+  { id:'midpoint',         name:'Midpoint Formula',               formula:'M = ((x₁+x₂)/2, (y₁+y₂)/2)',
+    svg:`<svg viewBox="0 0 200 110" width="176" height="97" xmlns="http://www.w3.org/2000/svg">
+      <line x1="20" y1="100" x2="180" y2="100" stroke="#1e2330" stroke-width="1.5"/>
+      <line x1="20" y1="100" x2="20"  y2="10"  stroke="#1e2330" stroke-width="1.5"/>
+      <circle cx="50"  cy="80" r="5" fill="#00e5ff"/><text x="30" y="76"  font-size="10" font-family="IBM Plex Mono,monospace" fill="#00e5ff">(x₁,y₁)</text>
+      <circle cx="150" cy="30" r="5" fill="#00e5ff"/><text x="154" y="28" font-size="10" font-family="IBM Plex Mono,monospace" fill="#00e5ff">(x₂,y₂)</text>
+      <circle cx="100" cy="55" r="6" fill="#ffd600"/><text x="104" y="52" font-size="10" font-family="IBM Plex Mono,monospace" fill="#ffd600">M</text>
+      <line x1="50" y1="80" x2="150" y2="30" stroke="#5a6070" stroke-width="1.5" stroke-dasharray="5,3"/>
+    </svg>`,
+    vars:['M = midpoint coordinates','(x₁,y₁) = first point','(x₂,y₂) = second point','Average the x-values, average the y-values'],
+    tip:'Midpoint is just the average of each coordinate. Add the x-values and divide by 2; same for y.',
+    ex:'(2,4) and (8,10) → M = ((2+8)/2, (4+10)/2) = (5,7)',
+    appQs:[
+      {q:'What is the midpoint of (0,0) and (6,8)?',opts:['(3,4)','(4,3)','(6,8)','(3,8)'],ans:0,exp:'M = ((0+6)/2,(0+8)/2) = (3,4)'},
+      {q:'What is the midpoint of (−2,5) and (4,−1)?',opts:['(1,2)','(2,4)','(1,4)','(2,2)'],ans:0,exp:'M = ((−2+4)/2,(5+(−1))/2) = (2/2, 4/2) = (1,2)'},
+    ]},
+
+  { id:'distance_formula', name:'Distance Between Two Points',    formula:'d = √((x₂−x₁)² + (y₂−y₁)²)',
+    svg:`<svg viewBox="0 0 200 120" width="176" height="106" xmlns="http://www.w3.org/2000/svg">
+      <line x1="20" y1="100" x2="180" y2="100" stroke="#1e2330" stroke-width="1.5"/>
+      <line x1="20" y1="100" x2="20"  y2="10"  stroke="#1e2330" stroke-width="1.5"/>
+      <circle cx="40" cy="85" r="5" fill="#00e5ff"/>
+      <circle cx="160" cy="25" r="5" fill="#00e5ff"/>
+      <line x1="40"  y1="85"  x2="160" y2="85" stroke="#ff3d5a" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <line x1="160" y1="85"  x2="160" y2="25" stroke="#34d399"  stroke-width="1.5" stroke-dasharray="5,3"/>
+      <line x1="40"  y1="85"  x2="160" y2="25" stroke="#ffd600"  stroke-width="2.5"/>
+      <text x="85"  y="100" font-size="9" font-family="IBM Plex Mono,monospace" fill="#ff3d5a">Δx</text>
+      <text x="163" y="58"  font-size="9" font-family="IBM Plex Mono,monospace" fill="#34d399">Δy</text>
+      <text x="76"  y="50"  font-size="10" font-family="IBM Plex Mono,monospace" fill="#ffd600">d</text>
+    </svg>`,
+    vars:['d = distance between the two points','Δx = x₂−x₁ (horizontal leg)','Δy = y₂−y₁ (vertical leg)','This IS the Pythagorean theorem on a graph'],
+    tip:'Draw the right triangle between the two points. The distance formula IS a²+b²=c² in disguise.',
+    ex:'(1,1) and (4,5) → d = √((3)²+(4)²) = √25 = 5',
+    appQs:[
+      {q:'What is the distance between (0,0) and (3,4)?',opts:['5','6','7','12'],ans:0,exp:'d = √(3²+4²) = √(9+16) = √25 = 5'},
+      {q:'What is the distance between (1,2) and (4,6)?',opts:['4','5','6','7'],ans:1,exp:'d = √((4−1)²+(6−2)²) = √(9+16) = √25 = 5'},
+    ]},
+
+  // ── ARITHMETIC & FINANCE ──────────────────────────────────────────────────
+  { id:'mean_avg',         name:'Mean (Average)',                  formula:'Mean = Sum ÷ Count',
+    svg:`<svg viewBox="0 0 220 70" width="196" height="62" xmlns="http://www.w3.org/2000/svg">
+      <text x="8"  y="28" font-size="13" font-family="IBM Plex Mono,monospace" fill="#00e5ff">Σ values</text>
+      <line x1="8" y1="32" x2="102" y2="32" stroke="#00e5ff" stroke-width="1.5"/>
+      <text x="36" y="50" font-size="13" font-family="IBM Plex Mono,monospace" fill="#00e5ff">n</text>
+      <text x="108" y="40" font-size="14" font-family="IBM Plex Mono,monospace" fill="#5a6070">=  x̄</text>
+      <text x="8"   y="65" font-size="9"  font-family="IBM Plex Mono,monospace" fill="#5a6070">Σ = sum of all values  |  n = count of values</text>
+    </svg>`,
+    vars:['x̄ (x-bar) = mean','Σ = sum of all values','n = how many values there are'],
+    tip:'Add them all up, divide by how many. On ASVAB you often need to find a missing value given a target mean.',
+    ex:'Scores 70,80,90,60 → sum=300, n=4 → mean = 300÷4 = 75',
+    appQs:[
+      {q:'Five tests scored 72, 85, 90, 68, 75. What is the mean?',opts:['76','78','80','82'],ans:1,exp:'Sum = 390, n=5 → 390÷5 = 78'},
+      {q:'A student needs a mean of 80 over 4 tests. First 3 scores: 75, 82, 79. What must the 4th score be?',opts:['82','84','86','88'],ans:1,exp:'Total needed = 80×4 = 320. Current sum = 236. Missing = 320−236 = 84'},
+    ]},
+
+  { id:'simple_interest',  name:'Simple Interest',                formula:'I = P × r × t',           alt:'Total = P + I',
+    svg:`<svg viewBox="0 0 200 80" width="178" height="71" xmlns="http://www.w3.org/2000/svg">
+      <text x="8"  y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#34d399" font-weight="bold">I</text>
+      <text x="24" y="28" font-size="13" font-family="IBM Plex Mono,monospace" fill="#5a6070">=</text>
+      <text x="40" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#ffd600">P</text>
+      <text x="56" y="28" font-size="13" font-family="IBM Plex Mono,monospace" fill="#5a6070">×</text>
+      <text x="68" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#00e5ff">r</text>
+      <text x="82" y="28" font-size="13" font-family="IBM Plex Mono,monospace" fill="#5a6070">×</text>
+      <text x="94" y="28" font-size="15" font-family="IBM Plex Mono,monospace" fill="#a78bfa">t</text>
+      <line x1="8" y1="38" x2="192" y2="38" stroke="#1e2330" stroke-width="1"/>
+      <text x="8" y="56" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">P=principal  r=annual rate (decimal)  t=years</text>
+      <text x="8" y="70" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">Total amount = P + I</text>
+    </svg>`,
+    vars:['I = interest earned','P = principal (starting amount)','r = annual interest rate as a decimal (e.g. 5% = 0.05)','t = time in years'],
+    tip:'Convert % to decimal first! 6% = 0.06. Simple interest does NOT compound — same interest every year.',
+    ex:'P=$1,000, r=5%, t=3 yr → I = 1000×0.05×3 = $150',
+    appQs:[
+      {q:'$2,000 is invested at 4% simple interest for 5 years. How much interest is earned?',opts:['$80','$400','$800','$2,400'],ans:1,exp:'I = 2000×0.04×5 = $400'},
+      {q:'What is the total amount after investing $500 at 6% simple interest for 2 years?',opts:['$530','$560','$600','$660'],ans:1,exp:'I = 500×0.06×2 = $60. Total = 500+60 = $560'},
+    ]},
+
+  { id:'percent_change',   name:'Percent Change',                 formula:'% Change = ((New−Old) / Old) × 100',
+    svg:`<svg viewBox="0 0 220 72" width="196" height="64" xmlns="http://www.w3.org/2000/svg">
+      <text x="8"  y="28" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ffd600">New − Old</text>
+      <line x1="8" y1="32" x2="112" y2="32" stroke="#ffd600" stroke-width="1.5"/>
+      <text x="40" y="50" font-size="13" font-family="IBM Plex Mono,monospace" fill="#ffd600">Old</text>
+      <text x="118" y="40" font-size="13" font-family="IBM Plex Mono,monospace" fill="#5a6070">× 100</text>
+      <text x="8"   y="66" font-size="9"  font-family="IBM Plex Mono,monospace" fill="#5a6070">positive = increase  |  negative = decrease</text>
+    </svg>`,
+    vars:['New = new value','Old = original value','Result is a percentage (multiply fraction by 100)','Positive result = increase  |  Negative = decrease'],
+    tip:'Always divide by the ORIGINAL (old) value, not the new one. Easy to mix up on ASVAB.',
+    ex:'Price was $80, now $100 → (100−80)/80 × 100 = 25% increase',
+    appQs:[
+      {q:'A TV was $400 and is now $300. What is the percent decrease?',opts:['20%','25%','30%','33%'],ans:1,exp:'(300−400)/400 × 100 = −100/400 × 100 = −25% → 25% decrease'},
+      {q:'A salary rose from $50,000 to $55,000. What is the percent increase?',opts:['5%','10%','15%','20%'],ans:1,exp:'(55000−50000)/50000 × 100 = 5000/50000 × 100 = 10%'},
+    ]},
+
+  // ── PHYSICS (continued) ───────────────────────────────────────────────────
+  { id:'density',          name:'Density',                        formula:'D = m / V',               alt:'also: m = D×V  |  V = m÷D',
+    svg:`<svg viewBox="0 0 180 100" width="158" height="88" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="90,8 22,92 158,92" fill="rgba(167,139,250,0.07)" stroke="#a78bfa" stroke-width="2"/>
+      <text x="82" y="38" font-size="14" font-family="IBM Plex Mono,monospace" fill="#a78bfa" font-weight="bold">D</text>
+      <line x1="22" y1="92" x2="158" y2="92" stroke="#1e2330" stroke-width="2"/>
+      <text x="38" y="88" font-size="14" font-family="IBM Plex Mono,monospace" fill="#ffd600" font-weight="bold">m</text>
+      <text x="116" y="88" font-size="14" font-family="IBM Plex Mono,monospace" fill="#00e5ff" font-weight="bold">V</text>
+      <text x="4" y="12" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">Cover what you want to find</text>
+    </svg>`,
+    vars:['D = density (g/cm³ or kg/m³)','m = mass (grams or kg)','V = volume (cm³ or m³)','Water density = 1 g/cm³ (objects float if D < 1)'],
+    tip:'Same triangle trick as VIR and speed. Cover the variable you want: D=m/V, m=DV, V=m/D.',
+    ex:'m=50g, V=25cm³ → D = 50÷25 = 2 g/cm³',
+    appQs:[
+      {q:'A block has mass 120g and volume 40 cm³. What is its density?',opts:['0.33 g/cm³','3 g/cm³','4 g/cm³','80 g/cm³'],ans:1,exp:'D = m÷V = 120÷40 = 3 g/cm³'},
+      {q:'A liquid has density 0.8 g/cm³. What is the mass of 250 cm³ of it?',opts:['200 g','250 g','312.5 g','800 g'],ans:0,exp:'m = D×V = 0.8×250 = 200 g'},
+    ]},
+
+  { id:'work_physics',     name:'Work',                           formula:'W = F × d',
+    svg:`<svg viewBox="0 0 200 80" width="178" height="71" xmlns="http://www.w3.org/2000/svg">
+      <rect x="80" y="28" width="50" height="34" rx="4" fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="2"/>
+      <text x="96" y="50" font-size="13" font-family="IBM Plex Mono,monospace" fill="#00e5ff">obj</text>
+      <polygon points="130,45 162,45 158,40 158,50" fill="#ff3d5a"/>
+      <text x="165" y="49" font-size="11" font-family="IBM Plex Mono,monospace" fill="#ff3d5a">F</text>
+      <line x1="80" y1="62" x2="162" y2="62" stroke="#ffd600" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <text x="108" y="74" font-size="9" font-family="IBM Plex Mono,monospace" fill="#ffd600">d</text>
+      <text x="8"   y="20" font-size="9" font-family="IBM Plex Mono,monospace" fill="#5a6070">Work(J) = Force(N) × distance(m)</text>
+    </svg>`,
+    vars:['W = work (Joules, J)','F = force applied (Newtons, N)','d = distance moved in direction of force (meters)','W = 0 if no movement, even if force is applied'],
+    tip:'No movement = no work (in physics). Carrying a box sideways at constant height = 0 work against gravity.',
+    ex:'F=50N, d=10m → W = 50×10 = 500 J',
+    appQs:[
+      {q:'A force of 30 N moves an object 8 m. How much work is done?',opts:['38 J','240 J','270 J','480 J'],ans:1,exp:'W = F×d = 30×8 = 240 J'},
+    ]},
+
+  { id:'kinetic_energy',   name:'Kinetic Energy',                 formula:'KE = ½mv²',
+    svg:`<svg viewBox="0 0 200 80" width="178" height="71" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="44" r="22" fill="rgba(255,61,90,0.08)" stroke="#ff3d5a" stroke-width="2"/>
+      <text x="39" y="49" font-size="11" font-family="IBM Plex Mono,monospace" fill="#ff3d5a">m</text>
+      <polygon points="72,44 160,44 154,38 154,50" fill="#ffd600"/>
+      <text x="108" y="38" font-size="10" font-family="IBM Plex Mono,monospace" fill="#ffd600">v</text>
+      <text x="8"   y="14" font-size="9"  font-family="IBM Plex Mono,monospace" fill="#5a6070">KE = ½ × mass × (speed)²</text>
+      <text x="8"   y="72" font-size="9"  font-family="IBM Plex Mono,monospace" fill="#5a6070">Double speed → 4× the energy (v is squared!)</text>
+    </svg>`,
+    vars:['KE = kinetic energy (Joules)','m = mass (kg)','v = speed/velocity (m/s)','v is squared — doubling speed quadruples KE'],
+    tip:'The v² is the key trap. If speed doubles, kinetic energy QUADRUPLES. Always square v before multiplying.',
+    ex:'m=4kg, v=6m/s → KE = ½×4×36 = 72 J',
+    appQs:[
+      {q:'A 2 kg ball moves at 5 m/s. What is its kinetic energy?',opts:['10 J','25 J','50 J','100 J'],ans:1,exp:'KE = ½×2×5² = ½×2×25 = 25 J'},
+      {q:'If a car\'s speed doubles, its kinetic energy becomes how many times greater?',opts:['2×','3×','4×','8×'],ans:2,exp:'KE ∝ v². Double v → (2v)² = 4v². KE is 4× greater.'},
+    ]},
+
+  { id:'temp_conversion',  name:'Temperature Conversion',         formula:'°F = (9/5)°C + 32',       alt:'°C = (°F − 32) × 5/9',
+    svg:`<svg viewBox="0 0 200 80" width="178" height="71" xmlns="http://www.w3.org/2000/svg">
+      <text x="8"  y="30" font-size="14" font-family="IBM Plex Mono,monospace" fill="#ff3d5a" font-weight="bold">°F</text>
+      <text x="36" y="30" font-size="12" font-family="IBM Plex Mono,monospace" fill="#5a6070">=</text>
+      <text x="52" y="30" font-size="14" font-family="IBM Plex Mono,monospace" fill="#ffd600">9/5 × °C</text>
+      <text x="128" y="30" font-size="12" font-family="IBM Plex Mono,monospace" fill="#5a6070">+ 32</text>
+      <line x1="8" y1="40" x2="192" y2="40" stroke="#1e2330" stroke-width="1"/>
+      <text x="8"  y="56" font-size="12" font-family="IBM Plex Mono,monospace" fill="#00e5ff" font-weight="bold">°C</text>
+      <text x="34" y="56" font-size="12" font-family="IBM Plex Mono,monospace" fill="#5a6070">= (°F − 32) × 5/9</text>
+      <text x="8"  y="72" font-size="9"  font-family="IBM Plex Mono,monospace" fill="#5a6070">0°C=32°F · 100°C=212°F · 37°C=98.6°F</text>
+    </svg>`,
+    vars:['°F to °C: subtract 32 first, then multiply by 5/9','°C to °F: multiply by 9/5 first, then add 32','Freezing: 0°C = 32°F','Boiling: 100°C = 212°F','Body temp: 37°C = 98.6°F'],
+    tip:'C to F: multiply by 1.8 (or 9/5) then ADD 32. F to C: SUBTRACT 32 first, then multiply by 5/9. Order matters!',
+    ex:'25°C → °F: 25×(9/5)+32 = 45+32 = 77°F',
+    appQs:[
+      {q:'Convert 20°C to Fahrenheit.',opts:['60°F','68°F','72°F','76°F'],ans:1,exp:'°F = (9/5)×20 + 32 = 36 + 32 = 68°F'},
+      {q:'Convert 98.6°F to Celsius.',opts:['30°C','35°C','37°C','40°C'],ans:2,exp:'°C = (98.6−32) × 5/9 = 66.6 × 5/9 = 37°C'},
+    ]},
+
+  { id:'vol_sphere',       name:'Volume of a Sphere',             formula:'V = (4/3)πr³',
+    svg:`<svg viewBox="0 0 120 120" width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="50" fill="rgba(0,229,255,0.07)" stroke="#00e5ff" stroke-width="2.5"/>
+      <ellipse cx="60" cy="60" rx="50" ry="16" fill="none" stroke="rgba(0,229,255,0.35)" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <line x1="60" y1="60" x2="110" y2="60" stroke="#ffd600" stroke-width="1.5" stroke-dasharray="4,2"/>
+      <circle cx="60" cy="60" r="3.5" fill="#ffd600"/>
+      <text x="76" y="55" font-size="12" font-family="IBM Plex Mono,monospace" fill="#ffd600">r</text>
+    </svg>`,
+    vars:['V = volume','r = radius','\u03c0 \u2248 3.14159','(4/3) ≈ 1.333'],
+    tip:'A sphere is 2/3 the volume of the cylinder that just fits around it. Cube the radius BEFORE multiplying.',
+    ex:'r=3 → V = (4/3)×π×27 = 36π ≈ 113.1',
+    appQs:[
+      {q:'What is the volume of a sphere with radius 3? (π ≈ 3.14)',opts:['56.5','75.4','113.1','150.8'],ans:2,exp:'V = (4/3)×3.14×27 = (4/3)×84.78 ≈ 113.1'},
+    ]},
+
+  { id:'sa_cylinder',      name:'Surface Area of a Cylinder',     formula:'SA = 2πr² + 2πrh',        alt:'= 2πr(r + h)',
+    svg:`<svg viewBox="0 0 120 164" width="100" height="137" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="40" width="80" height="104" fill="rgba(0,229,255,0.04)" stroke="none"/>
+      <line x1="20" y1="40" x2="20" y2="144" stroke="#00e5ff" stroke-width="2"/>
+      <line x1="100" y1="40" x2="100" y2="144" stroke="#00e5ff" stroke-width="2"/>
+      <ellipse cx="60" cy="144" rx="40" ry="14" fill="rgba(255,214,0,0.12)" stroke="#ffd600" stroke-width="2"/>
+      <ellipse cx="60" cy="40" rx="40" ry="14" fill="rgba(255,214,0,0.12)" stroke="#ffd600" stroke-width="2"/>
+      <text x="28" y="36" font-size="9" font-family="IBM Plex Mono,monospace" fill="#ffd600">πr² (top)</text>
+      <text x="28" y="158" font-size="9" font-family="IBM Plex Mono,monospace" fill="#ffd600">πr² (bottom)</text>
+      <text x="104" y="97" font-size="9" font-family="IBM Plex Mono,monospace" fill="#00e5ff">2πrh (side)</text>
+    </svg>`,
+    vars:['SA = surface area','r = radius','h = height','2πr² = top and bottom circles combined','2πrh = the curved side (label unrolled = rectangle)'],
+    tip:'Two circles (top + bottom) plus the rolled-out rectangle. Unroll the side and it becomes 2πr wide × h tall.',
+    ex:'r=4, h=10 → SA = 2π(16) + 2π(4)(10) = 32π + 80π = 112π ≈ 351.9',
+    appQs:[
+      {q:'A cylinder has radius 3 and height 7. What is its surface area? (π ≈ 3.14)',opts:['131.9','188.4','207.2','376.8'],ans:1,exp:'SA = 2π(9) + 2π(3)(7) = 18π + 42π = 60π ≈ 188.4'},
+    ]},
 ];
 
 // ── FL runtime state ──────────────────────────────────────────────────────────
+const FL_MASTERY_LEVEL = 7;  // level required for mastery
+const FL_SESSION_SIZE  = 5;  // questions per session
+const FL_PASS_THRESHOLD= 4;  // correct answers needed to pass a level
+
 const _fl = {
   deck:[], idx:0, revealed:false,
   batchSeen:[],
-  qQueue:[], qIdx:0, qDone:false,
-  sCorrect:0, sTotal:0,
+  // session state
+  sessionCards:[],   // array of card IDs for this run
+  sessionIdx:0,      // which card we're on
+  sessionQ:[],       // 5 questions for the current card
+  sessionQIdx:0,     // question index within this card's 5
+  sessionCorrect:0,  // correct count for current card's session
+  sessionAnswers:[],  // [true/false] per question slot
+  sessionResults:[],// [{cardId, cardName, level, passed, correct}] per card
+  qDone:false,
   fromTrain:false,
+  selected: new Set(),
 };
 
 function _flLoad()  { try { return JSON.parse(localStorage.getItem(FL_KEY)||'{}'); } catch { return {}; } }
@@ -5142,18 +5457,26 @@ function flBack() {
 }
 
 // ── HOME ──────────────────────────────────────────────────────────────────────
+function _flToggleSelect(id) {
+  if (_fl.selected.has(id)) _fl.selected.delete(id);
+  else _fl.selected.add(id);
+  _flRenderHome();
+}
+function _flClearSelect() { _fl.selected.clear(); _flRenderHome(); }
+
 function _flRenderHome() {
   const m = _flLoad();
   let mastered=0, learning=0, weak=0, unseen=0;
   FORMULA_CARDS.forEach(c => {
     const r = m[c.id];
     if (!r || !r.seen) unseen++;
-    else if ((r.streak||0) >= 3) mastered++;
-    else if ((r.streak||0) >= 1) learning++;
+    else if ((r.level||0) >= FL_MASTERY_LEVEL) mastered++;
+    else if ((r.level||0) >= 1) learning++;
     else weak++;
   });
   const total = FORMULA_CARDS.length;
   const pct   = Math.round(mastered / total * 100);
+  const nSel  = _fl.selected.size;
 
   let html = `
     <div style="margin-bottom:24px">
@@ -5171,42 +5494,62 @@ function _flRenderHome() {
         <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)"><span style="color:var(--border)">&#9679;</span> ${unseen} not seen</span>
       </div>
     </div>
+    <div class="fl-select-bar">
+      <span class="fl-sel-count">${nSel > 0 ? `<span>${nSel}</span> of ${total} selected — focused practice` : 'TAP CARDS TO FOCUS, OR START WITH ALL'}</span>
+      <button class="fl-sel-action" onclick="_flClearSelect()">CLEAR</button>
+    </div>
     <div class="fl-mastery-grid">`;
 
   FORMULA_CARDS.forEach(c => {
     const r = m[c.id];
-    const streak = r ? (r.streak||0) : 0;
+    const streak = r ? (r.level||0) : 0;
     const seen   = r && r.seen;
+    const isSel  = _fl.selected.has(c.id);
     let cls='fl-chip', fillColor='var(--border)', fillPct='0%';
     if (seen) {
-      if (streak >= 3)    { cls+=' mastered';   fillColor='var(--correct)'; fillPct='100%'; }
-      else if (streak>=1) { cls+=' learning';   fillColor='var(--mk)';      fillPct=`${Math.round(streak/3*100)}%`; }
+      if (streak >= FL_MASTERY_LEVEL)    { cls+=' mastered';   fillColor='var(--correct)'; fillPct='100%'; }
+      else if (streak>=1) { cls+=' learning';   fillColor='var(--mk)';      fillPct=`${Math.round(streak/FL_MASTERY_LEVEL*100)}%`; }
       else                { cls+=' needs-work'; fillColor='var(--wrong)';   fillPct='15%'; }
     }
-    html += `<div class="${cls}"><div class="fl-chip-name">${c.name}</div><div class="fl-chip-formula">${c.formula}</div><div class="fl-chip-bar"><div class="fl-chip-fill" style="width:${fillPct};background:${fillColor}"></div></div></div>`;
+    if (isSel) cls += ' selected';
+    const lvlLabel = streak >= FL_MASTERY_LEVEL ? '✓ MASTERED' : `L${streak}/${FL_MASTERY_LEVEL}`;
+    html += `<div class="${cls}" onclick="_flToggleSelect('${c.id}')"><div style="display:flex;justify-content:space-between;align-items:center"><div class="fl-chip-name">${c.name}</div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:${fillColor};letter-spacing:0.5px">${lvlLabel}</div></div><div class="fl-chip-formula">${c.formula}</div><div class="fl-chip-bar"><div class="fl-chip-fill" style="width:${fillPct};background:${fillColor}"></div></div></div>`;
   });
   html += `</div>`;
   document.getElementById('fl-mastery-overview').innerHTML = html;
+
+  // update action button labels
+  const trainBtn = document.getElementById('fl-train-btn');
+  const quizBtn  = document.getElementById('fl-quiz-btn');
+  if (trainBtn) trainBtn.textContent = nSel > 0 ? `FLASHCARDS (${nSel}) →` : 'FLASHCARDS →';
+  if (quizBtn)  quizBtn.textContent  = nSel > 0 ? `QUIZ (${nSel}) →`       : 'QUIZ ME →';
 }
 
 // ── TRAINING ─────────────────────────────────────────────────────────────────
-function _flBuildDeck() {
+// ids: optional array of card IDs for focused practice (random order)
+// no ids: full adaptive ordering (weak → unseen → learning → mastered)
+function _flBuildDeck(ids) {
+  const shuf = a => a.sort(() => Math.random()-0.5);
+  if (ids && ids.length) {
+    const idSet = new Set(ids);
+    return shuf(FORMULA_CARDS.filter(c => idSet.has(c.id)));
+  }
   const m = _flLoad();
   const g = [[],[],[],[]]; // [needs-work, unseen, learning, mastered]
   FORMULA_CARDS.forEach(c => {
     const r = m[c.id];
-    const s = r ? (r.streak||0) : -1;
+    const s = r ? (r.level||0) : -1;
     if (!r || !r.seen) g[1].push(c);
     else if (s === 0)  g[0].push(c);
-    else if (s <= 2)   g[2].push(c);
+    else if (s < FL_MASTERY_LEVEL)  g[2].push(c);
     else               g[3].push(c);
   });
-  const shuf = a => a.sort(() => Math.random()-0.5);
   return [...shuf(g[0]), ...shuf(g[1]), ...shuf(g[2]), ...shuf(g[3])];
 }
 
 function startFLTraining() {
-  _fl.deck = _flBuildDeck();
+  const ids = _fl.selected.size > 0 ? [..._fl.selected] : null;
+  _fl.deck = _flBuildDeck(ids);
   _fl.idx  = 0;
   _fl.batchSeen = [];
   _fl.fromTrain = true;
@@ -5282,59 +5625,307 @@ function _flCheckpoint() {
 
 // ── QUIZ ──────────────────────────────────────────────────────────────────────
 function _flStartBatchQuiz() { startFLQuiz(_fl.batchSeen, true); }
-function startFLQuizAll()    { startFLQuiz(FORMULA_CARDS.map(c=>c.id), false); }
+function startFLQuizAll()    {
+  const ids = _fl.selected.size > 0 ? [..._fl.selected] : FORMULA_CARDS.map(c=>c.id);
+  startFLQuiz(ids, false);
+}
 
 function startFLQuiz(ids, fromTrain) {
-  _fl.qQueue   = _flGenQ(ids, Math.min(ids.length * 2, 14));
-  _fl.qIdx     = 0;
-  _fl.qDone    = false;
-  _fl.sCorrect = 0;
-  _fl.sTotal   = _fl.qQueue.length;
-  _fl.fromTrain = !!fromTrain;
+  // Shuffle ids so card order is random each run
+  const shuffled = [...ids].sort(()=>Math.random()-0.5);
+  _fl.sessionCards   = shuffled;
+  _fl.sessionIdx     = 0;
+  _fl.sessionResults = [];
+  _fl.fromTrain      = !!fromTrain;
   _flPanel('fl-quiz');
+  _flBeginCardSession();
+}
+
+// Start a 5-question session for the current card
+function _flBeginCardSession() {
+  if (_fl.sessionIdx >= _fl.sessionCards.length) { _flShowSummary(); return; }
+  const id   = _fl.sessionCards[_fl.sessionIdx];
+  const m    = _flLoad();
+  const lvl  = (m[id] && m[id].level) || 0;
+  _fl.sessionQ       = _flGenLevelQ(id, lvl);
+  _fl.sessionQIdx    = 0;
+  _fl.sessionCorrect = 0;
+  _fl.sessionAnswers = [];
+  _fl.qDone          = false;
   _flRenderQ();
 }
 
-function _flGenQ(ids, maxCount) {
+// Difficulty-tier descriptions per level
+const _FL_DIFF = [
+  { label:'L1 · RECOGNITION',    color:'#64b5f6' },  // L1 — formula + SVG shown
+  { label:'L2 · RECOGNITION+',   color:'#64b5f6' },  // L2 — harder distractors
+  { label:'L3 · VARIABLES',      color:'var(--mk)' },// L3 — variable ID focus
+  { label:'L4 · APPLY+HINT',     color:'var(--mk)' },// L4 — app Qs, formula shown
+  { label:'L5 · COMPLETE',       color:'#fb923c'  },  // L5 — fill-in-the-blank
+  { label:'L6 · APPLY HARD',     color:'#fb923c'  },  // L6 — no hints, hard distractors
+  { label:'L7 · MASTERY CHECK',  color:'var(--correct)' }, // L7 — full mastery
+];
+
+// Generate exactly FL_SESSION_SIZE DISTINCT questions for a card at a given level.
+// Level progression:
+//   L1 — Recognition (SVG shown, easy distractors)
+//   L2 — Recognition+ (no SVG aid, harder distractors)
+//   L3 — Variables (symbol → meaning identification)
+//   L4 — Apply+Hint (app Qs with formula shown as hint)
+//   L5 — Complete-the-formula (fill in the blank symbol)
+//   L6 — Apply Hard (app Qs, no hint, shuffled distractors)
+//   L7 — Mastery Check (hardest app + complete + tough recognition)
+function _flGenLevelQ(cardId, currentLevel) {
   const cardMap = Object.fromEntries(FORMULA_CARDS.map(c=>[c.id,c]));
-  const out = [];
-  for (const id of [...ids].sort(()=>Math.random()-0.5)) {
-    const card = cardMap[id];
-    if (!card) continue;
-    // Type 1: identify the formula by name
-    const others = FORMULA_CARDS.filter(c=>c.id!==id).sort(()=>Math.random()-0.5).slice(0,3);
-    const opts1  = [...others.map(c=>c.formula), card.formula].sort(()=>Math.random()-0.5);
-    out.push({ q:`Which formula correctly calculates the <strong>${card.name}</strong>?`, svg:card.svg,
-               opts:opts1, ans:opts1.indexOf(card.formula),
-               exp:`${card.formula}${card.alt?' | '+card.alt:''}. ${card.tip}`, cardId:id });
-    // Type 2: application
-    if (card.appQs && card.appQs.length) {
-      const appQ = card.appQs[Math.floor(Math.random()*card.appQs.length)];
-      out.push({ q:appQ.q, formulaHint:card.formula, opts:appQ.opts, ans:appQ.ans, exp:appQ.exp, cardId:id });
-    }
-    if (out.length >= maxCount) break;
+  const card    = cardMap[cardId];
+  if (!card) return [];
+  const lvl  = Math.min(currentLevel + 1, FL_MASTERY_LEVEL);
+  const shuf = a => [...a].sort(()=>Math.random()-0.5);
+  const others = () => shuf(FORMULA_CARDS.filter(c=>c.id!==cardId));
+
+  // ── R1: "Which formula represents [Name]?" — SVG shown ───────────────────
+  const R1 = (hard) => {
+    const pool = hard ? others().filter(c=>c.formula.length>4) : others();
+    const opts = shuf([...pool.slice(0,3).map(c=>c.formula), card.formula]);
+    return { type:'R1',
+      q:`Which formula correctly represents the <strong>${card.name}</strong>?`,
+      svg:card.svg, opts, ans:opts.indexOf(card.formula),
+      exp:`${card.formula}${card.alt?' — also: '+card.alt:''}. ${card.tip}`,
+      cardId, cardName:card.name, lvl };
+  };
+
+  // ── R2: "This formula calculates what?" — inverse recognition ─────────────
+  const R2 = () => {
+    const pool = others().slice(0,3);
+    const opts = shuf([...pool.map(c=>c.name), card.name]);
+    return { type:'R2',
+      q:`The formula <strong>${card.formula}</strong> is used to calculate:`,
+      opts, ans:opts.indexOf(card.name),
+      exp:`${card.formula} gives you the ${card.name}. ${card.tip}`,
+      cardId, cardName:card.name, lvl };
+  };
+
+  // ── R3: "You need to find [Name]. Which formula?" ─────────────────────────
+  const R3 = () => {
+    const pool = others().slice(0,3);
+    const opts = shuf([...pool.map(c=>c.formula), card.formula]);
+    return { type:'R3',
+      q:`You need to calculate the <strong>${card.name}</strong>. Which formula do you use?`,
+      opts, ans:opts.indexOf(card.formula),
+      exp:`${card.formula}${card.alt?' — also written as '+card.alt:''}. ${card.tip}`,
+      cardId, cardName:card.name, lvl };
+  };
+
+  // ── R4: hard recognition — similar-length formula distractors ─────────────
+  const R4 = () => {
+    let sim = others().filter(c=>Math.abs(c.formula.length-card.formula.length)<=5);
+    if (sim.length < 3) sim = [...sim, ...others().filter(c=>!sim.includes(c))];
+    const opts = shuf([...shuf(sim).slice(0,3).map(c=>c.formula), card.formula]);
+    return { type:'R4',
+      q:`Which of these is the correct formula for <strong>${card.name}</strong>?`,
+      opts, ans:opts.indexOf(card.formula),
+      exp:`${card.formula}. The others are formulas for different quantities. ${card.tip}`,
+      cardId, cardName:card.name, lvl };
+  };
+
+  // ── V: Variable identification (one question per distinct var symbol) ──────
+  const isUnitSym = sym => /^\d/.test(sym) || /^[A-Za-z]+ /.test(sym);
+  const symCounts = {};
+  (card.vars||[]).forEach(v => {
+    const ei = v.indexOf('=');
+    if (ei >= 0) { const s = v.slice(0,ei).trim(); symCounts[s] = (symCounts[s]||0)+1; }
+  });
+  const Vs = () => {
+    if (!card.vars || card.vars.length < 2) return [];
+    return card.vars.map(varLine => {
+      const eqIdx = varLine.indexOf('=');
+      if (eqIdx < 0) return null;
+      const sym  = varLine.slice(0, eqIdx).trim();
+      const mean = varLine.slice(eqIdx+1).trim();
+      if (symCounts[sym] > 1) return null; // ambiguous — skip
+      const wrongs = card.vars
+        .filter(v => v !== varLine && v.indexOf('=') >= 0)
+        .map(v => v.slice(v.indexOf('=')+1).trim());
+      if (wrongs.length < 2) return null;
+      const opts = shuf([mean, ...shuf(wrongs).slice(0,3)]);
+      const q = isUnitSym(sym)
+        ? `<strong>${sym}</strong> is equal to:`
+        : `In the formula <strong>${card.formula}</strong>, what does <strong>${sym}</strong> represent?`;
+      const exp = isUnitSym(sym)
+        ? `${sym} = ${mean}.`
+        : `${sym} = ${mean}. Full formula: ${card.formula}`;
+      return { type:`V_${sym}`, q, opts, ans:opts.indexOf(mean), exp,
+        cardId, cardName:card.name, lvl };
+    }).filter(Boolean);
+  };
+
+  // ── C: Complete-the-formula — fill in the blank ───────────────────────────
+  // Shows the formula with one variable replaced by ___, asks which symbol fits.
+  // Only generated for algebraic symbols (single chars) that appear in the formula.
+  const Cs = () => {
+    if (!card.vars || !card.formula) return [];
+    // Distractor pool: short algebraic syms from other cards
+    const allOtherSyms = [...new Set(
+      FORMULA_CARDS.filter(c=>c.id!==cardId)
+        .flatMap(c=>(c.vars||[])
+          .filter(v=>v.indexOf('=')>=0)
+          .map(v=>v.slice(0,v.indexOf('=')).trim())
+        )
+        .filter(s => s.length >= 1 && s.length <= 3 && /^[a-zA-Zπ]/.test(s))
+    )];
+    return card.vars.map(varLine => {
+      const eqIdx = varLine.indexOf('=');
+      if (eqIdx < 0) return null;
+      const sym = varLine.slice(0, eqIdx).trim();
+      // Only short algebraic symbols — skip unit-fact lines like "1 yard"
+      if (isUnitSym(sym) || sym.length > 4) return null;
+      if (symCounts[sym] > 1) return null;
+      // Verify the symbol actually appears as a standalone token in the formula
+      const escaped = sym.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      if (!new RegExp('(?<![A-Za-z])' + escaped + '(?![A-Za-z])').test(card.formula)) return null;
+      const blanked = card.formula.replace(new RegExp(escaped,'g'), '___');
+      if (blanked === card.formula) return null;
+      // Distractors: sibling var symbols first, then other-card syms
+      const siblingSyms = card.vars
+        .filter(v => v !== varLine && v.indexOf('=') >= 0)
+        .map(v => v.slice(0,v.indexOf('=')).trim())
+        .filter(s => s.length >= 1 && s.length <= 3 && /^[a-zA-Zπ]/.test(s) && s !== sym);
+      const distPool = [...new Set([...siblingSyms, ...shuf(allOtherSyms)])].filter(s=>s!==sym);
+      if (distPool.length < 3) return null;
+      const opts = shuf([sym, ...shuf(distPool).slice(0,3)]);
+      const meaning = varLine.slice(eqIdx+1).trim();
+      const displayBlanked = blanked.replace('___',
+        '<span style="color:var(--wrong);font-weight:700;font-size:17px">___</span>');
+      return { type:`C_${sym}`,
+        q:`Complete the formula for <strong>${card.name}</strong>:<br>` +
+          `<span style="font-family:'IBM Plex Mono',monospace;font-size:15px;` +
+          `color:var(--accent);letter-spacing:1px">${displayBlanked}</span>`,
+        opts, ans:opts.indexOf(sym),
+        exp:`${card.formula} — the blank is <strong>${sym}</strong> (${meaning}).`,
+        cardId, cardName:card.name, lvl };
+    }).filter(Boolean);
+  };
+
+  // ── A: Application questions ──────────────────────────────────────────────
+  // withHint: show formula string above the question; hard: reshuffle option order
+  const As = (withHint, hard) => {
+    if (!card.appQs || !card.appQs.length) return [];
+    return card.appQs.map((appQ, i) => {
+      let opts = appQ.opts, ans = appQ.ans;
+      if (hard) {
+        const correct = appQ.opts[appQ.ans];
+        opts = shuf(appQ.opts);
+        ans  = opts.indexOf(correct);
+      }
+      return { type:`A${i}`,
+        q:appQ.q, opts, ans, exp:appQ.exp,
+        hint: withHint ? card.formula : null,
+        cardId, cardName:card.name, lvl };
+    });
+  };
+
+  // ── Build level-specific candidate lists ──────────────────────────────────
+  // Each level has a DIFFERENT primary question type so the user faces new
+  // challenges as they advance rather than seeing recycled recognition Qs.
+  const varQs   = shuf(Vs());
+  const compQs  = shuf(Cs());
+  const appHint  = As(true,  false); // formula shown as hint
+  const appPlain = As(false, false); // no hint
+  const appHard  = As(false, true);  // no hint + shuffled distractors
+
+  let candidates = [];
+  switch (lvl) {
+    case 1:
+      // Primary: formula recognition with SVG shown — easiest
+      candidates = [R1(false), R2(), R3(), ...varQs, R4()];
+      break;
+    case 2:
+      // Primary: recognition without SVG; harder formula distractors
+      candidates = [R3(), R4(), R2(), ...varQs, R1(false)];
+      break;
+    case 3:
+      // Primary: variable identification — know what each symbol means
+      candidates = [...varQs, R2(), R3(), ...appHint, R4()];
+      break;
+    case 4:
+      // Primary: application with formula shown as a hint
+      candidates = [...appHint, ...varQs, R4(), R3()];
+      break;
+    case 5:
+      // Primary: complete-the-formula (NEW type) + application without hint
+      candidates = [...compQs, ...appPlain, ...varQs, R4()];
+      break;
+    case 6:
+      // Primary: hard application (no hint, shuffled opts) + complete-the-formula
+      candidates = [...appHard, ...compQs, ...varQs, R4()];
+      break;
+    default:
+      // L7 Mastery: hardest application + complete + tough recognition
+      candidates = [...appHard, ...compQs, R4(), R1(true), ...varQs];
+      break;
   }
-  return out.slice(0, maxCount).sort(()=>Math.random()-0.5);
+
+  // Dedupe by type, take first FL_SESSION_SIZE unique ones
+  const seen = new Set();
+  const result = [];
+  for (const q of candidates) {
+    if (q && !seen.has(q.type)) { seen.add(q.type); result.push(q); }
+    if (result.length >= FL_SESSION_SIZE) break;
+  }
+  // Safety fill: escalate through all types if candidate pool was thin.
+  // L1/L2 may fall back to R1 (SVG shown). L3+ must never show R1 even as
+  // a fallback — by L3 the user should already know the formula cold.
+  const fallbacks = lvl >= 3
+    ? [R2(), R3(), R4(), ...varQs, ...compQs, ...appHint]
+    : [R1(false), R2(), R3(), R4(), ...varQs, ...compQs, ...appHint];
+  for (const q of fallbacks) {
+    if (result.length >= FL_SESSION_SIZE) break;
+    if (q && !seen.has(q.type)) { seen.add(q.type); result.push(q); }
+  }
+
+  return shuf(result.slice(0, FL_SESSION_SIZE));
 }
 
 function _flRenderQ() {
-  const q = _fl.qQueue[_fl.qIdx];
-  if (!q) { _flShowSummary(); return; }
+  const q = _fl.sessionQ[_fl.sessionQIdx];
+  if (!q) { _flEndCardSession(); return; }
   _fl.qDone = false;
-  const pct = Math.round(_fl.qIdx / _fl.qQueue.length * 100);
-  document.getElementById('fl-quiz-bar').style.width = pct + '%';
-  document.getElementById('fl-quiz-lbl').textContent = `${_fl.qIdx+1} / ${_fl.qQueue.length}`;
-  const letters = ['A','B','C','D'];
-  const svgHtml  = q.svg         ? `<div style="text-align:center;margin-bottom:14px">${q.svg}</div>` : '';
-  const hintHtml = q.formulaHint ? `<div class="fl-formula-hint">${q.formulaHint}</div>` : '';
+
+  // ── Level info
+  const liveM    = _flLoad();
+  const cardId   = _fl.sessionCards[_fl.sessionIdx];
+  const curLevel = (liveM[cardId] && liveM[cardId].level) || 0;
+  const attemptL = Math.min(curLevel + 1, FL_MASTERY_LEVEL);
+  const diffInfo = _FL_DIFF[attemptL - 1] || _FL_DIFF[0];
+  const diffColor= diffInfo.color;
+
+  // Level pips (0/7 → FL_MASTERY_LEVEL/7)
+  const pips = Array.from({length:FL_MASTERY_LEVEL}, (_,i) =>
+    `<span style="display:inline-block;width:9px;height:9px;border-radius:50%;margin:0 1.5px;background:${i < curLevel ? diffColor : 'var(--surface2)'};transition:background 0.2s"></span>`
+  ).join('');
+
+  const badgeHtml = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1.5px;color:${diffColor};padding:2px 8px;border:1px solid ${diffColor}55;border-radius:3px;white-space:nowrap">${diffInfo.label}</span>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q.cardName}</span>
+      <span style="display:flex;align-items:center;gap:1px;flex-shrink:0">${pips}<span style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--muted);margin-left:5px">${curLevel}/${FL_MASTERY_LEVEL}</span></span>
+    </div>
+    <div style="display:flex;gap:4px;margin-bottom:16px">
+      ${Array.from({length:FL_SESSION_SIZE},(_,i)=>`<div style="flex:1;height:4px;border-radius:2px;background:${i < _fl.sessionAnswers.length ? (_fl.sessionAnswers[i] ? 'var(--correct)' : 'var(--wrong)') : i===_fl.sessionQIdx ? diffColor : 'var(--surface2)'};transition:background 0.2s"></div>`).join('')}
+    </div>`;
+
+  const hintHtml = q.hint  ? `<div class="fl-formula-hint">${q.hint}</div>` : '';
+  const svgHtml  = q.svg   ? `<div style="text-align:center;margin-bottom:14px">${q.svg}</div>` : '';
+  const letters  = ['A','B','C','D'];
   const optsHtml = q.opts.map((opt,i)=>`
     <div class="fl-opt" id="flopt${i}" onclick="_flAnswer(${i})">
       <div class="fl-opt-ltr">${letters[i]}</div>
       <div>${opt}</div>
     </div>`).join('');
   document.getElementById('fl-quiz-body').innerHTML = `
-    ${svgHtml}
+    ${badgeHtml}
     ${hintHtml}
+    ${svgHtml}
     <div class="fl-quiz-q">${q.q}</div>
     <div>${optsHtml}</div>
     <div class="fl-quiz-exp" id="fl-qexp">${q.exp}</div>
@@ -5345,59 +5936,166 @@ function _flRenderQ() {
 function _flAnswer(idx) {
   if (_fl.qDone) return;
   _fl.qDone = true;
-  const q  = _fl.qQueue[_fl.qIdx];
+  const q  = _fl.sessionQ[_fl.sessionQIdx];
   const ok = idx === q.ans;
   document.querySelectorAll('.fl-opt').forEach(el => el.classList.add('fl-done'));
   document.getElementById(`flopt${q.ans}`).classList.add('correct');
   if (!ok) document.getElementById(`flopt${idx}`).classList.add('wrong');
   document.getElementById('fl-qexp').style.display  = 'block';
   document.getElementById('fl-qnext').style.display = 'inline-block';
-  const m  = _flLoad();
-  const id = q.cardId;
-  if (!m[id]) m[id] = {seen:0,correct:0,wrong:0,streak:0};
-  m[id].seen++;
-  if (ok) { m[id].correct++; m[id].streak=(m[id].streak||0)+1; _fl.sCorrect++; }
-  else    { m[id].wrong++;   m[id].streak=0; }
-  _flSave(m);
+  _fl.sessionAnswers.push(ok);
+  if (ok) _fl.sessionCorrect++;
 }
 
 function _flNextQ() {
-  _fl.qIdx++;
-  if (_fl.qIdx >= _fl.qQueue.length) _flShowSummary();
+  _fl.sessionQIdx++;
+  if (_fl.sessionQIdx >= _fl.sessionQ.length) _flEndCardSession();
   else _flRenderQ();
+}
+
+// Called after all 5 questions for the current card are answered
+function _flEndCardSession() {
+  const cardId   = _fl.sessionCards[_fl.sessionIdx];
+  const cardName = (FORMULA_CARDS.find(c=>c.id===cardId)||{}).name || cardId;
+  const correct  = _fl.sessionCorrect;
+  const passed   = correct >= FL_PASS_THRESHOLD;
+  const m        = _flLoad();
+  if (!m[cardId]) m[cardId] = {seen:0, correct:0, wrong:0, level:0};
+  const prevLevel = m[cardId].level || 0;
+  m[cardId].seen    += FL_SESSION_SIZE;
+  m[cardId].correct += correct;
+  m[cardId].wrong   += (FL_SESSION_SIZE - correct);
+  if (passed && prevLevel < FL_MASTERY_LEVEL) m[cardId].level = prevLevel + 1;
+  _flSave(m);
+  _fl.sessionResults.push({
+    cardId, cardName,
+    prevLevel,
+    newLevel: m[cardId].level,
+    correct, passed,
+  });
+  // show brief level-up / fail interstitial if more cards follow
+  _fl.sessionIdx++;
+  if (_fl.sessionIdx < _fl.sessionCards.length) {
+    _flShowCardResult(passed, correct, prevLevel, m[cardId].level, cardName);
+  } else {
+    _flShowSummary();
+  }
+}
+
+// Brief between-card result card
+function _flShowCardResult(passed, correct, prevLvl, newLvl, cardName) {
+  const color   = passed ? 'var(--correct)' : 'var(--wrong)';
+  const icon    = passed ? '✓' : '✕';
+  const headline= passed ? (newLvl >= FL_MASTERY_LEVEL ? 'MASTERED!' : `LEVEL ${newLvl} UNLOCKED`) : 'NOT QUITE';
+  const subline = passed
+    ? (newLvl >= FL_MASTERY_LEVEL ? `${cardName} — fully mastered.` : `${cardName} — level ${prevLvl} → ${newLvl}`)
+    : `${cardName} — ${correct}/${FL_SESSION_SIZE} correct (need ${FL_PASS_THRESHOLD}). Stay at level ${prevLvl}.`;
+  const pips    = Array.from({length:FL_MASTERY_LEVEL},(_,i)=>
+    `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;margin:0 2px;background:${i < newLvl ? color : 'var(--surface2)'}"></span>`
+  ).join('');
+  const moreLeft = _fl.sessionCards.length - _fl.sessionIdx;
+  document.getElementById('fl-quiz-body').innerHTML = `
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:48px;line-height:1;margin-bottom:8px;color:${color}">${icon}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:900;color:${color};letter-spacing:1px;margin-bottom:6px">${headline}</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:18px">${subline}</div>
+      <div style="display:flex;justify-content:center;margin-bottom:20px">${pips}</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:20px">${moreLeft} formula${moreLeft!==1?'s':''} remaining in this session</div>
+      <button onclick="_flBeginCardSession()" style="padding:12px 28px;background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.35);color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:2px;border-radius:6px;cursor:pointer">NEXT FORMULA →</button>
+    </div>`;
 }
 
 // ── SUMMARY ───────────────────────────────────────────────────────────────────
 function _flShowSummary() {
   _flPanel('fl-summary');
-  const correct = _fl.sCorrect, total = _fl.sTotal;
-  const pct     = total ? Math.round(correct/total*100) : 0;
-  const color   = pct>=80 ? 'var(--correct)' : pct>=60 ? 'var(--mk)' : 'var(--wrong)';
   const m       = _flLoad();
-  const weakCards = FORMULA_CARDS.filter(c => { const r=m[c.id]; return r&&r.seen&&(r.streak||0)===0; });
-  const weakHtml  = weakCards.length
-    ? `<div style="margin-top:20px;padding:16px;background:rgba(255,61,90,0.05);border:1px solid rgba(255,61,90,0.2);border-radius:8px">
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--wrong);margin-bottom:10px">NEEDS MORE PRACTICE</div>
-        ${weakCards.map(c=>`<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text);margin-bottom:6px">• ${c.name}: <span style="color:var(--mk)">${c.formula}</span></div>`).join('')}
-      </div>` : '';
-  const continueBtn = _fl.fromTrain
-    ? `<button onclick="startFLTraining()" style="flex:1;min-width:140px;padding:14px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.3);color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;text-transform:uppercase">TRAIN AGAIN</button>` : '';
-  document.getElementById('fl-summary-body').innerHTML = `
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;gap:16px;flex-wrap:wrap">
-      <div>
-        <div class="rank-badge" style="opacity:1;animation:none;text-align:left;margin-bottom:10px">&#x1F4D0; FORMULA LAB</div>
-        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.9">QUIZ<br><span style="color:${color}">RESULTS</span></h2>
+  const results = _fl.sessionResults;
+
+  // ── Session aggregates ──────────────────────────────────────────────────────
+  const totalQs      = results.length * FL_SESSION_SIZE;
+  const totalCorrect = results.reduce((s, r) => s + r.correct, 0);
+  const pct          = totalQs ? Math.round(totalCorrect / totalQs * 100) : 0;
+  const levelsEarned = results.filter(r => r.newLevel > r.prevLevel).length;
+  const newMastered  = results.filter(r => r.newLevel >= FL_MASTERY_LEVEL && r.prevLevel < FL_MASTERY_LEVEL).length;
+  const color        = pct >= 80 ? 'var(--correct)' : pct >= 60 ? 'var(--mk)' : 'var(--wrong)';
+
+  // ── All-time progress ───────────────────────────────────────────────────────
+  const masteredCount   = FORMULA_CARDS.filter(c => (m[c.id]?.level || 0) >= FL_MASTERY_LEVEL).length;
+  const inProgressCount = FORMULA_CARDS.filter(c => { const l = m[c.id]?.level || 0; return l > 0 && l < FL_MASTERY_LEVEL; }).length;
+  const notStarted      = FORMULA_CARDS.length - masteredCount - inProgressCount;
+  const masteryPct      = Math.round(masteredCount / FORMULA_CARDS.length * 100);
+
+  // ── Per-formula rows ────────────────────────────────────────────────────────
+  const rowsHtml = results.map(r => {
+    const scoreColor  = r.correct >= FL_PASS_THRESHOLD ? 'var(--correct)' : 'var(--wrong)';
+    const levelArrow  = r.newLevel > r.prevLevel
+      ? `L${r.prevLevel} → <span style="color:var(--correct);font-weight:700">L${r.newLevel}</span>`
+      : `<span style="color:var(--muted)">L${r.prevLevel} (no change)</span>`;
+    const masteredBadge = r.newLevel >= FL_MASTERY_LEVEL
+      ? `<span style="color:var(--correct);font-size:9px;letter-spacing:1px;margin-left:4px">★ MASTERED</span>` : '';
+    return `
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;background:var(--surface2);margin-bottom:5px">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.cardName}</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:${scoreColor};flex-shrink:0;font-weight:700">${r.correct}/${FL_SESSION_SIZE}</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);flex-shrink:0">${levelArrow}${masteredBadge}</div>
+      </div>`;
+  }).join('');
+
+  // ── Stat tiles ──────────────────────────────────────────────────────────────
+  const statTile = (val, label, c='var(--text)', bg='var(--surface2)', border='') =>
+    `<div style="flex:1;min-width:72px;padding:12px 8px;background:${bg};border:${border||'none'};border-radius:8px;text-align:center">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;color:${c};line-height:1">${val}</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--muted);margin-top:3px">${label}</div>
+    </div>`;
+
+  const statsHtml = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+    ${statTile(pct+'%', 'ACCURACY', color)}
+    ${statTile(totalCorrect+'/'+totalQs, 'CORRECT', 'var(--text)')}
+    ${statTile((levelsEarned > 0 ? '+' : '')+levelsEarned, 'LEVELS EARNED', 'var(--correct)')}
+    ${newMastered ? statTile('★'+newMastered, 'NEW MASTERED', 'var(--correct)', 'rgba(76,175,80,0.08)', '1px solid rgba(76,175,80,0.3)') : ''}
+  </div>`;
+
+  // ── Overall progress bar ────────────────────────────────────────────────────
+  const progressHtml = `
+    <div style="margin-top:20px;padding:14px 16px;background:var(--surface2);border-radius:8px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted)">OVERALL MASTERY</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--correct)">${masteredCount} / ${FORMULA_CARDS.length} formulas</span>
       </div>
-      <button onclick="flBack()" class="full-btn" style="opacity:1;animation:none;margin-top:8px">← BACK</button>
+      <div style="height:6px;background:var(--surface);border-radius:3px;overflow:hidden;margin-bottom:10px">
+        <div style="height:100%;width:${masteryPct}%;background:var(--correct);border-radius:3px"></div>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--correct)">✓ ${masteredCount} mastered (L${FL_MASTERY_LEVEL})</span>
+        ${inProgressCount ? `<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mk)">◑ ${inProgressCount} in progress</span>` : ''}
+        ${notStarted ? `<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted)">${notStarted} not started</span>` : ''}
+      </div>
+    </div>`;
+
+  // ── Action buttons ──────────────────────────────────────────────────────────
+  const sessionIds = results.map(r => `'${r.cardId}'`).join(',');
+  const retryBtn   = `<button onclick="startFLQuiz([${sessionIds}], false)" style="flex:1;min-width:140px;padding:14px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.3);color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;text-transform:uppercase">↺ RETRY SAME</button>`;
+  const allBtn     = `<button onclick="startFLQuizAll()" style="flex:1;min-width:140px;padding:14px;background:rgba(255,214,0,0.06);border:1px solid rgba(255,214,0,0.3);color:var(--mk);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;text-transform:uppercase">NEXT LEVEL →</button>`;
+  const trainBtn   = _fl.fromTrain ? `<button onclick="startFLTraining()" style="flex:1;min-width:140px;padding:14px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.3);color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;text-transform:uppercase">TRAIN AGAIN</button>` : '';
+
+  document.getElementById('fl-summary-body').innerHTML = `
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap">
+      <div>
+        <div class="rank-badge" style="opacity:1;animation:none;text-align:left;margin-bottom:8px">&#x1F4D0; FORMULA LAB</div>
+        <h2 style="font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:900;text-transform:uppercase;letter-spacing:-1px;line-height:0.9">SESSION<br><span style="color:${color}">RESULTS</span></h2>
+      </div>
+      <button onclick="flBack()" class="full-btn" style="opacity:1;animation:none;margin-top:8px">← BACK TO HOME</button>
     </div>
-    <div style="text-align:center;padding:10px 0 4px">
-      <div class="fl-score-big" style="color:${color}">${pct}%</div>
-      <div class="fl-score-lbl">${correct} / ${total} CORRECT</div>
+    ${statsHtml}
+    <div style="margin-top:20px">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:8px">THIS SESSION — ${results.length} FORMULA${results.length !== 1 ? 'S' : ''}</div>
+      ${rowsHtml}
     </div>
-    ${weakHtml}
+    ${progressHtml}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:24px">
-      ${continueBtn}
-      <button onclick="startFLQuizAll()" style="flex:1;min-width:140px;padding:14px;background:rgba(255,214,0,0.06);border:1px solid rgba(255,214,0,0.3);color:var(--mk);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;text-transform:uppercase">QUIZ AGAIN</button>
+      ${trainBtn}
+      ${retryBtn}
+      ${allBtn}
     </div>
   `;
 }
@@ -5521,9 +6219,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <button class="full-btn" style="opacity:1;animation:none;margin-top:8px" onclick="showScreen('splash')">&#8592; HOME</button>
       </div>
       <div id="fl-mastery-overview"></div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px">
-        <button onclick="startFLTraining()" style="flex:1;min-width:150px;padding:16px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.3);color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;transition:all 0.15s;text-transform:uppercase" onmouseover="this.style.background='rgba(0,229,255,0.12)'" onmouseout="this.style.background='rgba(0,229,255,0.06)'">FLASHCARDS →</button>
-        <button onclick="startFLQuizAll()" style="flex:1;min-width:150px;padding:16px;background:rgba(255,214,0,0.06);border:1px solid rgba(255,214,0,0.3);color:var(--mk);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;transition:all 0.15s;text-transform:uppercase" onmouseover="this.style.background='rgba(255,214,0,0.12)'" onmouseout="this.style.background='rgba(255,214,0,0.06)'">QUIZ ME →</button>
+      <div class="fl-sticky-actions">
+        <button id="fl-train-btn" onclick="startFLTraining()" style="flex:1;min-width:150px;padding:16px;background:rgba(0,229,255,0.06);border:1px solid rgba(0,229,255,0.3);color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;transition:all 0.15s;text-transform:uppercase" onmouseover="this.style.background='rgba(0,229,255,0.12)'" onmouseout="this.style.background='rgba(0,229,255,0.06)'">FLASHCARDS →</button>
+        <button id="fl-quiz-btn" onclick="startFLQuizAll()" style="flex:1;min-width:150px;padding:16px;background:rgba(255,214,0,0.06);border:1px solid rgba(255,214,0,0.3);color:var(--mk);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:2px;border-radius:8px;cursor:pointer;transition:all 0.15s;text-transform:uppercase" onmouseover="this.style.background='rgba(255,214,0,0.12)'" onmouseout="this.style.background='rgba(255,214,0,0.06)'">QUIZ ME →</button>
       </div>
     </div>
     <!-- TRAIN PANEL -->
@@ -5549,11 +6247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <div id="fl-quiz" style="display:none">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
         <div class="rank-badge" style="opacity:1;animation:none;margin:0">FORMULA QUIZ</div>
-        <button onclick="flBack()" style="margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;padding:6px 14px;border-radius:4px;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='var(--muted)'" onmouseout="this.style.borderColor='var(--border)'">&#8592; HOME</button>
-      </div>
-      <div class="fl-progress">
-        <div class="fl-progress-bar"><div class="fl-progress-fill" id="fl-quiz-bar"></div></div>
-        <div class="fl-prog-lbl" id="fl-quiz-lbl"></div>
+        <button onclick="flBack()" style="margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;padding:6px 14px;border-radius:4px;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='var(--muted)'" onmouseout="this.style.borderColor='var(--border)'">&#8592; BACK</button>
       </div>
       <div id="fl-quiz-body"></div>
     </div>
