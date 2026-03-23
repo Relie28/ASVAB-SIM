@@ -142,12 +142,12 @@ Raw accuracy per section is converted to a **standard score** on a 20–80 scale
 std = 50 + (pct − 0.5) × slope
 ```
 
-| Section | Slope | Derivation |
-| ------- | ----- | ---------- |
+| Section | Slope | Derivation             |
+| ------- | ----- | ---------------------- |
 | AR      | 48    | 13/16 (81.25%) → SS 65 |
 | WK      | 53    | 11/16 (68.75%) → SS 60 |
-| PC      | 57    | 9/11  (81.8%)  → SS 68 |
-| MK      | 48    | 12/16 (75.0%)  → SS 62 |
+| PC      | 57    | 9/11 (81.8%) → SS 68   |
+| MK      | 48    | 12/16 (75.0%) → SS 62  |
 
 Each slope is solved algebraically from the real score: `slope = (SS − 50) / (accuracy − 0.5)`. PC uses a steeper slope because fewer questions (11 vs. 16) means each carries more weight on the real test.
 
@@ -196,21 +196,21 @@ The composite is mapped to a percentile using a **normal distribution** approxim
 Percentile = Φ((composite − 200) / 33.4) × 100
 ```
 
-- **Mean = 200** — corresponds to 50th percentile (all sections at standard score 50)  
+- **Mean = 200** — corresponds to 50th percentile (all sections at standard score 50)
 - **SD = 33.4** — derived so that composite 255 maps to exactly the 95th percentile
 
 $$\Phi\!\left(\frac{255-200}{33.4}\right) = \Phi(1.647) \approx 95.0\%\ ✓$$
 
 Cross-checks against known data points:
 
-| Composite | Calculated | Expected |
-| --------- | ---------- | -------- |
-| 200       | 50th       | ~50th ✓  |
-| 235       | ~83rd      | ~80th ✓  |
-| 245       | ~90th      | ~90th ✓  |
+| Composite | Calculated | Expected   |
+| --------- | ---------- | ---------- |
+| 200       | 50th       | ~50th ✓    |
+| 235       | ~83rd      | ~80th ✓    |
+| 245       | ~90th      | ~90th ✓    |
 | 255       | **95th**   | **95th ✓** |
-| 265       | ~98th      | ~98th ✓  |
-| 270       | ~98.5th    | ~99th ✓  |
+| 265       | ~98th      | ~98th ✓    |
+| 270       | ~98.5th    | ~99th ✓    |
 
 This replaces the previous hand-crafted lookup table with a smooth, continuous, mathematically grounded function.
 
