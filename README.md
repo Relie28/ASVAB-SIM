@@ -1,8 +1,19 @@
-# ASVAB SIM — 95th Percentile Prep
+# ASVAB SIM — AFQT 95 ✓
 
 **🔗 Live app → [https://relie28.github.io/ASVAB-SIM/](https://relie28.github.io/ASVAB-SIM/)**
 
-A single-file, offline-capable web app built to simulate and reinforce performance on the **ASVAB / PICAT** (Pre-screening, Internet-delivered Computerized Adaptive Test). Built specifically around one user's real test results to drill the exact questions they missed, prepare for PICAT verification, and target an **AFQT score at the 95th percentile**.
+A single-file, offline-capable web app built to simulate and reinforce performance on the **ASVAB / PICAT** (Pre-screening, Internet-delivered Computerized Adaptive Test). Built around one user's real verified test results — **official AFQT 95 confirmed, March 2026** — and kept live as an ongoing drill tool for continued prep and score maintenance.
+
+> **Official scores (CAT-ASVAB · March 2026)**
+> | Section | Correct | Standard Score |
+> |---------|---------|---------------|
+> | AR | 13 / 16 | 65 |
+> | WK | 11 / 16 | 60 |
+> | PC | 9 / 11 | 68 |
+> | MK | 12 / 16 | 62 |
+> | GS | 9 / 16 | 51 |
+>
+> **AFQT: 95**
 
 ---
 
@@ -10,7 +21,9 @@ A single-file, offline-capable web app built to simulate and reinforce performan
 
 When you take the PICAT, your answers are saved. If you score high enough to qualify for enlistment, you are later given a **Verification Test** — a shorter, proctored version of the ASVAB that confirms your PICAT score was genuine. If your Verification score doesn't match your PICAT within a margin, your PICAT score is discarded.
 
-This app exists to close that gap. It reconstructs your real PICAT session — every question you answered, every section score — and turns it into a repeatable, adaptive drill tool so you can walk into the Verification Test knowing the material cold.
+This app was built to close that gap. It reconstructs the real PICAT session — every question, every section score — and turns it into a repeatable, adaptive drill tool. The target was AFQT 95. **That target has been met and confirmed.**
+
+The app remains live as a maintenance and improvement tool across all AFQT subtests.
 
 ---
 
@@ -83,24 +96,20 @@ Reports per-section accuracy and a raw score percentage at the end.
 
 ### Full ASVAB — How the AFQT Is Actually Calculated
 
-The AFQT is not a raw percentage. It's a **percentile rank** derived from a six-step pipeline that weights difficulty, normalizes scores, and compares you to a national reference population.
+The AFQT is not a raw percentage. It's a **percentile rank** derived from a pipeline that normalizes per-section accuracy into standard scores, combines them into a composite, and maps that composite onto a national reference population.
 
 ---
 
 #### Step 1 — Raw Correct Answers
 
-You start with accuracy per section. Using the scores this app is built around as an example:
+Accuracy is computed per section. The verified real-test scores this app is anchored to:
 
-| Section | Correct | Accuracy |
-| ------- | ------- | -------- |
-| AR      | 13/15   | 87%      |
-| WK      | 12/15   | 80%      |
-| PC      | 8/10    | 80%      |
-| MK      | 11/15   | 73%      |
-
-> ✅ **These are real ASVAB/PICAT scores.** These exact numbers — AR 13/15, WK 12/15, PC 8/10, MK 11/15 — produce a composite of **256** and an **AFQT percentile of exactly 95**. This is verified and confirmed, not estimated.
-
-But two people with 11/15 can receive **different scaled scores** depending on which 11 they got right — because each question carries a difficulty weight.
+| Section | Correct | Accuracy | Standard Score |
+| ------- | ------- | -------- | -------------- |
+| AR      | 13 / 16 | 81.25%   | 65             |
+| WK      | 11 / 16 | 68.75%   | 60             |
+| PC      | 9 / 11  | 81.8%    | 68             |
+| MK      | 12 / 16 | 75.0%    | 62             |
 
 ---
 
@@ -114,15 +123,6 @@ The PICAT uses adaptive-style scoring. Each question has three parameters:
 
 These are combined to estimate your **ability level (θ, "theta")** per section — a continuous measure of true ability, not a raw count.
 
-Conceptually, the ability estimates for the above scores might look like:
-
-```
-θ_AR ≈ 0.90   (very strong)
-θ_PC ≈ 0.70   (strong)
-θ_MK ≈ 0.80   (solid)
-θ_WK ≈ 0.50   (moderate)
-```
-
 **How this app approximates it:**
 
 Every question in the bank has a `diff` field (`1` easy, `2` medium, `3` hard). The `diff` value drives two things:
@@ -130,93 +130,98 @@ Every question in the bank has a `diff` field (`1` easy, `2` medium, `3` hard). 
 1. **Session flavor sampling** — CHALLENGING sessions draw proportionally more hard questions; REVIEW sessions draw more easy ones.
 2. **Result badges** — correct/incorrect hard questions are highlighted in the question review.
 
-For the standard score calculation itself, raw accuracy (`correct / total`) is used with a calibrated slope. Applying bonus weights for hard questions creates a systematic downward bias: realistic test-takers concentrate their misses on harder items, which would cause the score to diverge from the verified 95th-percentile anchor — so the weights are excluded from scoring.
+For the standard score calculation itself, raw accuracy (`correct / total`) is used with calibrated per-section slopes. Applying bonus weights for hard questions creates a systematic downward bias — realistic test-takers concentrate misses on harder items — so difficulty weights are excluded from scoring.
 
 ---
 
 #### Step 3 — Standard Scores (20–80 scale)
 
-Raw accuracy per section is converted to a **standard score** on a 20–80 scale:
+Raw accuracy per section is converted to a **standard score** on a 20–80 scale using per-section slopes calibrated directly from the verified real-test data:
 
 ```
-std = 50 + (pct − 0.5) × 46
+std = 50 + (pct − 0.5) × slope
 ```
 
-The slope `46` is derived algebraically from the real-test data: given the known accuracy values and the verified AFQT result of 95th percentile, the composite equation `2×VE + AR + MK = 256` requires exactly this slope. It is cross-validated against the DoD 1997 norming tables. This scale is normalized so that:
+| Section | Slope | Derivation |
+| ------- | ----- | ---------- |
+| AR      | 48    | 13/16 (81.25%) → SS 65 |
+| WK      | 53    | 11/16 (68.75%) → SS 60 |
+| PC      | 57    | 9/11  (81.8%)  → SS 68 |
+| MK      | 48    | 12/16 (75.0%)  → SS 62 |
 
-- **50** = population average (50% accuracy)
-- **60** ≈ top 16%
-- **70** ≈ top 2%
-
-Standard scores for the baseline profile:
-
-| Section | Accuracy | Standard score |
-| ------- | -------- | -------------- |
-| AR      | 87%      | 67             |
-| WK      | 80%      | 64             |
-| PC      | 80%      | 64             |
-| MK      | 73%      | 61             |
+Each slope is solved algebraically from the real score: `slope = (SS − 50) / (accuracy − 0.5)`. PC uses a steeper slope because fewer questions (11 vs. 16) means each carries more weight on the real test.
 
 ---
 
 #### Step 4 — Build VE (Verbal Expression)
 
-VE is derived from the WK and PC standard scores. The DoD lookup table that converts the raw WK+PC sum is approximately linear in the normal range — equivalent to taking the average:
+VE is derived from **combined WK+PC raw performance** — mirroring how the real ASVAB computes it from the sum of correct WK and PC answers before any scaling:
 
 ```
-VE = (WK_std + PC_std) / 2
-   = (64 + 64) / 2
-   = 64
+VE_pct = (WK_correct + PC_correct) / (WK_total + PC_total)
+VE_std  = 50 + (VE_pct − 0.5) × 58
 ```
 
-This is what the app computes directly.
+Using the real test: (11 + 9) / (16 + 11) = 0.741 → **VE = 64**
+
+The slope `58` is calibrated so that this combined-raw approach reproduces the verified composite:
+
+```
+VE = 64   →   2×VE = 128   →   128 + 65 + 62 = 255   →   AFQT 95 ✓
+```
+
+> **Why not just average the two standard scores?**  
+> Averaging `(WK_std + PC_std) / 2` treats WK's 16 questions and PC's 11 questions as equally weighted. On the real ASVAB, VE is derived from the combined raw sum — so a miss on PC hurts more than a miss on WK. The combined-raw method captures this correctly.
 
 ---
 
 #### Step 5 — AFQT Composite
 
-The AFQT composite is calculated as:
-
 ```
 AFQT = 2 × VE + AR + MK
+     = 2(64) + 65 + 62
+     = 128 + 65 + 62
+     = 255
 ```
 
-Using the calibrated standard scores for the real-test profile:
-
-```
-AFQT = 2(64) + 67 + 61
-     = 128 + 128
-     = 256
-```
-
-> **Note:** VE is doubled. This means Verbal (WK + PC) counts for **half** of your total AFQT. Improving your vocabulary by 2–3 questions has a disproportionately large effect on the final score.
+> **VE is doubled.** Verbal (WK + PC) accounts for **half** of your total AFQT. Improving by 2–3 vocabulary questions has a disproportionately large effect on your final score.
 
 ---
 
 #### Step 6 — Convert Composite → Percentile
 
-That composite is compared against a norming sample of thousands of Americans to produce your final **percentile rank**:
+The composite is mapped to a percentile using a **normal distribution** approximation of the DoD 1997 norming sample:
 
-| Composite | Approximate Percentile |
-| --------- | ---------------------- |
-| 150       | ~5th                   |
-| 175       | ~22nd                  |
-| 200       | ~50th                  |
-| 235       | ~80th                  |
-| 245       | ~90th                  |
-| 256       | ~95th                  |
-| 265       | ~98th                  |
-| 270+      | ~99th                  |
+```
+Percentile = Φ((composite − 200) / 33.4) × 100
+```
 
-A composite of **256** → **AFQT 95th percentile** — verified. This is not an estimate: the scoring engine slope (`46`) was derived algebraically so that the real test scores above produce _exactly_ composite 256, which sits at the 95th percentile threshold in the norming table.
+- **Mean = 200** — corresponds to 50th percentile (all sections at standard score 50)  
+- **SD = 33.4** — derived so that composite 255 maps to exactly the 95th percentile
+
+$$\Phi\!\left(\frac{255-200}{33.4}\right) = \Phi(1.647) \approx 95.0\%\ ✓$$
+
+Cross-checks against known data points:
+
+| Composite | Calculated | Expected |
+| --------- | ---------- | -------- |
+| 200       | 50th       | ~50th ✓  |
+| 235       | ~83rd      | ~80th ✓  |
+| 245       | ~90th      | ~90th ✓  |
+| 255       | **95th**   | **95th ✓** |
+| 265       | ~98th      | ~98th ✓  |
+| 270       | ~98.5th    | ~99th ✓  |
+
+This replaces the previous hand-crafted lookup table with a smooth, continuous, mathematically grounded function.
 
 ---
 
 #### What a 95 Means for Enlistment
 
 - Anything above 93 is effectively the **same qualification tier**
-- You already qualify for nearly every enlisted MOS/rating
-- At this point, **line scores** (GT, ST, EL, etc.) matter more to your recruiter than the AFQT percentile
+- Qualifies for nearly every enlisted MOS/rating across all branches
+- At this level, **line scores** (GT, ST, EL, etc.) matter more to your recruiter than the AFQT percentile
+- **This score has been officially confirmed** — the app continues to serve as a maintenance and improvement tool
 
 ---
 
@@ -244,11 +249,13 @@ A composite of **256** → **AFQT 95th percentile** — verified. This is not an
 
 ## Technical Notes
 
-- **Single file** — all HTML, CSS, and JavaScript in `index.html` (~1,900 lines)
+- **Single file** — all HTML, CSS, and JavaScript in `index.html` (~6,200 lines)
 - **No dependencies** — no build step, no npm, no frameworks
 - **Fonts** — loaded from Google Fonts (Barlow Condensed, IBM Plex Mono); app is functional without them
 - **Persistence** — session stats stored in `localStorage` under the key `asvab_stats` (up to 50 sessions retained)
 - **Responsive** — media queries at 768 px, 600 px, and 400 px for tablet and mobile
+- **Scoring engine** — per-section slopes (AR 48 · WK 53 · PC 57 · MK 48) + combined-raw VE (slope 58) + normal CDF percentile (μ=200, σ=33.4); all calibrated to verified AFQT 95 anchor
+- **Integrity audits** — `auditQuestionBank()` and `auditExplanations()` run on page load and auto-patch conflicting answer keys; `auditUserAnswers()` runs before scoring to recover any points lost to stale answer-key bugs
 
 ---
 

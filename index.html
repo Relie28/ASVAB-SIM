@@ -1781,27 +1781,23 @@ window.IS_DEV = location.protocol === 'file:' ||
   <div class="score-analysis" style="grid-template-columns:repeat(4,1fr);max-width:680px;">
     <div class="score-card ar">
       <div class="label">AR</div>
-      <div class="val">13/15</div>
-      <div class="sub">2 missed</div>
-      <div class="weakness-tag">PRIORITY</div>
+      <div class="val">13/16</div>
+      <div class="sub">3 missed · SS 65</div>
     </div>
     <div class="score-card wk">
       <div class="label">WK</div>
-      <div class="val">12/15</div>
-      <div class="sub">3 missed</div>
-      <div class="weakness-tag">TARGET</div>
+      <div class="val">11/16</div>
+      <div class="sub">5 missed · SS 60</div>
     </div>
-    <div class="score-card" style="--val-color:#34d399;">
+    <div class="score-card">
       <div class="label" style="color:var(--muted)">PC</div>
-      <div class="val" style="color:#34d399">8/10</div>
-      <div class="sub">2 missed</div>
-      <div class="weakness-tag">TARGET</div>
+      <div class="val" style="color:#34d399">9/11</div>
+      <div class="sub">2 missed · SS 68</div>
     </div>
     <div class="score-card mk">
       <div class="label">MK</div>
-      <div class="val">11/15</div>
-      <div class="sub">4 missed</div>
-      <div class="weakness-tag">PRIORITY</div>
+      <div class="val">12/16</div>
+      <div class="sub">4 missed · SS 62</div>
     </div>
   </div>
 
@@ -3706,46 +3702,63 @@ function ordSuffix(n) {
 
 // ── SCORING ENGINE ──
 //
-// Standard score pipeline (calibrated to DoD 1997 norms):
-//   1. Raw weighted accuracy: pct = correct / total
-//   2. Standard score: std = 50 + (pct − 0.5) × 46
-//      Slope 46 calibrated so baseline profile
-//      (AR 87%, WK/PC 80%, MK 73%) → composite 256 → AFQT 95th percentile.
-//   3. VE = (WK_std + PC_std) / 2  (approximates DoD VE lookup table)
+// Standard score pipeline (calibrated to real CAT-ASVAB verified performance):
+//   1. Raw accuracy: pct = correct / total  (per section)
+//   2. Per-section standard score: std = 50 + (pct − 0.5) × slope
+//      Slopes derived from verified real-test anchor (AFQT 95):
+//        AR  13/16 (81.25%) → SS 65  →  slope 48
+//        WK  11/16 (68.75%) → SS 60  →  slope 53
+//        PC   9/11 (81.8%)  → SS 68  →  slope 57
+//        MK  12/16 (75.0%)  → SS 62  →  slope 48
+//   3. VE = f(WK_correct + PC_correct, WK_total + PC_total)
+//      Computed from COMBINED WK+PC raw performance (mirrors real ASVAB VE derivation).
+//      Slope 58 verified: (11+9)/(16+11)=0.741 → VE 64 → composite 255 → AFQT 95 ✓
 //   4. AFQT composite = 2×VE + AR_std + MK_std
-//   5. Composite → percentile via norming table.
+//   5. Composite → percentile via normal CDF: mean=200 (all-50s baseline), SD=33.4
+//      Derived from anchor: Φ((255−200)/33.4) = Φ(1.647) ≈ 95.0% ✓
+//      Smooth, continuous — no hand-crafted lookup table.
 //
 // Note: difficulty weights (diff:1/2/3) define question difficulty for
 // session flavor sampling and result badges, but are intentionally excluded
-// from the standard-score computation. Adding hard-question bonuses to the
-// score creates a systematic downward bias when realistic miss patterns
-// concentrate misses on harder items — making the calibration diverge from
-// the known 95th-percentile anchor point.
+// from the standard-score computation.
 
-function calcStandard(qs, correctMask) {
+function calcStandard(qs, correctMask, section) {
   const correct = correctMask.filter(Boolean).length;
   const pct = qs.length > 0 ? correct / qs.length : 0;
-  return Math.max(20, Math.min(80, Math.round(50 + (pct - 0.5) * 46)));
+  // Per-section slopes calibrated from verified real-test anchor scores.
+  // AR 13/16→65 (slope 48), WK 11/16→60 (slope 53), PC 9/11→68 (slope 57), MK 12/16→62 (slope 48).
+  const slopeMap = { AR: 48, WK: 53, PC: 57, MK: 48 };
+  const slope = slopeMap[section] || 50;
+  return Math.max(20, Math.min(80, Math.round(50 + (pct - 0.5) * slope)));
+}
+
+// VE (Verbal Expression) standard score derived from combined WK+PC raw performance.
+// Mirrors the real ASVAB: VE_raw = WK_correct + PC_correct, normalized to SS scale.
+// Slope 58 calibrated: (11+9)/(16+11)=0.741 → VE 64 → AFQT composite 255 → 95th pct ✓
+function calcVE(wkCorrect, wkTotal, pcCorrect, pcTotal) {
+  const n = (wkTotal || 0) + (pcTotal || 0);
+  const r = (wkCorrect || 0) + (pcCorrect || 0);
+  const pct = n > 0 ? r / n : 0.5;
+  return Math.max(20, Math.min(80, Math.round(50 + (pct - 0.5) * 58)));
+}
+
+// Normal CDF — Abramowitz & Stegun rational approximation (max error < 7.5e-8).
+function normalCDF(z) {
+  const a = [0.319381530, -0.356563782, 1.781477937, -1.821255978, 1.330274429];
+  const t   = 1 / (1 + 0.2316419 * Math.abs(z));
+  const poly = t*(a[0]+t*(a[1]+t*(a[2]+t*(a[3]+t*a[4]))));
+  const phi  = Math.exp(-0.5*z*z) / Math.sqrt(2*Math.PI);
+  const cdf  = 1 - phi * poly;
+  return z >= 0 ? cdf : 1 - cdf;
 }
 
 function compositeToPercentile(comp) {
-  // Composite → AFQT percentile.
-  // Calibration anchors:
-  //   composite 200 → 50th pct  (50% accuracy, all sections at std 50)
-  //   composite 256 → 95th pct  (user's verified real-test profile)
-  //   composite 292 → 99th pct  (100% accuracy)
-  // Lower end corrected so random guessing (25% acc, composite ~152) → ~5th pct.
-  const table = [
-    [0,1],[80,1],[120,1],[130,2],[140,3],[150,5],[155,7],
-    [160,10],[165,13],[170,17],[175,22],[180,27],[185,33],
-    [190,40],[195,46],[200,50],[205,54],[210,58],[215,61],
-    [220,65],[225,70],[230,75],[235,80],[240,85],[245,90],[248,92],
-    [250,93],[252,94],[255,95],[258,96],[260,97],[265,98],[270,99],[280,99]
-  ];
-  for (let i = table.length - 1; i >= 0; i--) {
-    if (comp >= table[i][0]) return table[i][1];
-  }
-  return 1;
+  // AFQT percentile via normal approximation of the 1997 DoD norming distribution.
+  // mean = 200 (all-50s baseline), SD = 33.4.
+  // Derived from real-test anchor: Φ((255−200)/33.4) = Φ(1.647) ≈ 95.0% ✓
+  // Cross-checks: Φ((270−200)/33.4) = 98.3% ✓  Φ((160−200)/33.4) = 11.5% ✓
+  const pct = Math.round(normalCDF((comp - 200) / 33.4) * 100);
+  return Math.max(1, Math.min(99, pct));
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -4077,7 +4090,7 @@ function showResults() {
   });
 
   const std = {};
-  Object.keys(secT).forEach(s => { std[s] = calcStandard(secQs[s], secMask[s]); });
+  Object.keys(secT).forEach(s => { std[s] = calcStandard(secQs[s], secMask[s], s); });
 
   // ── Practice mode: compute AFQT estimate ONLY when all 4 AFQT sections are present ──
   if (isPracticeMode) {
@@ -4099,8 +4112,7 @@ function showResults() {
     if (allAfqt) {
       // All 4 sections present — full AFQT estimate
       const AR_p = std['AR'], MK_p = std['MK'];
-      const WK_p = std['WK'], PC_p = std['PC'];
-      const VE_p = (WK_p + PC_p) / 2;
+      const VE_p = calcVE(secC['WK'], secT['WK'], secC['PC'], secT['PC']);
       const comp_p    = Math.round(2 * VE_p + AR_p + MK_p);
       const afqtPct_p = compositeToPercentile(comp_p);
       const afqtCol_p = afqtPct_p >= 95 ? 'var(--correct)' : afqtPct_p >= 80 ? 'var(--ar)' : afqtPct_p >= 60 ? 'var(--accent3)' : 'var(--wrong)';
@@ -4341,8 +4353,8 @@ function showResults() {
     return;
   }
 
-  const AR = std['AR']||50, MK = std['MK']||50, WK = std['WK']||50, PC = std['PC']||50;
-  const VE = (WK + PC) / 2;
+  const AR = std['AR']||50, MK = std['MK']||50;
+  const VE = calcVE(secC['WK'], secT['WK'], secC['PC'], secT['PC']);
   const composite = Math.round(2*VE + AR + MK);
   const afqtPct = compositeToPercentile(composite);
   lastAfqt = afqtPct;
@@ -4382,7 +4394,7 @@ function showResults() {
     <div class="result-card VE">
       <div class="r-label">VERBAL EXPR.</div>
       <div class="r-score">${Math.round(VE)}</div>
-      <div class="r-fraction">avg(WK_std, PC_std)</div>
+      <div class="r-fraction">WK+PC combined raw</div>
     </div>`;
 
   const extraSecs = ['GS','EI','AI','MC','AO'];
